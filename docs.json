@@ -3,8 +3,8 @@
   "theme": "mint",
   "name": "Inagent",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
+    "primary": "#661aff",
+    "light": "#9966ff",
     "dark": "#884dff"
   },
   "favicon": "/favicon.svg",
@@ -15,8 +15,7 @@
         "groups": [
           {
             "group": "Introducción",
-            "pages": [
-              "index",
+            "pages": [              
               "getting-started/overview",
               "getting-started/quickstart",
               "getting-started/production-checklist",

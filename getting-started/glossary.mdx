@@ -1,5 +1,160 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: Glosario
+description: Definiciones de los conceptos y términos principales utilizados en la plataforma Inagent.
 ---
 
+# Glosario
+
+Este glosario explica los términos clave que encontrarás al crear y operar agentes virtuales con **Inagent**.
+
+---
+
+## A
+
+### Agente
+Entidad virtual creada en Inagent que interactúa con usuarios a través de uno o varios canales.  
+Cada agente incluye su **guion** de conversación, **fuentes de conocimiento**, configuraciones de **canales** y **automatizaciones**.
+
+### Automatización
+Proceso que ejecuta acciones automáticamente cuando ocurre un evento determinado, como el inicio o fin de una conversación, o la detección de una condición predefinida.
+
+---
+
+## B
+
+### Billing / Facturación
+Plan de suscripción que define los límites de uso (minutos de voz, mensajes, etc.) y los costos asociados.
+
+---
+
+## C
+
+### Canal
+Medio por el cual un agente conversa con los usuarios.  
+Inagent incluye los siguientes canales nativos:
+- **Voz** (WebCall/WebRTC, SIP Trunk, Twilio)
+- **WhatsApp**
+- **Webchat**
+- **Instagram**
+- **Facebook Messenger**
+- **SMS**
+
+Cada canal puede configurarse y activarse de forma independiente.
+
+### Conversación
+Interacción completa entre un usuario y un agente.  
+Contiene el historial de mensajes, metadatos y cualquier automatización ejecutada.
+
+---
+
+## E
+
+### Entorno
+Espacio lógico que permite separar las etapas de **desarrollo**, **pruebas** y **producción**.
+
+### Evento
+Acción o cambio de estado dentro de una conversación que puede utilizarse para activar una automatización (por ejemplo, fin de conversación, recepción de mensaje).
+
+---
+
+## G
+
+### Guion
+Base del comportamiento de un agente.  
+Describe cómo el agente saluda, formula preguntas, guía a los usuarios y finaliza la conversación, definiendo el tono y estilo de comunicación.
+
+---
+
+## I
+
+### Integración REST
+Conexión entre Inagent y sistemas externos a través de una **API REST**.  
+Permite enviar o recibir datos, actualizar registros en tiempo real y ejecutar acciones desde automatizaciones.
+
+### Instagram
+Canal nativo que permite que los agentes conversen mediante mensajes directos de Instagram.
+
+---
+
+## K
+
+### KPI
+Indicador clave de rendimiento usado para medir el desempeño de un agente o proceso, por ejemplo: tasa de resolución, volumen de conversaciones o tiempo promedio de respuesta.
+
+### Knowledge / Conocimiento
+Información que el agente utiliza para responder.  
+Puede provenir de:
+- **Texto nativo**: contenido escrito directamente en la plataforma.
+- **Documentos (PDF)**: archivos cargados que se indexan automáticamente.
+- **Sitios web externos**: URLs de las que se extrae información en línea.
+
+---
+
+## M
+
+### Messenger (Facebook Messenger)
+Canal nativo que habilita la interacción entre agentes virtuales y usuarios a través de la plataforma de mensajería de Facebook.
+
+---
+
+## R
+
+### Reportería
+Módulo de análisis y métricas de Inagent.  
+Incluye:
+- **Reportes de sistema**: métricas predefinidas (volumen de conversaciones, tiempos de respuesta, etc.).  
+- **Reportes avanzados**: reportes totalmente personalizados a partir de KPIs definidos en lenguaje natural.
+
+### REST API
+Interfaz estándar basada en HTTP/JSON que permite a aplicaciones externas interactuar con los agentes, automatizaciones y reportes de Inagent.
+
+---
+
+## S
+
+### SMS
+Canal nativo que permite a los agentes enviar y recibir mensajes de texto (Short Message Service) para interactuar con los usuarios.
+
+### Sistema de eventos
+Infraestructura que gestiona las notificaciones en tiempo real (por ejemplo, webhooks) para disparar automatizaciones externas.
+
+---
+
+## T
+
+### Tenant
+Espacio de trabajo que agrupa la configuración, datos y consumo de un cliente.  
+En Inagent, los tenants son **provisionados por el equipo de Inconcert** y no requieren creación por parte del cliente final.
+
+---
+
+## V
+
+### Versión
+Instancia publicada de un agente.  
+Permite mantener estabilidad en producción mientras se desarrollan nuevas mejoras en paralelo.
+
+### Voz
+Canal nativo de Inagent para interacciones en tiempo real.  
+Soporta:
+- **WebCall (WebRTC)**: llamadas desde navegador web.
+- **SIP Trunk**: integración con PBX o telefonía tradicional.
+- **Twilio**: números telefónicos en la nube.
+
+---
+
+## W
+
+### Webchat
+Canal que permite integrar el agente en un sitio web, con opciones de personalización de diseño, burbuja de entrada y mensajes de bienvenida.
+
+### Webhook
+Notificación HTTP que Inagent envía a un sistema externo cuando ocurre un evento, por ejemplo el inicio o fin de una conversación, o el resultado de una automatización.
+
+### WhatsApp
+Canal nativo que permite al agente comunicarse a través de mensajes de WhatsApp, incluyendo texto, multimedia y plantillas oficiales.
+
+---
+
+¿Falta algún término?  
+[Contacta al soporte](mailto:support@inagent.app) para sugerir nuevas definiciones.

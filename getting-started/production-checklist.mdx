@@ -1,5 +1,102 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: Lista de verificación para producción
+description: Pasos recomendados para preparar y lanzar un agente virtual de Inagent en un entorno de producción de manera segura.
 ---
 
+import { Callout } from "nextra-theme-docs"
+
+# Lista de verificación para producción
+
+Antes de publicar un agente en vivo, sigue esta **lista de verificación** para asegurar una experiencia de alta calidad y minimizar riesgos en producción.
+
+---
+
+## 1. Revisión del agente
+
+- ✅ **Guion completo y probado**  
+  - Comprueba que el flujo de conversación (saludo, preguntas clave, cierre) esté bien redactado y sin ambigüedades.
+  - Revisa que el tono de voz y el estilo de las respuestas coincidan con tu marca.
+
+- ✅ **Conocimiento validado**  
+  - Verifica que el texto nativo sea preciso y esté actualizado.  
+  - Comprueba que los documentos PDF sean la última versión.  
+  - Si usas sitios web externos, asegúrate de que las URLs estén disponibles y sean confiables.
+
+<Callout type="tip">
+Realiza varias rondas de pruebas internas en modo borrador o preproducción.
+</Callout>
+
+---
+
+## 2. Configuración de canales
+
+Asegúrate de que cada canal requerido esté configurado y probado:
+
+- **Voz**
+  - **WebCall (WebRTC)**: prueba llamadas de extremo a extremo.
+  - **SIP Trunk**: confirma la conexión con tu PBX o proveedor telefónico.
+  - **Twilio**: valida números y créditos de uso.
+- **WhatsApp**: revisa la plantilla de mensajes, permisos y pruebas de envío/recepción.
+- **Webchat**: comprueba diseño, burbuja de entrada, idioma y responsive en dispositivos móviles.
+- **Instagram**: verifica la integración con tu cuenta de Instagram Business.
+- **Facebook Messenger**: confirma que la página y permisos estén correctos.
+- **SMS**: revisa el proveedor configurado, remitentes y mensajes de prueba.
+
+<Callout type="info">
+Cada canal cuenta con su propia guía detallada en **Guías → Canales**.
+</Callout>
+
+---
+
+## 3. Automatizaciones
+
+- Revisa los **triggers y acciones**:  
+  - Inicio o fin de conversación.  
+  - Acciones como enviar emails, notificaciones, actualizaciones en CRM o transferencias a humano.
+- Asegúrate de que las credenciales de cualquier integración (API REST u otras) sean correctas y tengan los permisos necesarios.
+
+---
+
+## 4. Monitoreo y reportería
+
+- Configura **Reportes de sistema** para métricas básicas (volumen de conversaciones, tiempos de respuesta, uso de canales).
+- Define, si es necesario, **Reportes avanzados** con KPIs personalizados (por ejemplo: tasa de resolución, ingresos generados, nivel de satisfacción).
+- Activa alertas o notificaciones para incidencias críticas.
+
+---
+
+## 5. Pruebas de carga y volumen
+
+- Si esperas alto tráfico, ejecuta una **prueba de estrés** para garantizar la estabilidad.
+- Verifica límites de uso y **rate limits** establecidos en tu plan.
+
+---
+
+## 6. Seguridad y cumplimiento
+
+- Comprueba las políticas de **autenticación y acceso** (API keys, OAuth si aplica).
+- Revisa la **firma de webhooks** y su validación en los sistemas receptores.
+- Confirma que el manejo de datos sensibles cumpla con las normativas aplicables (por ejemplo, GDPR/ISO 27001).
+
+---
+
+## 7. Plan de contingencia
+
+- Define procedimientos para:
+  - Transferencia a humano en caso de falla.
+  - Escalamiento de incidentes críticos.
+- Mantén a mano los contactos de soporte:
+  - **Soporte Inagent**: [support@inagent.app](mailto:support@inagent.app)
+  - **Estado de la plataforma**: [https://status.inagent.app](https://status.inagent.app)
+
+---
+
+## 8. Publicación
+
+- ✅ Haz clic en **Publicar** desde la consola de Inagent.
+- ✅ Verifica nuevamente que el entorno sea **producción** y no de pruebas.
+- ✅ Realiza una prueba real en cada canal para confirmar que el agente responde como se espera.
+
+<Callout type="success">
+Cuando todos los puntos de esta lista estén completados, tu agente estará listo para operar en producción con el mayor nivel de calidad y seguridad.
+</Callout>
