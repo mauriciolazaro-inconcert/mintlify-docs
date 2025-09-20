@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Inagent",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -14,35 +14,102 @@
         "tab": "Guides",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Introduction",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "getting-started/overview",
+              "getting-started/quickstart",
+              "getting-started/production-checklist",
+              "getting-started/glossary"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Build: Create Virtual Agents",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "build/agents/planning",
+              "build/agents/create-agent",
+              "build/agents/behavior/overview",
+              "build/agents/behavior/script",
+              "build/agents/behavior/guardrails",
+              "build/agents/behavior/output-filters",
+              "build/agents/behavior/topics",
+              "build/agents/behavior/tools/overview",
+              "build/agents/behavior/tools/code-tool",
+              "build/agents/behavior/tools/human-handoff-tool",
+              "build/agents/behavior/tools/rest-api-tool",
+              "build/agents/knowledge/overview",
+              "build/agents/knowledge/native-text",
+              "build/agents/knowledge/documents-pdf",
+              "build/agents/knowledge/external-sites",
+              "build/agents/testing",
+              "build/agents/versioning-release"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Channels",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "channels/voice/overview",
+              "channels/voice/webcall-webrtc",
+              "channels/voice/sip-trunk",
+              "channels/voice/twilio",
+              "channels/whatsapp/setup",
+              "channels/webchat/setup"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Automations",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "automations/overview",
+              "automations/triggers",
+              "automations/runnables",
+              "automations/examples"
+            ]
+          },
+          {
+            "group": "Reporting",
+            "pages": [
+              "reporting/overview",
+              "reporting/system-reports",
+              "reporting/advanced-reports-kpis"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/overview",
+              "integrations/rest-api"
+            ]
+          },
+          {
+            "group": "Deployment, Security & Compliance",
+            "pages": [
+              "deploy/environments",
+              "security/authentication",
+              "security/webhooks",
+              "security/data-protection",
+              "security/rate-limits"
+            ]
+          },
+          {
+            "group": "Billing & Usage",
+            "pages": [
+              "billing/plans",
+              "billing/usage-voice",
+              "billing/usage-messaging"
+            ]
+          },
+          {
+            "group": "Support & Operations",
+            "pages": [
+              "support/troubleshooting",
+              "support/faq",
+              "support/status"
+            ]
+          },
+          {
+            "group": "Release Notes",
+            "pages": [
+              "changelog"
             ]
           }
         ]
@@ -51,18 +118,92 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "API Overview",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/errors",
+              "api-reference/sdks",
+              "api-reference/postman"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Auth",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/auth/login",
+              "api-reference/auth/token-introspection"
+            ]
+          },
+          {
+            "group": "Tenants",
+            "pages": [
+              "api-reference/tenants/list",
+              "api-reference/tenants/get",
+              "api-reference/tenants/create",
+              "api-reference/tenants/update"
+            ]
+          },
+          {
+            "group": "Agents",
+            "pages": [
+              "api-reference/agents/list",
+              "api-reference/agents/get",
+              "api-reference/agents/create",
+              "api-reference/agents/update",
+              "api-reference/agents/publish",
+              "api-reference/agents/knowledge"
+            ]
+          },
+          {
+            "group": "Behavior & Tools",
+            "pages": [
+              "api-reference/behavior/script",
+              "api-reference/behavior/guardrails",
+              "api-reference/behavior/output-filters",
+              "api-reference/behavior/topics",
+              "api-reference/tools/code-tool",
+              "api-reference/tools/human-handoff-tool",
+              "api-reference/tools/rest-api-tool"
+            ]
+          },
+          {
+            "group": "Conversations",
+            "pages": [
+              "api-reference/conversations/list",
+              "api-reference/conversations/get",
+              "api-reference/conversations/send-message",
+              "api-reference/conversations/events"
+            ]
+          },
+          {
+            "group": "Automations",
+            "pages": [
+              "api-reference/automations/list",
+              "api-reference/automations/create",
+              "api-reference/automations/update",
+              "api-reference/automations/execute"
+            ]
+          },
+          {
+            "group": "Reporting",
+            "pages": [
+              "api-reference/reporting/system-reports",
+              "api-reference/reporting/advanced-reports-kpis"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "api-reference/integrations/rest-api"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks/overview",
+              "api-reference/webhooks/events",
+              "api-reference/webhooks/signing",
+              "api-reference/webhooks/retries"
             ]
           }
         ]
@@ -71,14 +212,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Status",
+          "href": "https://status.inagent.app",
+          "icon": "signal"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Support",
+          "href": "mailto:support@inagent.app",
+          "icon": "lifebuoy"
         }
       ]
     }
@@ -91,32 +232,36 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@inagent.app"
+      },
+      {
+        "label": "Blog",
+        "href": "https://inagent.app/blog"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Sign In",
+      "href": "https://app.inagent.app"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/inagent",
+      "github": "https://github.com/inagent",
+      "linkedin": "https://linkedin.com/company/inagent"
     }
   }
 }
