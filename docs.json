@@ -5,16 +5,16 @@
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
-    "dark": "#15803D"
+    "dark": "#884dff"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Guías",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Introducción",
             "pages": [
               "index",
               "getting-started/overview",
@@ -24,7 +24,7 @@
             ]
           },
           {
-            "group": "Build: Create Virtual Agents",
+            "group": "Construir: Crear Agentes Virtuales",
             "pages": [
               "build/agents/planning",
               "build/agents/create-agent",
@@ -46,7 +46,7 @@
             ]
           },
           {
-            "group": "Channels",
+            "group": "Canales",
             "pages": [
               "channels/voice/overview",
               "channels/voice/webcall-webrtc",
@@ -57,7 +57,7 @@
             ]
           },
           {
-            "group": "Automations",
+            "group": "Automatizaciones",
             "pages": [
               "automations/overview",
               "automations/triggers",
@@ -66,7 +66,7 @@
             ]
           },
           {
-            "group": "Reporting",
+            "group": "Reportería",
             "pages": [
               "reporting/overview",
               "reporting/system-reports",
@@ -74,14 +74,14 @@
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Integraciones",
             "pages": [
               "integrations/overview",
               "integrations/rest-api"
             ]
           },
           {
-            "group": "Deployment, Security & Compliance",
+            "group": "Despliegue, Seguridad y Cumplimiento",
             "pages": [
               "deploy/environments",
               "security/authentication",
@@ -91,7 +91,7 @@
             ]
           },
           {
-            "group": "Billing & Usage",
+            "group": "Facturación y Consumos",
             "pages": [
               "billing/plans",
               "billing/usage-voice",
@@ -99,7 +99,7 @@
             ]
           },
           {
-            "group": "Support & Operations",
+            "group": "Soporte y Operaciones",
             "pages": [
               "support/troubleshooting",
               "support/faq",
@@ -107,7 +107,7 @@
             ]
           },
           {
-            "group": "Release Notes",
+            "group": "Notas de versión",
             "pages": [
               "changelog"
             ]
@@ -115,10 +115,10 @@
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Referencia de API",
         "groups": [
           {
-            "group": "API Overview",
+            "group": "Introducción a la API",
             "pages": [
               "api-reference/introduction",
               "api-reference/authentication",
@@ -128,7 +128,7 @@
             ]
           },
           {
-            "group": "Auth",
+            "group": "Autenticación",
             "pages": [
               "api-reference/auth/login",
               "api-reference/auth/token-introspection"
@@ -144,7 +144,7 @@
             ]
           },
           {
-            "group": "Agents",
+            "group": "Agentes",
             "pages": [
               "api-reference/agents/list",
               "api-reference/agents/get",
@@ -155,7 +155,7 @@
             ]
           },
           {
-            "group": "Behavior & Tools",
+            "group": "Comportamiento y Herramientas",
             "pages": [
               "api-reference/behavior/script",
               "api-reference/behavior/guardrails",
@@ -167,7 +167,7 @@
             ]
           },
           {
-            "group": "Conversations",
+            "group": "Conversaciones",
             "pages": [
               "api-reference/conversations/list",
               "api-reference/conversations/get",
@@ -176,7 +176,7 @@
             ]
           },
           {
-            "group": "Automations",
+            "group": "Automatizaciones",
             "pages": [
               "api-reference/automations/list",
               "api-reference/automations/create",
@@ -185,14 +185,14 @@
             ]
           },
           {
-            "group": "Reporting",
+            "group": "Reportería",
             "pages": [
               "api-reference/reporting/system-reports",
               "api-reference/reporting/advanced-reports-kpis"
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Integraciones",
             "pages": [
               "api-reference/integrations/rest-api"
             ]
@@ -212,12 +212,12 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Status",
+          "anchor": "Estado del servicio",
           "href": "https://status.inagent.app",
           "icon": "signal"
         },
         {
-          "anchor": "Support",
+          "anchor": "Soporte",
           "href": "mailto:support@inagent.app",
           "icon": "lifebuoy"
         }
@@ -231,7 +231,7 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
+        "label": "Soporte",
         "href": "mailto:support@inagent.app"
       },
       {
@@ -241,7 +241,7 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Sign In",
+      "label": "Ingresar",
       "href": "https://app.inagent.app"
     }
   },

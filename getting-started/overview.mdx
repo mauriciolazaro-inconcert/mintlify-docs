@@ -1,90 +1,91 @@
 ---
-title: "Overview"
-description: "High-level introduction to Inagent, its core concepts, and how to start building virtual agents."
+title: Descripción general
+description: Introducción de alto nivel a Inagent, sus conceptos clave y cómo comenzar a crear agentes virtuales.
 ---
 
 import { Callout } from "nextra-theme-docs"
 
-# Inagent Overview
+# Descripción general de Inagent
 
-Inagent is a **next-generation SaaS platform for AI-powered virtual agents**.\
-It enables businesses to design, deploy, and scale conversational agents across **voice, WhatsApp, and webchat channels**—without complex infrastructure.
+**Inagent** es una **plataforma SaaS de nueva generación para agentes virtuales impulsados por IA**.  
+Permite a las empresas **diseñar, desplegar y escalar** agentes conversacionales en **voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS**, sin necesidad de infraestructura compleja.
 
-Whether you want to automate lead generation, customer support, collections, or advanced reporting, Inagent provides the tools and APIs to move from idea to production quickly.
-
----
-
-## Key Capabilities
-
-- **Multi-channel engagement**\
-  Build once and deploy on **Voice (WebCall, SIP Trunk, Twilio)**, **WhatsApp**, and **Webchat**.
-- **Powerful behavior engine**\
-  Define scripts, guardrails, output filters, and topic detection.\
-  Extend agent capabilities with **Tools** such as Code execution, Human Handoff, and REST API calls.
-- **Flexible knowledge sources**\
-  Combine **native text**, **documents (PDF)**, and **external websites** as the agent’s knowledge base.
-- **Real-time automations**\
-  Trigger actions during or after a conversation: transfer to a contact center, update CRMs, call APIs, and more.
-- **Reporting & KPIs**\
-  Access built-in **System Reports** or build **Advanced Reports** using custom KPIs defined in natural language.
-- **Secure & scalable**\
-  Built on modern cloud infrastructure with tenant isolation, fine-grained authentication, and rate limiting.
+Ya sea para automatizar la generación de leads, el soporte al cliente, la cobranza o la reportería avanzada, Inagent ofrece las herramientas y APIs necesarias para pasar de la idea a la producción rápidamente.
 
 ---
 
-## How the Documentation Is Organized
+## Capacidades principales
 
-Inagent docs are divided into two main areas:
+- **Interacción multicanal**  
+  Diseña una sola vez y publica en **Voz (WebCall, SIP Trunk, Twilio)**, **WhatsApp**, **Webchat**, **Instagram**, **Facebook Messenger** y **SMS**.
 
-### **Guides** (this tab)
+- **Motor de comportamiento avanzado**  
+  Define el **guion**, aplica **moderadores (guardrails)**, **filtros de salida**, y configura **detección de temas (topics)**.  
+  Amplía las capacidades del agente con **Herramientas (Tools)** como **Código**, **Transferencia a humano** y **API REST**.
 
-Step-by-step instructions to **build and operate agents**, including:
+- **Fuentes de conocimiento flexibles**  
+  Combina **texto nativo**, **documentos (PDF)** y **sitios web externos** como base de conocimiento del agente.
 
-- Creating agents and defining their behavior
-- Adding knowledge sources
-- Configuring channels (Voice, WhatsApp, Webchat)
-- Setting up automations and reporting
-- Managing deployment, security, and billing
+- **Automatizaciones en tiempo real**  
+  Dispara acciones durante o después de una conversación: transferencia a un contact center, actualización de CRM, llamadas a APIs y más.
 
-### **API reference**
+- **Reportería y KPIs**  
+  Accede a **Reportes de sistema** preconstruidos o crea **Reportes avanzados** con KPIs definidos en lenguaje natural.
 
-Complete, OpenAPI-driven documentation of every endpoint, including:
-
-- Authentication and tenant management
-- Agent creation and behavior configuration
-- Conversations and webhooks
-- Automations and reporting
+- **Seguridad y escalabilidad**  
+  Construido sobre infraestructura cloud moderna, con aislamiento por tenant, autenticación granular y control de límites de uso.
 
 ---
 
-## Typical Build Workflow
+## Cómo está organizada la documentación
 
-<tip>
-  If you’re new to Inagent, follow this recommended sequence.
-</tip>
+La documentación de Inagent se divide en dos áreas principales:
 
-1. **Plan your agent**\
-   Identify the use case, objectives, and success KPIs.
-2. **Create the agent**\
-   Use the **Build** section to define behavior, knowledge, and tools.
-3. **Connect channels**\
-   Add Voice, WhatsApp, and Webchat as needed.
-4. **Automate actions**\
-   Set triggers and runnables to react in real time.
-5. **Test and release**\
-   Use staging environments, then publish to production.
-6. **Monitor & report**\
-   Track system and advanced KPIs using the Reporting module.
+### **Guías** (esta pestaña)
+Instrucciones paso a paso para **construir y operar agentes**, incluyendo:
+- Creación de agentes y definición de su comportamiento  
+- Adición de fuentes de conocimiento  
+- Configuración de canales (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS)  
+- Configuración de automatizaciones y reportería  
+- Gestión de despliegue, seguridad y facturación
 
----
-
-## Next Steps
-
-- 👉 [**Quickstart**](quickstart): create your first agent in minutes.
-- 👉 [**Build: Create Virtual Agents**](../build/agents/create-agent): deep dive into planning and design.
-- 👉 [**API reference**](/api-reference/introduction): explore the full REST API and SDKs.
+### **Referencia de API**
+Documentación completa (basada en OpenAPI) de cada endpoint, que cubre:
+- Autenticación y gestión de tenants  
+- Creación de agentes y configuración de comportamiento  
+- Conversaciones y webhooks  
+- Automatizaciones y reportería
 
 ---
 
-Need help?\
-[Contact support](mailto:support@inagent.app) or check the [status page](https://status.inagent.app) for real-time platform updates.
+## Flujo de trabajo recomendado
+
+<Callout type="tip">
+Si es tu primera vez en Inagent, sigue esta secuencia recomendada.
+</Callout>
+
+1. **Planifica tu agente**  
+   Define el caso de uso, los objetivos y los KPIs de éxito.
+2. **Crea el agente**  
+   Utiliza la sección **Construir** para definir comportamiento, conocimiento y herramientas.
+3. **Conecta los canales**  
+   Agrega Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS según sea necesario.
+4. **Configura las automatizaciones**  
+   Establece disparadores y acciones en tiempo real.
+5. **Prueba y publica**  
+   Usa entornos de prueba antes de pasar a producción.
+6. **Monitorea y reporta**  
+   Supervisa métricas y KPIs con la sección de **Reportería**.
+
+---
+
+## Próximos pasos
+
+- 👉 **[Inicio rápido](quickstart)**: crea tu primer agente en minutos.  
+- 👉 **[Construir: Crear Agentes Virtuales](../build/agents/create-agent)**: profundiza en el diseño y la planificación.  
+- 👉 **[Referencia de API](/api-reference/introduction)**: explora la API REST completa y los SDKs.
+
+---
+
+¿Necesitas ayuda?  
+[Contacta al soporte](mailto:support@inagent.app) o revisa la [página de estado](https://status.inagent.app) para ver actualizaciones en tiempo real.
