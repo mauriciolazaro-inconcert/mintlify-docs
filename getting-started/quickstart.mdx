@@ -1,28 +1,16 @@
 ---
-title: Inicio rápido
-description: Crea y publica tu primer agente virtual en Inagent en pocos minutos.
+title: "Inicio rápido"
+description: "Crea y publica tu primer agente virtual en Inagent en pocos minutos."
 ---
 
-import { Callout } from "nextra-theme-docs"
-
-# Inicio rápido
-
-Este tutorial te llevará a **crear, configurar y publicar tu primer agente virtual en Inagent** en cuestión de minutos.  
+Este tutorial te llevará a **crear, configurar y publicar tu primer agente virtual en Inagent** en cuestión de minutos.\
 Al finalizar, tendrás un agente funcional disponible en uno o varios canales (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS).
 
----
+## 1. inicia sesión
 
-## 1. Regístrate e inicia sesión
-
-1. Accede a [app.inagent.app](https://app.inagent.app)  
-2. Crea una cuenta de **tenant** (espacio de trabajo) o únete a uno existente.  
+1. Accede a [app.virtualagents.inconcertcc.com](https://app.virtualagents.inconcertcc.com)
+2. Inicia sesión en la plataforma con el usuario entregado por Inconcert.
 3. Verifica tu correo electrónico para activar el acceso.
-
-<Callout type="tip">
-Puedes crear múltiples tenants para separar proyectos, clientes o entornos (por ejemplo: desarrollo, pruebas y producción).
-</Callout>
-
----
 
 ## 2. Crea tu primer agente
 
@@ -31,8 +19,6 @@ Puedes crear múltiples tenants para separar proyectos, clientes o entornos (por
 3. Selecciona un idioma principal (puede manejar varios, pero se recomienda empezar con uno).
 
 El agente se creará en modo **borrador** para que puedas definir su comportamiento y conocimiento antes de publicarlo.
-
----
 
 ## 3. Define el comportamiento
 
@@ -47,30 +33,26 @@ El agente se creará en modo **borrador** para que puedas definir su comportamie
      - **Transferencia a humano**: deriva la conversación a un agente humano.
      - **API REST**: llama a servicios externos en tiempo real.
 
-<Callout type="info">
-Cada sección de comportamiento tiene documentación detallada en la pestaña **Guías → Construir → Crear Agentes Virtuales**.
-</Callout>
-
----
+<info>
+  Cada sección de comportamiento tiene documentación detallada en la pestaña **Guías → Construir → Crear Agentes Virtuales**.
+</info>
 
 ## 4. Agrega conocimiento
 
-Un agente es tan bueno como la información que maneja.  
+Un agente es tan bueno como la información que maneja.\
 Ve a **Conocimiento** y elige una o varias fuentes:
 
 - **Texto nativo**: escribe directamente en la plataforma la información esencial (por ejemplo, políticas de devolución).
 - **Documentos (PDF)**: sube archivos con manuales, productos o preguntas frecuentes.
 - **Sitios web externos**: ingresa URLs para que el agente indexe y mantenga actualizada la información de tu web.
 
----
-
 ## 5. Conecta canales
 
 En **Canales** selecciona los medios por donde interactuará el agente:
 
-- **Voz**  
-  - **WebCall (WebRTC)** para llamadas desde la web.  
-  - **SIP Trunk** para central telefónica o PBX.  
+- **Voz**
+  - **WebCall (WebRTC)** para llamadas desde la web.
+  - **SIP Trunk** para central telefónica o PBX.
   - **Twilio** para números telefónicos en la nube.
 - **WhatsApp**
 - **Webchat**
@@ -79,8 +61,6 @@ En **Canales** selecciona los medios por donde interactuará el agente:
 - **SMS**
 
 Cada canal tiene su propia guía de configuración en **Guías → Canales**.
-
----
 
 ## 6. Configura automatizaciones (opcional pero recomendado)
 
@@ -99,27 +79,21 @@ Puedes, por ejemplo, **crear un ticket en tu CRM**, **enviar un correo de seguim
 1. Usa el **modo de prueba** para conversar con el agente en un entorno seguro.
 2. Revisa los **logs de conversación** y ajusta guion, conocimiento o automatizaciones según los resultados.
 
----
-
 ## 8. Publica en producción
 
 1. Haz clic en **Publicar** y selecciona el entorno de destino.
 2. Verifica que los canales estén activos y que las credenciales (por ejemplo en WhatsApp o Twilio) sean las correctas.
 3. Opcional: configura **alertas y reportería** para monitorear desempeño y KPIs.
 
-<Callout type="success">
-¡Listo! Tu agente virtual está disponible en los canales seleccionados y listo para interactuar con usuarios reales.
-</Callout>
-
----
+<success>
+  ¡Listo! Tu agente virtual está disponible en los canales seleccionados y listo para interactuar con usuarios reales.
+</success>
 
 ## Próximos pasos
 
-- Explora **[Comportamiento](../build/agents/behavior/overview)** para profundizar en la lógica conversacional.  
-- Aprende a crear **[reportes avanzados](../reporting/advanced-reports-kpis)** con KPIs personalizados.  
-- Consulta la **[Referencia de API](/api-reference/introduction)** para integraciones personalizadas o automatización avanzada.
+- Explora [**Comportamiento**](../build/agents/behavior/overview) para profundizar en la lógica conversacional.
+- Aprende a crear [**reportes avanzados**](../reporting/advanced-reports-kpis) con KPIs personalizados.
+- Consulta la [**Referencia de API**](/api-reference/introduction) para integraciones personalizadas o automatización avanzada.
 
----
-
-¿Dudas o inconvenientes?  
+¿Dudas o inconvenientes?\
 [Contacta a soporte](mailto:support@inagent.app) o revisa el [estado de la plataforma](https://status.inagent.app).
