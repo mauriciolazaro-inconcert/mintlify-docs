@@ -212,12 +212,12 @@
       "anchors": [
         {
           "anchor": "Estado del servicio",
-          "href": "https://status.inagent.app",
+          "href": "https://stats.uptimerobot.com/e65RjhwUee",
           "icon": "signal"
         },
         {
           "anchor": "Soporte",
-          "href": "mailto:support@inagent.app",
+          "href": "mailto:soporte@inconcertcx.com",
           "icon": "lifebuoy"
         }
       ]
@@ -231,17 +231,17 @@
     "links": [
       {
         "label": "Soporte",
-        "href": "mailto:support@inagent.app"
+        "href": "mailto:soporte@inconcertcx.com"
       },
       {
         "label": "Blog",
-        "href": "https://inagent.app/blog"
+        "href": "https://www.inconcertcx.com/es/blog"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Ingresar",
-      "href": "https://app.inagent.app"
+      "href": "https://app.virtualagents.inconcertcc.com"
     }
   },
   "contextual": {
