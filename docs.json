@@ -240,7 +240,7 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Ingresar",
+      "label": "Inagent",
       "href": "https://app.virtualagents.inconcertcc.com"
     }
   },
