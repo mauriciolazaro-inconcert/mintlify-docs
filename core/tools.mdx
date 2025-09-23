@@ -1,0 +1,117 @@
+---
+title: Herramientas
+description: Visión general de las herramientas (Tools) que amplían las capacidades de un agente, cómo se heredan entre equipo y agente y cómo se integran en el flujo conversacional.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Herramientas
+
+Las **Herramientas** (Tools) son **acciones o integraciones externas** que un agente puede ejecutar durante una conversación.  
+Permiten **salir del flujo puramente textual** para realizar tareas como transferir a un humano, consumir una API externa o ejecutar código.
+
+---
+
+## Propósito
+
+- **Ampliar las capacidades del agente**: no solo responder, sino también actuar.  
+- **Automatizar procesos**: ejecutar lógica de negocio, buscar información externa o modificar datos.  
+- **Mejorar la experiencia de usuario**: ofrecer soluciones inmediatas (pago, registro, confirmación de cita, etc.).
+
+---
+
+## Herencia Equipo → Agente
+
+Las herramientas pueden configurarse en dos niveles:
+
+1. **Nivel equipo**  
+   - Herramientas disponibles para todos los agentes del equipo.  
+   - Ejemplo: una API REST común o la transferencia a humano para todo el equipo.
+
+2. **Nivel agente**  
+   - Herramientas específicas de un agente en particular.  
+   - Ejemplo: un script de código solo necesario para un agente de soporte avanzado.
+
+<Callout type="info">
+Las herramientas definidas a nivel equipo **se heredan automáticamente** a los agentes,  
+que pueden a su vez **agregar herramientas propias** o sobrescribir configuraciones.
+</Callout>
+
+---
+
+## Tipos de herramientas
+
+Actualmente Inagent ofrece tres tipos principales de herramientas nativas:
+
+### 1. Transferencia a humano
+Permite derivar una conversación a un **agente humano** o a un **centro de contacto**, conservando el historial, las variables de contexto y las notas del bot.  
+Ideal para casos donde se necesita atención personalizada.
+
+Más detalles en [Transferencia a humano](../tools/human-handoff).
+
+### 2. API REST
+Ejecuta **llamadas HTTP** a servicios externos (GET, POST, PUT, DELETE).  
+Se puede utilizar para:
+- Consultar bases de datos externas.
+- Crear o actualizar registros en CRMs u otros sistemas.
+- Disparar procesos de negocio en tiempo real.
+
+Más detalles en [API REST](../tools/rest-api).
+
+### 3. Código (Controller)
+Permite **ejecutar lógica personalizada** directamente dentro de Inagent.  
+Ideal para:
+- Procesar datos antes de responder.
+- Implementar validaciones complejas.
+- Integrar con servicios que no exponen un endpoint estándar.
+
+Más detalles en [Código (Controller)](../tools/code).
+
+---
+
+## Integración en el ciclo conversacional
+
+Las herramientas forman parte del **flujo interno** de cada turno:
+
+1. **Entrada del usuario**  
+   - Se analizan los Tópicos y se activa el Guion + Reglas.
+
+2. **Decisión en Guion/Reglas**  
+   - El agente determina si debe:
+     - Escribir una respuesta inmediata,
+     - **Invocar una herramienta** (Transferencia, API REST, Código), o
+     - Consultar la Base de conocimiento.
+
+3. **Ejecución de la herramienta**  
+   - Se ejecuta la acción y se recupera el resultado (si aplica).
+
+4. **Generación de la respuesta final**  
+   - Se integra la información de la herramienta en la respuesta.
+
+5. **Guardrails y Modificadores**  
+   - Si están habilitados, la respuesta pasa por guardrails de seguridad/estilo y luego por modificadores antes de enviarse al usuario.
+
+<Callout type="tip">
+Algunas herramientas, especialmente las que llaman APIs externas o ejecutan código,  
+pueden **añadir latencia**. Evalúa su impacto si el canal es de **voz**, donde la rapidez es crítica.
+</Callout>
+
+---
+
+## Buenas prácticas
+
+- **Centraliza en el equipo lo común** y usa nivel agente solo para lógica muy específica.  
+- **Documenta los endpoints y parámetros** de las APIs externas para facilitar mantenimiento.  
+- **Prueba exhaustivamente** en Playground con variables de contexto y testers guardados.  
+- **Mide latencia**: herramientas que consumen servicios externos pueden afectar la velocidad de respuesta.
+
+---
+
+## Próximos pasos
+
+- Explora en detalle cada tipo de herramienta:
+  - [Transferencia a humano](../tools/human-handoff)
+  - [API REST](../tools/rest-api)
+  - [Código (Controller)](../tools/code)
+- Integra las herramientas con tu [Guion y Reglas](../agents/behavior) para automatizar procesos de negocio.
+

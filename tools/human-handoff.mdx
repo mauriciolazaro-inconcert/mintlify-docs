@@ -1,0 +1,139 @@
+---
+title: Transferencia a humano
+description: Herramienta que permite derivar la conversación a un agente humano, definiendo contexto, parámetros y agentes de destino.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Transferencia a humano
+
+La herramienta **Transferencia a humano** permite que un agente virtual de Inagent  
+**derive la conversación a un agente humano** cuando se cumplen ciertas condiciones.  
+Es fundamental para ofrecer una experiencia omnicanal donde la IA y los operadores humanos colaboran.
+
+---
+
+## Propósito
+
+- Permitir que el agente virtual **reconozca cuándo se requiere intervención humana**.  
+- Transferir la conversación con **contexto suficiente** para que el operador continúe sin pérdida de información.  
+- Mantener una **trazabilidad completa** de las acciones de transferencia para reportes y análisis.
+
+---
+
+## Configuración de la herramienta
+
+Al crear o editar una herramienta de tipo **Transferencia a humano**, se definen los siguientes campos:
+
+### 1. Nombre
+Nombre único para identificar esta herramienta dentro del equipo.  
+Por ejemplo: `TransferenciaCobros` o `EscalamientoSoporte`.
+
+### 2. Descripción
+Texto explicativo que indica **cuándo** debe utilizarse esta transferencia.  
+Esto es fundamental, ya que el agente virtual usa esta descripción para decidir el momento adecuado para activar la transferencia.
+
+> **Ejemplo de descripción:**  
+> “Usar esta transferencia cuando el cliente solicite hablar con un humano para resolver un problema de facturación.”
+
+### 3. Agentes asociados
+Lista de **agentes humanos o colas de destino** que pueden recibir la conversación.  
+El agente virtual derivará el contacto a uno de estos destinos según la configuración del equipo.
+
+---
+
+## Parámetros de transferencia
+
+Los **parámetros** son datos que el agente virtual enviará junto con la conversación  
+para que el agente humano reciba **todo el contexto necesario**.
+
+### Modos de configuración de parámetros
+
+Los parámetros pueden definirse de dos maneras:
+
+#### a. Modo Básico
+Permite configurar cada parámetro de forma sencilla, campo por campo:
+
+- **Nombre**: identificador del parámetro.  
+- **Tipo**: tipo de dato esperado.
+  - **Texto**: cadenas de caracteres. Ejemplo: motivo de la transferencia.
+  - **Número**: valores numéricos. Ejemplo: monto de deuda.
+  - **Objeto**: estructura con varios campos clave-valor. Ejemplo: `{ "plan": "premium", "saldo": 20 }`.
+  - **Array**: lista de valores homogéneos. Ejemplo: `["pedido-123", "pedido-456"]`.
+- **Descripción**: explica qué representa el parámetro y cómo se completará.
+
+<Callout type="tip">
+El modo **Básico** es ideal para la mayoría de los casos,  
+ya que permite una configuración clara y fácil de mantener.
+</Callout>
+
+#### b. Formato JSON Schema
+Ofrece **total libertad de definición**, siguiendo el estándar [JSON Schema](https://json-schema.org/).  
+Permite crear estructuras complejas, anidadas o con validaciones personalizadas.
+
+Ejemplo de un esquema en JSON Schema:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "motivoTransferencia": { "type": "string" },
+    "datosCliente": {
+      "type": "object",
+      "properties": {
+        "plan": { "type": "string" },
+        "saldo": { "type": "number" }
+      }
+    }
+  },
+  "required": ["motivoTransferencia"]
+}
+```
+
+<Callout type="info"> El modo **JSON Schema** es útil cuando se necesita un **formato avanzado**, por ejemplo validaciones específicas, estructuras anidadas o tipos de datos complejos. </Callout>
+
+## Ejemplo de configuración
+
+**Nombre:** `TransferenciaCobros`  
+**Descripción:** “Usar cuando el cliente quiera renegociar su deuda o reclamar un pago no aplicado.”  
+**Agentes asociados:** `EquipoCobros`
+
+### Parámetros (modo Básico)
+
+| Nombre              | Tipo   | Descripción                                        |
+|---------------------|--------|----------------------------------------------------|
+| motivoTransferencia | Texto  | Motivo que el cliente expresa para la transferencia |
+| saldoPendiente      | Número | Monto de deuda pendiente                            |
+| datosCliente        | Objeto | Información relevante del cliente (plan, historial)  |
+
+---
+
+## Uso en el ciclo conversacional
+
+Cuando el agente virtual decide transferir:
+
+1. **Evalúa guion y reglas** para determinar si se cumple la condición de transferencia.
+2. **Rellena los parámetros** con la información disponible (por ejemplo, variables de contexto o datos del CRM).
+3. **Activa la herramienta Transferencia a humano**, enviando:
+   - Mensaje de aviso al cliente (opcional).
+   - Parámetros de contexto para el agente humano.
+4. La conversación **continúa en manos del agente humano** sin pérdida de historial.
+
+---
+
+## Buenas prácticas
+
+- **Escribe descripciones claras y específicas** para que el agente virtual sepa exactamente cuándo usar la herramienta.
+- **Define parámetros mínimos pero suficientes** para que el operador humano tenga toda la información.
+- **Elige el modo adecuado**:
+  - Usa **Básico** para la mayoría de los casos.
+  - Usa **JSON Schema** si necesitas estructuras complejas o validaciones avanzadas.
+- **Prueba la transferencia en Playground** para verificar que los parámetros lleguen correctamente al destino.
+
+---
+
+## Próximos pasos
+
+- Configura los **[Contactos](../contacts)** que recibirán las conversaciones transferidas.
+- Prueba la herramienta en el **[Playground](../playground)** para confirmar que los parámetros se envían correctamente.
+- Monitorea el resultado en **[Reportes](../reporting/overview)** para medir calidad y tiempos de atención.

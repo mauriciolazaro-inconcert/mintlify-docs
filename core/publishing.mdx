@@ -1,0 +1,79 @@
+---
+title: Publicación
+description: Cómo publicar una versión de un agente virtual para ponerla en producción, gestionar su historial de versiones y agregar descripciones de cambios.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Publicación de versiones
+
+La sección **Publicación** permite pasar una **versión guardada** de un agente virtual  
+a **producción**, haciéndola disponible para los **canales asociados** (voz, webchat, API, etc.).  
+
+Mientras los cambios no se publiquen, **solo estarán visibles en el Playground** para pruebas internas.
+
+---
+
+## Propósito
+
+- **Controlar el despliegue** de cambios en guion, reglas, herramientas, conocimiento y configuración.  
+- **Asegurar calidad**: los cambios pueden probarse en el Playground antes de impactar a los usuarios finales.  
+- **Mantener un historial de versiones** con descripciones detalladas para trazabilidad y auditoría.
+
+---
+
+## Flujo de trabajo
+
+1. **Edición y guardado**  
+   - Realiza los cambios necesarios en guion, herramientas, conocimiento, etc.  
+   - Guarda los cambios en el equipo o agente, pero aún **no estarán en producción**.
+
+2. **Pruebas en Playground**  
+   - Verifica el comportamiento con escenarios y variables de contexto.  
+   - Asegúrate de que las reglas, transferencias y herramientas funcionen como se espera.
+
+3. **Publicación**  
+   - Desde la sección **Publicación**, selecciona *Publicar versión*.  
+   - Ingresar una **descripción del cambio** (por ejemplo: “Ajuste de reglas de bienvenida” o “Nueva herramienta de transferencia”).
+
+4. **Versionado automático**  
+   - Cada publicación genera una versión incremental con formato **X.Y**, por ejemplo:
+     - Primera publicación: **1.1**
+     - Segunda publicación: **1.2**
+     - Y así sucesivamente.
+
+5. **Disponibilidad inmediata**  
+   - La nueva versión queda activa en todos los **canales configurados** del equipo.
+
+---
+
+## Versiones anteriores
+
+Inagent mantiene un **historial completo de versiones publicadas**.  
+En cualquier momento puedes:
+
+- **Revisar las versiones previas** con su número y descripción.  
+- **Re-publicar una versión anterior** si deseas volver a un estado estable.
+
+<Callout type="info">
+Por esta razón es fundamental que cada publicación incluya una  
+**descripción clara del cambio**.  
+Esto facilita identificar rápidamente la versión correcta en caso de tener que revertir.
+</Callout>
+
+---
+
+## Buenas prácticas
+
+- **Describe con precisión cada cambio**: por ejemplo “Ajuste en regla de derivación de cobros” o “Actualización de base de conocimiento”.  
+- **Prueba exhaustivamente en Playground** antes de publicar, especialmente si el canal incluye voz o múltiples integraciones.  
+- **Revisa las dependencias**: asegúrate de que las herramientas, tópicos o guardrails funcionen con la nueva lógica.  
+- **Mantén un ciclo de versiones ordenado**: evita publicaciones innecesarias con cambios mínimos.
+
+---
+
+## Próximos pasos
+
+- Revisa el flujo de pruebas en [Playground](../playground) para validar los cambios antes de publicar.  
+- Documenta en el historial las descripciones de cada versión para facilitar auditorías o rollbacks.  
+- Consulta los [Canales](../channels) para confirmar que la nueva versión está activa en todos los medios de contacto.

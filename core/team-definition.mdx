@@ -1,0 +1,61 @@
+---
+title: "Definición de Equipo"
+description: "Aprende qué es un equipo en Inagent, su rol en la plataforma y cómo configurarlo para administrar agentes, canales y recursos compartidos."
+---
+
+# Definición de Equipo
+
+Un **equipo** es la unidad principal de organización en Inagent.\
+En él se agrupan los **agentes virtuales** que trabajan de manera coordinada y que comparten configuraciones, herramientas y recursos.
+
+## Propósito del equipo
+
+- **Agrupar agentes virtuales** que colaboran en una misma lógica de negocio o flujo de atención.
+- **Centralizar la configuración** de elementos comunes:
+  - Bases de conocimiento globales.
+  - Herramientas y APIs.
+  - Guardrails o moderadores.
+  - Canales de comunicación (voz, WhatsApp, webchat, etc.).
+- **Supervisar en tiempo real** las interacciones, métricas y reportes.
+
+## Elementos principales de un equipo
+
+- **Agentes virtuales**\
+  Cada equipo contiene uno o varios agentes que heredan las configuraciones globales y pueden tener sus propias personalizaciones.
+- **Recepcionista**\
+  Es el agente designado para recibir las **interacciones iniciales** y derivarlas a otros agentes cuando sea necesario.
+- **Contactos**\
+  Define **qué agentes pueden transferirse conversaciones** entre sí dentro del equipo.
+- **Canales**\
+  Asociaciones a los distintos canales (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger, SMS) que todos los agentes del equipo pueden utilizar.
+- **Bases de conocimiento, Herramientas y Guardrails**\
+  Se definen a nivel equipo para que **hereden automáticamente a todos los agentes**, evitando duplicar configuraciones.
+- **Tópicos**\
+  Permiten detectar temas específicos y disparar automatizaciones.
+- **Otros (Timeout y reglas especiales)**\
+  Configuraciones para gestionar tiempos de inactividad y reglas de sesión.
+
+## Creación de un equipo
+
+1. **Nombre y descripción**\
+   Asigna un nombre claro que identifique su función (por ejemplo “Soporte LATAM” o “Ventas Online”).
+2. **Crear el primer agente dentro del equipo**\
+   Crea tu primer agente del equipo que asumirá rol de recepcionista.
+3. **Configurar canales**\
+   Conecta los canales que el equipo va a utilizar.
+4. **Agregar Contactos**\
+   Indica qué agentes se pueden transferir conversaciones entre sí.
+5. **Configurar conocimiento y herramientas**\
+   Carga bases de conocimiento, agrega herramientas y define guardrails globales.
+6. **Guardar y publicar**\
+   El equipo puede guardarse en borrador y publicarse con control de versiones y trazabilidad.
+
+## Buenas prácticas
+
+- Define las configuraciones globales en el equipo y **solo especializa en los agentes cuando sea necesario**.
+- Mantén una estructura de nombres coherente para equipos y agentes, facilitando su identificación en reportes y supervisión.
+- Prueba los flujos en el **Playground del equipo** antes de publicar.
+
+---
+
+En las siguientes páginas se detalla cómo crear y configurar los distintos elementos dentro del equipo, como el **Agente** y su **Comportamiento**.

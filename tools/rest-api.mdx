@@ -1,0 +1,154 @@
+---
+title: API REST
+description: Herramienta que permite a un agente virtual realizar solicitudes HTTP (GET, POST, PUT, DELETE) para integrar datos externos en tiempo real.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# API REST
+
+La herramienta **API REST** permite que un agente virtual de Inagent **realice llamadas HTTP** a sistemas externos  
+(GET, POST, PUT, DELETE) para consultar, crear, actualizar o eliminar datos durante una conversación.
+
+Es ideal para integrar datos de CRM, sistemas de inventario, pasarelas de pago u otros servicios de negocio  
+sin salir del flujo de diálogo.
+
+---
+
+## Propósito
+
+- **Conectar el agente virtual con sistemas externos** en tiempo real.  
+- Consultar o enviar datos para enriquecer la respuesta del agente.  
+- Integrar lógica de negocio sin tener que codificar dentro del guion.
+
+---
+
+## Configuración de la herramienta
+
+Al crear o editar una herramienta de tipo **API REST**, se definen los siguientes campos principales:
+
+### 1. Nombre
+Identificador único de la herramienta, por ejemplo `ConsultaCliente` o `ActualizarPedido`.
+
+### 2. Descripción
+Indica el propósito y los casos en los que debe usarse.  
+> Ejemplo: “Usar cuando el cliente consulte el estado de su pedido.”
+
+### 3. Agentes asociados
+Lista de agentes virtuales que **podrán invocar esta herramienta** durante una conversación.
+
+---
+
+## Configuración de la API REST
+
+En la pestaña **Configuración API REST** se establecen los detalles de la llamada HTTP:
+
+| Campo           | Descripción                                                                                             |
+|-----------------|---------------------------------------------------------------------------------------------------------|
+| **Método**      | Tipo de solicitud HTTP: `GET`, `POST`, `PUT` o `DELETE`.                                               |
+| **URL**         | Endpoint del servicio REST. Se pueden incluir variables dinámicas con `args.variable`.                  |
+| **Query params**| Parámetros de URL que se envían en la consulta. También aceptan variables `args.variable`.              |
+| **Headers**     | Encabezados HTTP (por ejemplo `Authorization`, `Content-Type`).                                         |
+| **Body**        | Cuerpo de la petición, en formato JSON u otro. **Aquí también pueden usarse variables `args.variable`** para pasar datos dinámicos. |
+
+<Callout type="info">
+Las variables `args.variable` se obtienen de los parámetros definidos en el  
+**tab Interfaz de agente** (modo Básico o JSON Schema).  
+Esto permite que los datos ingresados por el usuario o presentes en el contexto  
+se inyecten dinámicamente en la URL, en los query params o en el body de la llamada.
+</Callout>
+
+---
+
+## Prueba y mapeo de respuesta
+
+La interfaz permite **ejecutar una prueba de la API** directamente desde la herramienta  
+para validar que la configuración es correcta.
+
+- Una vez ejecutada la prueba, la **respuesta se puede mapear** atributo por atributo.  
+- Cada atributo de la respuesta se asocia a una **variable** que el agente virtual podrá usar en su guion.
+
+> Ejemplo: mapear `response.customer.name` a la variable `clienteNombre`.
+
+### Códigos de respuesta
+
+En el mapeo es posible:
+
+- **Indicar el código de respuesta esperado** (por ejemplo `200`) y su significado.  
+- **Definir descripciones personalizadas** para cada código.  
+  - Ejemplo: `404` → “El contacto no existe”.
+
+<Callout type="tip">
+Describir los códigos de respuesta es esencial para que el agente  
+pueda reaccionar de manera adecuada ante errores o resultados inesperados.
+</Callout>
+
+---
+
+## Interfaz de agente
+
+El tab **Interfaz de agente** define los **atributos que el agente virtual debe proporcionar**  
+antes de invocar la API REST.  
+De esta forma se garantiza que la llamada cuente con los datos necesarios.
+
+Se puede configurar de dos maneras:
+
+### a. Modo Básico (Parámetros simples)
+Similar a la herramienta [Transferencia a humano](../tools/human-handoff):
+
+- **Nombre del parámetro**  
+- **Tipo**: Texto, Número, Objeto o Array  
+- **Descripción**: qué representa y cómo se usará.
+
+### b. Formato JSON Schema
+Permite una definición más flexible y validaciones avanzadas.  
+Por ejemplo:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "name":   { "type": "string" },
+    "phone":  { "type": "string" },
+    "email":  { "type": "string" }
+  },
+  "required": ["name", "phone"]
+}
+```
+En este ejemplo, name y phone son obligatorios, mientras que email es opcional.
+
+<Callout type="info"> Las variables definidas aquí se usarán como `args.variable` en la URL, query params o body para garantizar que los datos necesarios estén siempre presentes y validados. </Callout>
+
+---
+
+## Flujo en una conversación
+
+Cuando el agente virtual necesita **consultar o enviar información**, el proceso típico es:
+
+1. **Evalúa el guion y las reglas** para determinar si es necesario llamar a la API.
+2. **Reúne los datos de entrada** desde las variables de contexto o de la conversación.
+3. **Ejecuta la llamada HTTP** con el método, URL, headers, query params y body definidos.  
+   - Aquí puede usar `args.variable` para inyectar datos dinámicos.
+4. **Mapea la respuesta**: cada campo de la respuesta se asigna a variables que pueden usarse en mensajes posteriores.
+5. **Maneja códigos de respuesta**:
+   - Si el código es `200`, continúa el flujo normal.
+   - Si es `404`, puede responder, por ejemplo, “El contacto no existe”.
+
+---
+
+## Buenas prácticas
+
+- **Documenta claramente el propósito** de la herramienta y los datos de entrada/salida.
+- **Usa JSON Schema** cuando la estructura de entrada sea compleja o requiera validación estricta.
+- **Incluye descripciones en los códigos de respuesta** para una mejor gestión de errores.
+- **Prueba la herramienta en Playground** antes de ponerla en producción.
+- **Aprovecha `args.variable`** para pasar datos dinámicos en URL, query params o body sin hardcodear valores.
+
+---
+
+## Próximos pasos
+
+- Configura los **atributos de entrada** en modo Básico o JSON Schema según la complejidad.
+- **Prueba la API** desde la interfaz de la herramienta para validar query params, headers y body.
+- **Publica los cambios** y monitorea en **[Reportes](../reporting/overview)** el comportamiento de las llamadas.
+

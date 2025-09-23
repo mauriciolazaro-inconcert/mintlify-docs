@@ -1,0 +1,94 @@
+---
+title: Guardrails
+description: Filtros de seguridad y estilo que controlan el contenido de las respuestas del agente. Incluye herencia, buenas prácticas y advertencias de rendimiento.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Guardrails (Moderadores)
+
+Los **Guardrails** son **filtros automáticos** que se aplican a las respuestas generadas por un agente para **asegurar calidad, seguridad y cumplimiento**.  
+Funcionan como una capa de control que revisa cada mensaje antes de ser enviado al usuario.
+
+---
+
+## Propósito
+
+- **Mantener el tono corporativo** y la coherencia de estilo.  
+- **Evitar respuestas inapropiadas** o que contengan información sensible.  
+- **Cumplir políticas y regulaciones** (por ejemplo, protección de datos o normativas de privacidad).  
+- Servir como **último control de calidad** antes de entregar la respuesta final.
+
+---
+
+## Herencia Equipo → Agente
+
+Los guardrails pueden definirse en:
+
+1. **Nivel equipo**  
+   - Se aplican de forma automática a todos los agentes.  
+   - Ejemplo: prohibir términos sensibles o forzar un tono formal.
+
+2. **Nivel agente**  
+   - Se agregan guardrails adicionales o se ajustan los heredados.  
+   - Útiles cuando un agente requiere filtros más estrictos (por ejemplo, un bot de finanzas).
+
+<Callout type="info">
+La herencia asegura que las políticas corporativas se cumplan en todo el equipo,  
+permitiendo a la vez que cada agente defina reglas de seguridad o estilo específicas.
+</Callout>
+
+---
+
+## Rol en el ciclo conversacional
+
+Durante cada turno de conversación, los guardrails intervienen en la fase final:
+
+1. **Entrada del usuario**  
+2. **Guion + Reglas**: el agente decide responder, usar herramientas o transferir.  
+3. **Generación de la respuesta candidata**  
+4. **Guardrails**:  
+   - Evalúan y, si es necesario, corrigen o bloquean la respuesta.  
+   - Pueden solicitar una nueva redacción al modelo para cumplir las restricciones.
+5. **Modificadores** (si están habilitados)  
+6. **Entrega de la respuesta final**
+
+<Callout type="warning">
+**Advertencia de rendimiento**
+
+Cada guardrail implica una revisión extra de la respuesta, lo que:
+- **Aumenta el número de mensajes procesados**.
+- **Incrementa la latencia de respuesta**.
+
+Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad de interacción es crítica.
+</Callout>
+
+---
+
+## Ejemplos de guardrails comunes
+
+- **Contenido sensible**: bloquear datos personales, números de tarjetas o información confidencial.  
+- **Tono y estilo**: garantizar que las respuestas mantengan un estilo formal o un lenguaje inclusivo.  
+- **Limitación de temas**: impedir que el agente responda a consultas fuera de su dominio.  
+- **Prevención de lenguaje inapropiado**: filtrar insultos, lenguaje discriminatorio o expresiones violentas.
+
+---
+
+## Buenas prácticas
+
+- **Configura en el equipo lo que es política global** (privacidad, estilo corporativo).  
+- **Define solo los guardrails necesarios**: demasiados filtros pueden afectar la naturalidad de las respuestas.  
+- **Prueba exhaustivamente** en Playground: verifica que las correcciones se apliquen sin romper la intención original.  
+- **Monitorea el impacto en latencia**, especialmente si el canal principal es **voz**.
+
+<Callout type="tip">
+Utiliza **testers guardados** en el Playground para reproducir escenarios críticos y comprobar cómo actúan los guardrails en tiempo real.
+</Callout>
+
+---
+
+## Próximos pasos
+
+- Define qué guardrails se aplican a nivel **equipo** y cuáles en cada **agente**.  
+- Documenta las políticas de contenido y estilo que se deben cumplir.  
+- Prueba y ajusta con el [Playground](../playground) para encontrar el equilibrio entre **seguridad** y **fluidez**.

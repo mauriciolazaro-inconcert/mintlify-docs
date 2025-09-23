@@ -1,0 +1,129 @@
+---
+title: Comportamiento del Agente
+description: Define la personalidad, guion, reglas, guardrails y modificadores que controlan cómo un agente de Inagent conversa y actúa.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Comportamiento del Agente
+
+El **Comportamiento** es el corazón de cada agente.  
+Aquí defines **cómo habla**, **qué dice** y **qué procesos debe ejecutar en cada turno**, incluyendo **Reglas**, **Guardrails** y **Modificadores**.
+
+---
+
+## Objetivo del Comportamiento
+
+- Establecer la **personalidad** y el **tono de voz** del agente.  
+- Definir el **guion conversacional**: estructura, mensajes clave y rutas de diálogo.  
+- Configurar **Reglas** transversales, **Guardrails** de seguridad/estilo y **Modificadores** que post-procesan las respuestas.
+
+El resultado es un agente que suena natural, respeta las políticas de negocio y se integra con herramientas y bases de conocimiento.
+
+---
+
+## Componentes principales
+
+### 1. Guion o Prompt principal
+Es el **plan maestro de conversación**.  
+Incluye:
+
+- Saludo inicial.  
+- Pasos para cumplir el objetivo (venta, soporte, cobranza, etc.).  
+- Mensajes de transición.  
+- Respuestas de fallback.
+
+El guion puede invocar:
+- **Bases de conocimiento** globales o propias.
+- **Herramientas (Tools)** como API REST, Código o Transferencia a humano.
+
+### 2. Reglas (agregados al guion)
+Las **Reglas** son **condiciones transversales** que se ejecutan **siempre**, sin importar en qué sección del guion esté el agente.
+
+- **Funciones**: verificar identidad, activar transferencias, prohibir términos, controlar flujos.  
+- **Evaluación**: en **cada turno** de la conversación.
+
+Para más detalle de diseño de Reglas, revisa [Definición de Agente](../agent-definition).
+
+### 3. Guardrails (Moderadores)
+Los **Guardrails** son filtros de **seguridad, estilo o cumplimiento** que se aplican a cada respuesta generada.
+
+- Aseguran un **tono corporativo**.
+- Bloquean contenido sensible o no deseado.
+- Pueden heredarse del equipo y complementarse con guardrails propios del agente.
+
+<Callout type="warning">
+**Advertencia sobre rendimiento**
+
+Cada guardrail implica una revisión extra de la respuesta, lo que:
+
+- **Aumenta el número de mensajes procesados**.
+- **Incrementa la latencia de respuesta**.
+
+Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad es crítica.
+</Callout>
+
+### 4. Modificadores
+Los **Modificadores** actúan **después de los guardrails** y permiten ajustar o limpiar la respuesta final.
+
+- Ejemplos:  
+  - **Forzar traducción** al idioma del usuario.  
+  - **Quitar caracteres especiales** (asteriscos, tags HTML).  
+  - **Normalizar formatos** (por ejemplo, números de teléfono).
+
+<Callout type="warning">
+Los modificadores también pueden **añadir latencia**, ya que se aplican a la respuesta final antes de enviarla.
+</Callout>
+
+---
+
+## Ciclo interno de la conversación
+
+En cada turno, Inagent ejecuta el siguiente flujo:
+
+1. **Entrada del usuario**
+   - Se analiza el mensaje y se detectan **Tópicos** si corresponde.
+2. **Guion + Reglas**
+   - Con base en el Guion y las Reglas (del agente y del equipo) decide:
+     - Escribir una respuesta inmediata, o
+     - Llamar a una **herramienta (Tool)** (por ejemplo, API REST o Código), o
+     - Consultar la **Base de conocimiento**.
+     - Transferir a otro **Contacto** la interacción
+3. **Generación de mensaje**
+   - Produce una respuesta candidata.
+4. **Guardrails (si están habilitados)**
+   - La respuesta pasa por los guardrails de seguridad/estilo.
+   - Si se corrige, se **regenera el mensaje** según las indicaciones del guardrail.
+5. **Modificadores**
+   - Se aplican ajustes finales (traducción, limpieza, formato).
+6. **Entrega al canal**
+   - Se envía la respuesta final al usuario.
+
+<Callout type="info">
+La presencia de guardrails o modificadores puede aumentar ligeramente el tiempo de respuesta.  
+En canales de **voz**, se recomienda minimizar o deshabilitar estas capas para garantizar la fluidez de la conversación.
+</Callout>
+
+---
+
+## Buenas prácticas
+
+- **Escribe en lenguaje natural y claro**: el agente debe sonar humano pero profesional.
+- **Divide el guion en secciones lógicas**: saludo, diagnóstico, solución, cierre.
+- **Crea reglas explícitas y medibles**: cada regla con condición y acción clara.
+- **Minimiza guardrails en voz**: usa solo lo imprescindible para evitar latencia.
+- **Evalúa impacto de modificadores**: comprueba que no afecten la experiencia en tiempo real.
+- **Prueba en Playground**: simula casos reales, usa variables de contexto y testers guardados para validar todo el flujo (guion, reglas, guardrails, modificadores).
+
+---
+
+## Próximos pasos
+
+- Revisa [Definición de Agente](../agent-definition) para entender la herencia de configuraciones.
+- Consulta [Bases de conocimiento](../knowledge) para integrar información de respaldo en el guion.
+- Explora [Herramientas](../tools) para ampliar capacidades durante el flujo (API REST, Código, Transferencia a humano).
+- Utiliza el [Playground](../playground) para probar con debugging y validar latencias antes de publicar.
+
+---
+
+Con un comportamiento bien diseñado —guion sólido, reglas transversales, guardrails y modificadores correctamente calibrados— tu agente ofrecerá conversaciones **naturales, seguras y eficientes**, optimizadas tanto para texto como para voz.

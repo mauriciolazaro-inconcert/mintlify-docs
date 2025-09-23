@@ -1,0 +1,106 @@
+---
+title: Bases de conocimiento
+description: Visión general de cómo Inagent gestiona la información que usan los agentes para responder, con herencia entre equipo y agente.
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Bases de conocimiento
+
+Las **Bases de conocimiento** son la **fuente central de información** que Inagent utiliza para responder con precisión y contexto.  
+Permiten que los agentes —y el equipo como conjunto— tengan acceso inmediato a documentos, datos y respuestas actualizadas, sin depender de flujos rígidos.
+
+---
+
+## Propósito
+
+- **Responder con datos precisos y actualizados**.  
+- **Unificar la información** en todos los agentes del equipo.  
+- **Reducir mantenimiento**: se actualiza en un solo lugar y se replica automáticamente.  
+- **Aumentar la tasa de resolución**: los agentes pueden responder preguntas complejas sin necesidad de programación.
+
+---
+
+## Herencia Equipo → Agente
+
+Las bases de conocimiento se definen en dos niveles:
+
+1. **Nivel equipo**  
+   - Información compartida por todos los agentes del equipo.
+   - Ejemplo: políticas de privacidad, catálogo de productos, datos corporativos.
+   - Cualquier actualización aquí **se hereda automáticamente** a todos los agentes.
+
+2. **Nivel agente**  
+   - Información específica que solo necesita un agente.
+   - Ejemplo: guías de un producto, FAQ de un servicio especializado.
+
+<Callout type="info">
+La herencia evita duplicar contenido.  
+El agente puede **extender** o **priorizar** su conocimiento específico frente al heredado del equipo.
+</Callout>
+
+---
+
+## Cómo interviene en la conversación
+
+Durante cada turno, la base de conocimiento es clave en el ciclo interno:
+
+1. **Entrada del usuario**  
+   - Se analiza el mensaje, se detectan Tópicos si corresponde.
+
+2. **Guion + Reglas**  
+   - El agente decide si necesita información adicional.
+
+3. **Consulta de conocimiento**  
+   - Accede a la base relevante (equipo o agente) para obtener hechos, definiciones o instrucciones.
+
+4. **Respuesta o acción**  
+   - Integra la información en el mensaje final o la usa para alimentar una herramienta (por ejemplo, API REST).
+
+Si no hay información relevante, se pueden aplicar **respuestas de fallback** o **transferir a un contacto**.
+
+---
+
+## Tipos de base de conocimiento
+
+En Inagent puedes utilizar diferentes orígenes de información, cada uno con su propia configuración:
+
+- **Texto nativo**  
+  Contenido escrito directamente dentro de la plataforma.
+
+- **Documentos (PDF)**  
+  Archivos que se indexan para búsqueda semántica.
+
+- **Sitios web externos**  
+  URLs que se rastrean e indexan de forma controlada.
+
+Cada tipo tiene su propia sección detallada en la documentación:
+
+- [Texto nativo](../knowledge/native-text)  
+- [Documentos PDF](../knowledge/documents-pdf)  
+- [Sitios externos](../knowledge/external-sites)
+
+---
+
+## Buenas prácticas
+
+- **Centraliza lo común en el equipo** y agrega solo lo necesario en cada agente.  
+- **Mantén un lenguaje claro y actualizado**: la IA extrae mejor la información si está bien estructurada.  
+- **Evita duplicados**: si el mismo dato existe en varias fuentes, prioriza una sola para reducir inconsistencias.  
+- **Prueba en Playground**: asegúrate de que las respuestas provengan de la fuente correcta.
+
+<Callout type="tip">
+Si un agente necesita priorizar su conocimiento frente al del equipo, configúralo en la sección  
+[Herencia y precedencia](../knowledge/inheritance).
+</Callout>
+
+---
+
+## Próximos pasos
+
+- Aprende a cargar y organizar información en:
+  - [Texto nativo](../knowledge/native-text)
+  - [Documentos PDF](../knowledge/documents-pdf)
+  - [Sitios externos](../knowledge/external-sites)
+- Si necesitas que un agente sobrescriba o amplíe la información global, consulta  
+  [Herencia y precedencia](../knowledge/inheritance).

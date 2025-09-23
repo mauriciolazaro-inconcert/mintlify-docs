@@ -1,0 +1,112 @@
+---
+title: "Recepcionista"
+description: "Agente que recibe las interacciones iniciales del equipo y decide continuar, consultar conocimiento o herramientas, o transferir a otro contacto."
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Recepcionista
+
+El **recepcionista** es el **agente de entrada** del equipo: recibe **todas las interacciones nuevas** desde los canales asociados (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS).\
+Su función es **acoger al usuario**, **entender la necesidad** y **decidir**: responder, **llamar herramientas**, consultar **bases de conocimiento**, o **transferir** la conversación a otro agente (un **Contacto**) más adecuado.
+
+---
+
+## Responsabilidades del recepcionista
+
+- **Saludo y diagnóstico** inicial.
+- **Ruta de decisión** según **Guion + Reglas**:
+  - Responder directamente.
+  - **Invocar herramientas** (API REST, Código, Transferencia a humano).
+  - Consultar **Bases de conocimiento**.
+  - **Transferir** a un **Contacto** (otro agente del equipo).
+- **Mantener cumplimiento**: se aplican **Guardrails** (si están habilitados) y **Modificadores** de salida.
+
+<Callout type="info">
+El recepcionista **hereda** conocimientos, herramientas y guardrails definidos a nivel **equipo**, y puede tener ajustes propios como cualquier agente.
+</Callout>
+
+---
+
+## Enrutamiento con Contactos
+
+Los **Contactos** definen **qué agentes** pueden recibir transferencias desde el recepcionista (y entre sí).
+
+- **Lista de Contactos**: mantenla actualizada con los agentes que operan en el equipo.
+- **Criterios de transferencia** (ejemplos):
+  - **Tópicos**: si el usuario menciona “cancelación”, envía a **Retención**.
+  - **Especialización**: ventas, soporte técnico, cobranza, etc.
+
+> Las **Reglas** del recepcionista suelen contener las condiciones que disparan la transferencia (por tópico, por intención o por fallo de validaciones).
+
+---
+
+## Relación con Tópicos
+
+Los **Tópicos** permiten **detectar temas** en tiempo real (intenciones, motivos, categorías).\
+El recepcionista puede usar esta detección para **enrutar** automáticamente:
+
+- “Cobranza” → Transferir a agente **Cobros**.
+- “Soporte técnico” → Transferir a **Soporte Nivel 1**.
+- “Ventas” → Transferir a **Ventas Inbound**.
+
+<Callout type="tip">
+Define Tópicos **con nombres claros** y **reglas de enrutamiento** simples (si tópico = X → transferir a Y).  
+Esto facilita el mantenimiento y la trazabilidad.
+</Callout>
+
+---
+
+## Ciclo interno cuando el recepcionista atiende
+
+1. **Entrada del usuario** (posible detección de Tópicos).
+2. **Guion + Reglas** del recepcionista:
+   - Responder,
+   - Llamar **Tools** (API REST / Código / Transferencia a humano),
+   - Consultar **Base de conocimiento**, o
+   - **Transferir** a un **Contacto**.
+3. Si **no transfiere**:
+   - (Opcional) **Guardrails** si están habilitados.
+   - (Opcional) **Modificadores** (traducción, limpieza, formato).
+4. **Entrega de respuesta** por el canal correspondiente.
+
+<Callout type="warning">
+**Rendimiento**  
+Los **Guardrails** y **Modificadores** pueden **aumentar la latencia**.  
+En **canales de voz** se recomienda **minimizar** o **deshabilitar** guardrails para preservar fluidez.
+</Callout>
+
+---
+
+## Configuración paso a paso
+
+1. **Elegir recepcionista**
+   - En el equipo, selecciona el agente que actuará como recepcionista.
+2. **Definir Contactos**
+   - Agrega los agentes que pueden recibir transferencias (matriz de interrelación).
+3. **Ajustar Guion y Reglas**
+   - Guion de bienvenida y diagnóstico breve.
+   - Reglas para validación (p. ej., verificación antes de datos sensibles) y **derivación** por tópico o condición.
+4. **Probar en Playground**
+   - Simula conversaciones y verifica rutas de transferencia.
+   - Usa **variables de contexto** y **testers guardados**.
+5. **Publicar**
+   - Versiona y publica con trazabilidad.
+
+---
+
+## Mejores prácticas
+
+- **Corto y claro**: el recepcionista debe **diagnosticar rápido** y enrutAR sin rodeos.
+- **Reglas explícitas**: “si tópico = X → transferir a Y”.
+- **Fallback seguro**: si no hay Contacto válido, responde con un **mensaje de contención** y ofrece **Transferencia a humano**.
+- **Mantenimiento de Contactos**: revisa periodicidad (altas/bajas) y especialidades.
+- **Evitar guardrails en voz**: prioriza **baja latencia**.
+
+---
+
+## Próximos pasos
+
+- Define los [**Contactos**](../contacts) del equipo.
+- Crea Tópicos clave en [**Topics**](../topics) y conéctalos a reglas de enrutamiento.
+- Prueba todo con [**Playground**](../playground) y luego [**Publica**](../publishing) con control de versiones.

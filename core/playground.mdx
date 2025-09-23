@@ -1,0 +1,113 @@
+---
+title: "Playground"
+description: "Herramienta de prueba y depuración en tiempo real para agentes virtuales. Permite habilitar trazas de debug, simular variables de contexto y guardar escenarios de prueba."
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Playground
+
+El **Playground** es el **entorno de pruebas y depuración** de Inagent.\
+Permite **probar agentes virtuales en tiempo real**, observar el comportamiento interno de cada respuesta\
+y simular diferentes contextos de interacción **antes de publicar en producción**.
+
+---
+
+## Propósito
+
+- Validar que el **guion**, las **reglas**, las **herramientas**, los **guardrails** y los **modificadores** funcionen como se espera.
+- Visualizar el **flujo interno de ejecución** (inicio/fin de interacción, uso de herramientas, consultas de conocimiento, guardrails, transferencias, etc.).
+- Simular **variables de contexto** que normalmente provendrían de integraciones externas (CRM, WhatsApp, etc.).
+- Guardar **escenarios de prueba** para reproducir casos complejos.
+
+---
+
+## Opciones de depuración (Debug)
+
+El Playground permite habilitar trazas de **debug** que insertan **marcas grises en el diálogo** para mostrar eventos clave en tiempo real.\
+Cada marca incluye el momento del evento y, cuando corresponde, el resultado obtenido.
+
+### Eventos que se pueden habilitar
+
+- **Inicio y finalización de interacción**: muestra cuándo comienza y termina la conversación.
+- **Uso de herramientas (Tools)**: indica cuándo se ejecuta una herramienta (API REST, Código, Transferencia a humano) y el resultado devuelto.
+- **Uso de modificadores**: señala si se aplicaron transformaciones de texto, traducciones o estilos de habla.
+- **Transferencias entre agentes**: registra la decisión y el momento en que una conversación es transferida a un **Contacto**.
+- **Consulta de bases de conocimiento**: muestra cuándo y cómo se recupera información de una base de conocimiento.
+- **Aplicación de guardrails**: indica cuándo se aplican filtros de moderación o de estilo.
+
+<Callout type="tip">
+Puedes activar o desactivar cada categoría de debug de forma independiente para ajustar el nivel de detalle a tus necesidades de prueba.
+</Callout>
+
+---
+
+## Variables de contexto
+
+El Playground permite **definir variables de contexto** para simular datos que normalmente provienen de integraciones externas (por ejemplo, WhatsApp o un CRM).
+
+- Se cargan como un **objeto JSON**.
+- Ejemplo:
+
+```json
+{
+  "telefono": "+59899123456",
+  "id_cliente": "12345",
+  "plan": "premium"
+}
+```
+
+Estas variables están disponibles para el agente durante toda la interacción y se comportan igual que en un entorno real.
+
+ Las variables de contexto permiten recrear escenarios complejos, como llamadas que traen datos previos del CRM o mensajes con metadatos del canal. 
+
+---
+
+## Escenarios guardados
+
+Los **datos de prueba** (incluyendo variables de contexto y configuraciones de debug) pueden **guardarse** para reutilizarlos en futuras pruebas.
+
+- Cada usuario puede mantener **N escenarios guardados** según sus necesidades.
+- Los escenarios guardados **pertenecen a la sesión del usuario**: nadie más puede ver ni modificar los escenarios personales.
+
+### Esto facilita
+
+- Probar **flujos de negocio recurrentes**.
+- Ejecutar **regresiones** después de cambios en el guion o las herramientas.
+- Mantener un **historial de pruebas críticas**.
+
+---
+
+## Flujo de prueba recomendado
+
+1. **Seleccionar el agente** a probar.
+2. **Activar las opciones de debug** deseadas: inicio/fin, herramientas, modificadores, transferencias, consultas de conocimiento, guardrails.
+3. **Definir variables de contexto** en formato JSON para simular entradas reales.
+4. **Interactuar con el agente** enviando mensajes como lo haría un usuario final.
+5. **Revisar las marcas grises** que muestran:
+   - Inicio y final de la interacción.
+   - Uso de herramientas, guardrails, modificadores.
+   - Transferencias entre agentes.
+   - Consultas a bases de conocimiento.
+6. **Guardar el escenario de prueba** si se quiere reutilizar.
+
+<Callout type="tip">
+Prueba distintos contextos (por ejemplo, usuarios con planes distintos o idiomas diferentes) para asegurar que el agente responda correctamente en todos los casos.
+</Callout>
+
+---
+
+## Buenas prácticas
+
+- **Activa solo las trazas necesarias**: demasiados eventos pueden dificultar la lectura.
+- **Agrupa escenarios guardados por objetivo** (p. ej., “onboarding cliente”, “fallo de pago”).
+- **Valida latencia**: observa si guardrails o modificadores añaden tiempo de respuesta.
+- **Repite pruebas críticas** después de cada cambio de guion o herramienta para evitar regresiones.
+
+---
+
+## Próximos pasos
+
+- Consulta **[Comportamiento del Agente](../agents/behavior)** para saber cómo se evalúan guion, reglas, herramientas, guardrails y modificadores.
+- Revisa **[Herramientas](../tools)** para entender qué se ejecuta cuando se llama a una API REST, se corre código o se transfiere a un humano.
+- Usa **[Reportes avanzados](../reporting/advanced-reports-kpis)** para medir la eficacia de las pruebas en escenarios reales.

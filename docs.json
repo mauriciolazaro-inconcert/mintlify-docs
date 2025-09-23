@@ -3,18 +3,18 @@
   "theme": "mint",
   "name": "Inagent",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#661aff",
+    "light": "#9966ff",
+    "dark": "#884dff"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guías",
+        "tab": "Documentación",
         "groups": [
           {
-            "group": "Introducción",
+            "group": "Guías",
             "pages": [
               "getting-started/overview",
               "getting-started/quickstart",
@@ -23,36 +23,34 @@
             ]
           },
           {
-            "group": "Equipos",
-            "pages": [
-              "teams/overview",
-              "teams/team-definition",
-              "teams/agents/overview",
-              "teams/agents/behavior/script",
-              "teams/agents/knowledge/overview",
-              "teams/agents/knowledge/native-text",
-              "teams/agents/knowledge/documents-pdf",
-              "teams/agents/knowledge/external-sites",
-              "teams/agents/tools/overview",
-              "teams/agents/tools/human-handoff",
-              "teams/agents/tools/rest-api",
-              "teams/agents/tools/code",
-              "teams/agents/rules",
-              "teams/receptionist",
-              "teams/knowledge",
-              "teams/tools",
-              "teams/guardrails",
-              "teams/topics",
-              "teams/others/inactivity-rules",
-              "teams/channels",
-              "teams/playground",
-              "teams/publishing"
+            "group": "Conceptos Core",
+            "pages": [              
+              "core/team-definition",
+              "core/agent-definition",
+              "core/agents/behavior",
+              "core/receptionist",
+              "core/contacts",
+              "core/knowledge",
+              "core/tools",
+              "core/guardrails",
+              "core/topics",
+              "core/others",
+              "core/channels",
+              "core/playground",
+              "core/publishing"                            
+            ]
+          },
+          {
+            "group": "Herramientas",
+            "pages": [              
+              "tools/human-handoff",
+              "tools/rest-api",
+              "tools/code"
             ]
           },
           {
             "group": "Bases de conocimiento",
-            "pages": [
-              "knowledge/overview",
+            "pages": [              
               "knowledge/native-text",
               "knowledge/documents-pdf",
               "knowledge/external-sites",
@@ -84,16 +82,6 @@
               "reporting/overview",
               "reporting/system-reports",
               "reporting/advanced-reports-kpis"
-            ]
-          },
-          {
-            "group": "Sandbox",
-            "pages": [
-              "sandbox/overview",
-              "sandbox/bots/cobranza",
-              "sandbox/bots/leads",
-              "sandbox/bots/faq",
-              "sandbox/bots/agendamiento"
             ]
           },
           {

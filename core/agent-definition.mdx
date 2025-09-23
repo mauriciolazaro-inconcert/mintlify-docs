@@ -1,0 +1,86 @@
+---
+title: "Definición de Agente"
+description: "Qué es un agente virtual en Inagent, su rol dentro del equipo, herencia de configuraciones y cómo funcionan las reglas (agregados al guion)."
+---
+
+import { Callout } from "nextra-theme-docs"
+
+# Definición de Agente
+
+Un **agente virtual** es la entidad que conversa con los usuarios finales.\
+Cada agente pertenece a un **equipo**, **hereda** configuraciones globales (conocimiento, herramientas, guardrails, canales) y puede **extenderlas o personalizarlas**.
+
+---
+
+## Descripción del rol del agente
+
+Un agente cumple tres funciones principales:
+
+1. **Atender y guiar la conversación**\
+   Responde en tiempo real, conduce el diálogo según su **Guion** (comportamiento) y resuelve el objetivo propuesto (venta, soporte, cobranza, etc.).
+2. **Especializarse en un dominio**\
+   Puede enfocarse en un tema (por ejemplo, “Soporte nivel 1” o “Cobranza preferencial”). El **recepcionista** del equipo puede **transferirle** conversaciones cuando detecta que es el mejor candidato (según **Contactos** o **Tópicos**).
+3. **Cumplir políticas y reglas de negocio**\
+   Aunque el Guion cambie de rama, el agente **debe respetar siempre** las **Reglas** (agregados al Guion) y los **Guardrails** (seguridad/compliance), además de aplicar **Modificadores** cuando corresponda (p. ej., forzar traducción).
+
+<info>
+  **Reglas = agregados al Guion.** No son pasos del flujo, sino condiciones transversales que se aplican en todo momento del script.
+</info>
+
+---
+
+## Herencia y personalización
+
+- **Hereda del equipo**: bases de conocimiento, herramientas (incluida la transferencia a humano), guardrails y canales.
+- **Personaliza a nivel agente**: puede añadir **conocimiento propio**, **herramientas** adicionales o **guardrails del agente**; y define su **Guion**.
+
+> Regla general: configura lo **común** en el **equipo** y **especializa** en el **agente** solo lo necesario.
+
+---
+
+## Elementos configurables del agente
+
+- **Comportamiento (Guion/Prompt)**\
+  Tono, estilo y pasos del diálogo. Incluye **Reglas** como **agregados** que se aplican de forma transversal (ver sección “Reglas”).
+- **Guardrails del agente**\
+  Moderadores específicos de este agente (además de los guardrails heredados del equipo) para reforzar políticas de seguridad, estilo o cumplimiento.
+- **Conocimiento propio**\
+  Información específica del agente que complementa o prioriza frente al conocimiento del equipo cuando aplique.
+- **Herramientas**\
+  Capacidades como **Transferencia a humano**, **API REST** y **Código** (controlador).
+- **Otros (Modificadores)**\
+  Filtros de salida que fuerzan comportamientos transversales (p. ej., traducción automática, limpieza de asteriscos).
+- **Playground del agente**\
+  Pruebas en vivo, variables de contexto, testers guardados y nivel de debugging.
+
+---
+
+## Reglas (agregados al guion)
+
+Las **Reglas** son **agregados al Guion**: condiciones y restricciones **transversales** que se aplican **siempre**, sin depender de una sección específica del script.
+
+### ¿Para qué sirven?
+
+- **Asegurar cumplimiento** del discurso y de políticas de negocio.
+- **Uniformar comportamientos** independientemente del camino conversacional (ej.: pedir verificación antes de revelar datos).
+- **Activar acciones/derivaciones** cuando se cumplan condiciones (ej.: si detecta intención de cancelación → transferir a humano).
+
+### Alcance y persistencia
+
+- **Globales al Guion**: no son un paso, afectan a todo el flujo.
+- **Evaluadas en cada turno**: se chequean en cada intercambio (entrada y/o salida).
+- **Compatibles con herencia**: conviven con guardrails del equipo; el agente puede sumar reglas propias.
+
+### Tipos habituales
+
+- **Proceso**: “Antes de entregar un comprobante, verifica identidad.”
+- **Contenido**: “Nunca menciones precios internos.”
+- **Enrutamiento**: “Si detectas ‘cancelación’, transfiere al agente Retención.”
+- **Formato**: “Responde con oraciones breves en pasos numerados.”
+
+### Ejemplo (derivación por intención)
+
+```text
+Si el usuario menciona "cancelación de servicio",
+entonces informa el proceso breve y TRANSFIERE al agente "Retención".
+```
