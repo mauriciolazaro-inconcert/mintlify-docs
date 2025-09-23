@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Inagent",
   "colors": {
-    "primary": "#661aff",
-    "light": "#9966ff",
-    "dark": "#884dff"
+    "primary": "#16A34A",
+    "light": "#07C983",
+    "dark": "#15803D"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -15,7 +15,7 @@
         "groups": [
           {
             "group": "Introducción",
-            "pages": [              
+            "pages": [
               "getting-started/overview",
               "getting-started/quickstart",
               "getting-started/production-checklist",
@@ -23,49 +23,63 @@
             ]
           },
           {
-            "group": "Construir: Crear Agentes Virtuales",
+            "group": "Equipos",
             "pages": [
-              "build/agents/planning",
-              "build/agents/create-agent",
-              "build/agents/behavior/overview",
-              "build/agents/behavior/script",
-              "build/agents/behavior/guardrails",
-              "build/agents/behavior/output-filters",
-              "build/agents/behavior/topics",
-              "build/agents/behavior/tools/overview",
-              "build/agents/behavior/tools/code-tool",
-              "build/agents/behavior/tools/human-handoff-tool",
-              "build/agents/behavior/tools/rest-api-tool",
-              "build/agents/knowledge/overview",
-              "build/agents/knowledge/native-text",
-              "build/agents/knowledge/documents-pdf",
-              "build/agents/knowledge/external-sites",
-              "build/agents/testing",
-              "build/agents/versioning-release"
+              "teams/overview",
+              "teams/team-definition",
+              "teams/agents/overview",
+              "teams/agents/behavior/script",
+              "teams/agents/knowledge/overview",
+              "teams/agents/knowledge/native-text",
+              "teams/agents/knowledge/documents-pdf",
+              "teams/agents/knowledge/external-sites",
+              "teams/agents/tools/overview",
+              "teams/agents/tools/human-handoff",
+              "teams/agents/tools/rest-api",
+              "teams/agents/tools/code",
+              "teams/agents/rules",
+              "teams/receptionist",
+              "teams/knowledge",
+              "teams/tools",
+              "teams/guardrails",
+              "teams/topics",
+              "teams/others/inactivity-rules",
+              "teams/channels",
+              "teams/playground",
+              "teams/publishing"
             ]
           },
           {
-            "group": "Canales",
+            "group": "Bases de conocimiento",
             "pages": [
-              "channels/voice/overview",
-              "channels/voice/webcall-webrtc",
-              "channels/voice/sip-trunk",
-              "channels/voice/twilio",
-              "channels/whatsapp/setup",
-              "channels/webchat/setup"
+              "knowledge/overview",
+              "knowledge/native-text",
+              "knowledge/documents-pdf",
+              "knowledge/external-sites",
+              "knowledge/inheritance"
             ]
           },
           {
-            "group": "Automatizaciones",
+            "group": "Supervisión de equipos",
             "pages": [
-              "automations/overview",
-              "automations/triggers",
-              "automations/runnables",
-              "automations/examples"
+              "supervision/overview",
+              "supervision/live-monitoring",
+              "supervision/whisper",
+              "supervision/transfer",
+              "supervision/instant-stats"
             ]
           },
           {
-            "group": "Reportería",
+            "group": "Historial de conversaciones",
+            "pages": [
+              "conversation-history/overview",
+              "conversation-history/search-filter",
+              "conversation-history/detail-view",
+              "conversation-history/audit"
+            ]
+          },
+          {
+            "group": "Reportes",
             "pages": [
               "reporting/overview",
               "reporting/system-reports",
@@ -73,42 +87,38 @@
             ]
           },
           {
-            "group": "Integraciones",
+            "group": "Sandbox",
             "pages": [
-              "integrations/overview",
-              "integrations/rest-api"
+              "sandbox/overview",
+              "sandbox/bots/cobranza",
+              "sandbox/bots/leads",
+              "sandbox/bots/faq",
+              "sandbox/bots/agendamiento"
             ]
           },
           {
-            "group": "Despliegue, Seguridad y Cumplimiento",
+            "group": "Canales",
             "pages": [
-              "deploy/environments",
-              "security/authentication",
-              "security/webhooks",
-              "security/data-protection",
-              "security/rate-limits"
+              "channels/overview",
+              "channels/voice/overview",
+              "channels/voice/webcall-webrtc",
+              "channels/voice/sip-trunk",
+              "channels/voice/twilio",
+              "channels/whatsapp/setup",
+              "channels/webchat/setup",
+              "channels/instagram/setup",
+              "channels/facebook-messenger/setup",
+              "channels/sms/setup"
             ]
           },
           {
-            "group": "Facturación y Consumos",
+            "group": "Facturación",
             "pages": [
+              "billing/overview",
               "billing/plans",
               "billing/usage-voice",
-              "billing/usage-messaging"
-            ]
-          },
-          {
-            "group": "Soporte y Operaciones",
-            "pages": [
-              "support/troubleshooting",
-              "support/faq",
-              "support/status"
-            ]
-          },
-          {
-            "group": "Notas de versión",
-            "pages": [
-              "changelog"
+              "billing/usage-messaging",
+              "billing/invoices"
             ]
           }
         ]
@@ -127,73 +137,12 @@
             ]
           },
           {
-            "group": "Autenticación",
+            "group": "Endpoints principales",
             "pages": [
-              "api-reference/auth/login",
-              "api-reference/auth/token-introspection"
-            ]
-          },
-          {
-            "group": "Tenants",
-            "pages": [
-              "api-reference/tenants/list",
-              "api-reference/tenants/get",
-              "api-reference/tenants/create",
-              "api-reference/tenants/update"
-            ]
-          },
-          {
-            "group": "Agentes",
-            "pages": [
-              "api-reference/agents/list",
-              "api-reference/agents/get",
-              "api-reference/agents/create",
-              "api-reference/agents/update",
-              "api-reference/agents/publish",
-              "api-reference/agents/knowledge"
-            ]
-          },
-          {
-            "group": "Comportamiento y Herramientas",
-            "pages": [
-              "api-reference/behavior/script",
-              "api-reference/behavior/guardrails",
-              "api-reference/behavior/output-filters",
-              "api-reference/behavior/topics",
-              "api-reference/tools/code-tool",
-              "api-reference/tools/human-handoff-tool",
-              "api-reference/tools/rest-api-tool"
-            ]
-          },
-          {
-            "group": "Conversaciones",
-            "pages": [
-              "api-reference/conversations/list",
-              "api-reference/conversations/get",
-              "api-reference/conversations/send-message",
-              "api-reference/conversations/events"
-            ]
-          },
-          {
-            "group": "Automatizaciones",
-            "pages": [
-              "api-reference/automations/list",
-              "api-reference/automations/create",
-              "api-reference/automations/update",
-              "api-reference/automations/execute"
-            ]
-          },
-          {
-            "group": "Reportería",
-            "pages": [
-              "api-reference/reporting/system-reports",
-              "api-reference/reporting/advanced-reports-kpis"
-            ]
-          },
-          {
-            "group": "Integraciones",
-            "pages": [
-              "api-reference/integrations/rest-api"
+              "api-reference/endpoints/teams",
+              "api-reference/endpoints/agents",
+              "api-reference/endpoints/conversations",
+              "api-reference/endpoints/reporting"
             ]
           },
           {
@@ -203,6 +152,13 @@
               "api-reference/webhooks/events",
               "api-reference/webhooks/signing",
               "api-reference/webhooks/retries"
+            ]
+          },
+          {
+            "group": "Ejemplos y SDKs",
+            "pages": [
+              "api-reference/examples",
+              "api-reference/sdks"
             ]
           }
         ]
@@ -240,8 +196,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Inagent",
-      "href": "https://app.virtualagents.inconcertcc.com"
+      "label": "Ingresar",
+      "href": "https://app.virtualagents.inconcertcc.com/"
     }
   },
   "contextual": {
