@@ -1,0 +1,79 @@
+---
+title: "Descripción general de Equipos"
+description: "Conceptos y elementos principales de un equipo en Inagent: agentes, recepcionista, canales y configuraciones compartidas."
+---
+
+# Equipos en Inagent
+
+Un **equipo** en Inagent es un **conjunto organizado de agentes virtuales** que colaboran para atender conversaciones en uno o varios canales.\
+Dentro de cada equipo, **un agente actúa como recepcionista**: es el punto de entrada de todas las interacciones y puede transferir las conversaciones a otros agentes del mismo equipo.
+
+---
+
+## Estructura de un equipo
+
+Un equipo reúne en una sola entidad:
+
+- **Agentes virtuales**
+  - Cada equipo puede tener múltiples agentes.
+  - Uno de ellos es el **recepcionista**, que recibe la primera interacción y decide si continúa la conversación o la transfiere a otro agente.
+- **Canales asociados**
+  - Un equipo puede conectarse a **múltiples canales** (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger, SMS).
+  - Todos los agentes del equipo comparten estos canales y pueden responder a través de ellos según la configuración.
+- **Bases de conocimiento**
+  - **Del equipo**: contenido global disponible para todos los agentes.
+  - **De cada agente**: información específica y exclusiva de cada uno.
+  - La base de conocimiento del equipo **hereda automáticamente a sus agentes**, asegurando respuestas coherentes.
+- **Herramientas**
+  - **Del equipo**: integraciones y capacidades comunes (por ejemplo, API REST o código personalizado).
+  - **De cada agente**: herramientas individuales que complementan o amplían las heredadas.
+- **Moderadores (Guardrails)**
+  - Reglas de seguridad o estilo que se aplican globalmente al equipo.
+  - Cada agente puede agregar guardrails propios adicionales.
+- **Tópicos (Topics)**
+  - Permiten detectar temas específicos durante una conversación y **disparar automatizaciones** predefinidas.
+- **Otros (timeout y reglas especiales)**
+  - Configuración de **tiempo de inactividad** (timeout) y otras opciones avanzadas para manejar sesiones prolongadas o inactivas.
+
+<info>
+  Toda configuración definida a nivel de equipo (conocimiento, herramientas, guardrails) se **hereda automáticamente** a los agentes que lo conforman, evitando duplicar trabajo y garantizando coherencia.
+</info>
+
+---
+
+## El rol del recepcionista
+
+El **recepcionista** es un agente especial dentro del equipo:
+
+- Recibe **todas las interacciones iniciales**.
+- Puede **resolver directamente** la consulta o **transferir la conversación** a otro agente del equipo.
+- Utiliza la configuración de **candidatos a transferencia** para saber a qué agentes puede derivar cada tipo de conversación.
+
+Esta lógica permite distribuir las conversaciones según especialidades o cargas de trabajo.
+
+---
+
+## Vista general y configuración
+
+En la **Vista general del equipo** podrás:
+
+- Ver un resumen de canales, agentes y configuraciones activas.
+- Definir **qué agentes pueden transferirse llamadas entre sí** como candidatos de recepción.
+- Acceder a las secciones de **Bases de conocimiento**, **Herramientas**, **Guardrails**, **Topics** y **Otros** para administrar cada área.
+
+---
+
+## Próximos pasos
+
+Para profundizar en cada parte del equipo, consulta:
+
+- 👉 [**Definición de equipo**](team-definition): cómo crear, editar y versionar equipos.
+- 👉 [**Agentes del equipo**](agents/overview): cómo crear agentes y configurar su comportamiento.
+- 👉 [**Canales**](../channels/overview): cómo vincular Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS.
+- 👉 [**Tópicos**](topics): detección de temas para automatizaciones.
+- 👉 [**Otros**](others/inactivity-rules): configuración de timeout y reglas avanzadas.
+
+---
+
+¿Necesitas asistencia adicional?\
+[Contacta al soporte](mailto:support@inagent.app) o revisa la [página de estado](https://status.inagent.app) para confirmar la disponibilidad de la plataforma.
