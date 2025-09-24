@@ -56,15 +56,13 @@
               "knowledge/native-text",
               "knowledge/documents-pdf",
               "knowledge/external-sites",
-              "knowledge/videos",
-              "knowledge/inheritance"
+              "knowledge/videos"
             ]
           },
           {
             "group": "Supervisión de equipos",
             "pages": [
-              "supervision/overview",
-              "supervision/live-monitoring",
+              "supervision/overview",              
               "supervision/whisper",
               "supervision/transfer",
               "supervision/impersonate",
