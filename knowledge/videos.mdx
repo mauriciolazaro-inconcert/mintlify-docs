@@ -1,0 +1,75 @@
+---
+title: "Videos"
+description: "Inagent permite subir archivos de video en formato MP4 para utilizarlos como parte de la Base de conocimiento.
+
+El sistema transcribe automáticamente el audio del video y utiliza esa transcripción como fuente de información para que el agente virtual pueda responder preguntas de los usuarios."
+---
+
+import { Callout } from "nextra-theme-docs"
+
+<warning>
+  Importante: Inagent **no analiza imágenes ni gráficos del video**.\
+  **Solo el sonido** (audio) es procesado para generar la base de conocimiento.
+</warning>
+
+---
+
+## Cómo cargar un video
+
+Para añadir un video como fuente de conocimiento:
+
+1. Ve a la sección **Bases de conocimiento**.
+2. Haz clic en **Añadir conocimiento** → **Video (MP4)**.
+3. Asigna un **nombre descriptivo** al archivo.
+4. Activa el switch **Contexto** si deseas agregar **Tags (clave–valor)** que sirvan como metadatos.
+5. Sube el archivo MP4.
+
+---
+
+## Proceso de indexado
+
+Cuando el archivo MP4 se guarda:
+
+- **Transcripción automática**: el audio se convierte a texto de manera precisa.
+- **División en chunks**: la transcripción se corta en fragmentos con overlapping para conservar el contexto.
+- **Generación de embeddings**: cada fragmento se convierte en un vector semántico para búsqueda por significado.
+- **Integración de Tags**: los metadatos agregados se aplican a todos los fragmentos del video.
+
+---
+
+## Metadatos de contexto (Tags)
+
+Puedes asociar **Tags (clave–valor)** al video completo para que formen parte del contexto semántico.
+
+### Ejemplo de Tags
+
+| Clave         | Valor        |
+| ------------- | ------------ |
+| tipoContenido | Capacitación |
+| idioma        | Español      |
+
+Estos metadatos permiten que, cuando el agente seleccione los **top 5 chunks** para responder,\
+tome en cuenta que la información proviene de un contenido de capacitación en español.
+
+<tip>
+  Los Tags enriquecen la búsqueda y ayudan al agente a **priorizar fragmentos relevantes**\
+  dentro de la transcripción, mejorando la calidad de la respuesta.
+</tip>
+
+---
+
+## Buenas prácticas
+
+- **Usa audio claro**: un sonido limpio mejora la precisión de la transcripción.
+- **Agrega Tags significativos** para que la IA comprenda mejor el tipo de contenido.
+- **Incluye títulos descriptivos** para identificar el video fácilmente.
+- **Revisa en Playground** que los fragmentos más importantes aparezcan en el top 5 de búsqueda.
+
+---
+
+## Próximos pasos
+
+- Combina el contenido de **Videos** con [Texto nativo](./native-text) y [Documentos PDF](./documents-pdf)\
+  para tener una base de conocimiento más completa.
+- Consulta [Sitios externos](./external-sites) si deseas integrar contenido que se actualice automáticamente.
+- Revisa [Herencia de conocimiento](./inheritance) para compartir transcripciones entre equipos y agentes.

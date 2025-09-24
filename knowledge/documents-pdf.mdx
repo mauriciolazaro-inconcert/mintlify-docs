@@ -1,4 +1,72 @@
 ---
 title: "Documentos PDF"
-description: "Description of your new file."
+description: "En Inagent puedes subir archivos PDF para que formen parte de una Base de conocimiento.
+
+Cada documento se procesa automáticamente para que el agente virtual pueda buscar y responder con información precisa."
 ---
+
+## Cómo cargar un documento
+
+Para añadir un PDF a la base de conocimiento:
+
+1. Ve a la sección **Bases de conocimiento**.
+2. Haz clic en **Añadir conocimiento** → **PDF**.
+3. **Asigna un nombre** descriptivo al documento.
+4. Activa el switch **Contexto** si quieres agregar **Tags (clave–valor)** como metadatos.
+5. Sube el archivo PDF.
+
+Una vez guardado, el documento se procesa e indexa automáticamente.
+
+<info>
+  El motor no analiza imágenes ni gráficos: **solo procesa texto extraíble** del PDF.
+</info>
+
+---
+
+## Proceso de indexado
+
+Cuando el documento es guardado:
+
+- El contenido se **divide en fragmentos (chunks)** con overlapping para mantener el contexto.
+- Cada fragmento se convierte en un **vector semántico** para permitir búsqueda por significado.
+- El documento queda disponible para las respuestas del agente en milisegundos.
+
+---
+
+## Metadatos (Tags con clave–valor)
+
+El switch **Contexto** permite asignar **Tags** al documento como pares `clave: valor`.\
+Estos metadatos se incorporan a cada fragmento, de modo que se utilizan al elegir los **top 5 chunks** para elaborar la respuesta.
+
+### Ejemplo de Tags
+
+| Clave        | Valor    |
+| ------------ | -------- |
+| tipoEstudio  | Maestría |
+| departamento | Finanzas |
+
+En este ejemplo, **cualquier fragmento proveniente de este PDF** llevará implícito que\
+`tipoEstudio = Maestría` y `departamento = Finanzas`.\
+El agente virtual considerará estos datos para **refinar el ranking de relevancia** durante la búsqueda.
+
+<tip>
+  Definir buenos Tags permite a la IA **entender el contexto** y mejorar la precisión de las respuestas.
+</tip>
+
+---
+
+## Buenas prácticas
+
+- **Usa nombres descriptivos** para identificar rápidamente el documento.
+- **Sube PDFs bien estructurados** (títulos, subtítulos claros) para optimizar el chunking.
+- **Incluye metadatos clave** mediante el switch **Contexto** para mejorar la relevancia en las respuestas.
+- **Prueba en Playground** preguntas que combinen Tags para validar que se tengan en cuenta.
+- **Actualiza periódicamente** los documentos si la información cambia.
+
+---
+
+## Próximos pasos
+
+- Complementa esta base con [Texto nativo](./native-text) para información redactada directamente en Inagent.
+- Consulta [Sitios externos](./external-sites) si deseas mantener información siempre actualizada desde la web.
+- Aprende sobre [Herencia de conocimiento](./inheritance) para compartir los datos entre equipos y agentes.

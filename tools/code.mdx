@@ -1,4 +1,225 @@
 ---
 title: "Código"
-description: "Description of your new file."
+description: "La herramienta Código (Controller) te permite ejecutar JavaScript para implementar lógica personalizada dentro del flujo conversacional: validar datos, transformar respuestas, orquestar llamadas a otros servicios, o enrutar a otro agente virtual de manera dinámica."
 ---
+
+## Propósito
+
+- **Extender** el comportamiento del agente más allá de lo declarativo (guion/reglas).
+- **Orquestar** integraciones y decisiones complejas sin salir de Inagent.
+- **Controlar** el flujo: enviar mensajes, transferir a otros agentes, cerrar/resolver una interacción, etc.
+
+<Callout type="warning">
+El uso de código puede **añadir latencia**. Optimiza la lógica y evita operaciones costosas, especialmente en **canales de voz**.
+</Callout>
+
+---
+
+## Configuración de la herramienta
+
+### 1) Nombre
+
+Identificador interno, ej.: `ValidadorDocumento`, `RouterSoporte`.
+
+### 2) Descripción
+
+Cuándo se debe usar esta herramienta y qué hace.
+
+> Ej.: “Valida el documento del cliente y decide si enruta a KYC o continúa el flujo.”
+
+### 3) Agentes asociados
+
+Agentes virtuales autorizados a invocar esta herramienta.
+
+### 4) Interfaz de agente (Entradas)
+
+Define **qué datos necesita** el script antes de ejecutarse. Dos modos:
+
+#### a. Modo Básico (Parámetros)
+
+- **Nombre** (ej.: `dni`, `motivo`)
+- **Tipo**: Texto, Número, Objeto, Array
+- **Descripción**: cómo se usa
+
+#### b. Formato **JSON Schema**
+
+Para estructuras complejas y validaciones estrictas.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dni":   { "type": "string", "minLength": 6 },
+    "email": { "type": "string", "format": "email" },
+    "tags":  { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["dni"]
+}
+```
+
+<Callout type="info"> Las entradas definidas aquí estarán disponibles como **`args.<nombre>`** dentro del código (ej.: `args.dni`, `args.email`). </Callout>
+
+## Variables dinámicas (`args.*`)
+
+Cualquier **parámetro definido en la Interfaz de agente**  
+(tanto en modo **Básico** como en **JSON Schema**) se accede en el código como:
+
+```javascript
+args.<nombreDelParametro>
+```
+
+Por ejemplo, si defines un parámetro `dni` en la Interfaz de agente,
+podrás usarlo en el código como `args.dni`.
+
+Estas variables también pueden emplearse en otras herramientas:
+
+- **URL** de una API REST  
+- **Query params**  
+- **Body** de la solicitud HTTP  
+
+de forma que los datos se inyecten dinámicamente sin tener que codificarlos de manera fija.
+
+---
+
+## Estructura del código JavaScript
+
+El editor permite escribir un **controller en JavaScript**.  
+Debes **exportar las funciones** que utilices para que Inagent las ejecute.
+
+Dentro de la función principal tendrás acceso a utilidades del runtime, como:
+
+- `controller` – para enviar mensajes, transferir, resolver, etc.  
+- `args` – parámetros definidos en la Interfaz de agente.  
+- `context` – almacenamiento de variables durante la sesión.  
+- `logger` – registro de eventos para debugging.
+
+A continuación se muestran **patrones comunes** que puedes adaptar a tus nombres y a las APIs reales del runtime de Inagent.
+
+```javascript
+// Ejemplo de estructura básica
+export default async function main({ controller, args, context, logger }) {
+  // Lee parámetros definidos en Interfaz de agente
+  const dni = args.dni;               // string
+  const motivo = args.motivo ?? "N/A";
+
+  logger.info("Iniciando controller Código", { dni, motivo });
+
+  // 1) Validaciones o lógica
+  if (!dni || dni.length < 6) {
+    await controller.impersonate({
+      text: "El documento parece incompleto. ¿Podrías confirmarlo?"
+    });
+    return { status: "need_more_data" };
+  }
+
+  // 2) Ejemplo de escritura de variables para usar luego en el guion
+  context.set("dniValidado", dni);
+
+  // 3) Decidir acción final: responder, transferir, o finalizar
+  return { status: "ok" };
+}
+```
+
+## Métodos clave del controller
+
+Los nombres pueden variar según el runtime; aquí usamos las convenciones  
+**`impersonate`**, **`mutateTo`** y **`resolve`** tal como se definen en este documento.
+
+### 1) `controller.impersonate({...})`
+
+Envía un **mensaje estático** “en nombre del agente”, **sin esperar generación de IA**.  
+Es útil para confirmaciones o mensajes breves completamente controlados.
+
+```javascript
+await controller.impersonate({
+  text: "He registrado tu pedido. ¿Deseas continuar con el pago?"
+});
+```
+En este ejemplo, el mensaje se envía de inmediato sin pasar por el modelo de IA,
+asegurando una respuesta predefinida y consistente.
+
+### 2) `controller.mutateTo({ agentId, reason, contextOverrides })`
+
+Transfiere la interacción a otro agente virtual del equipo (similar a un enrutamiento interno).
+
+```javascript
+await controller.mutateTo({
+  agentId: "agente_soporte_n2",
+  reason: "Derivación por complejidad técnica",
+  contextOverrides: { prioridad: "alta" } // opcional
+});
+return { status: "transferred" };
+```
+### 3) `controller.resolve({ reason, payload })`
+
+Marca la interacción como resuelta/finalizada (por ejemplo, tras un proceso exitoso o una transferencia).
+```javascript
+await controller.resolve({
+  reason: "Proceso completado",
+  payload: { ticketId: "TK-9123" } // opcional
+});
+return { status: "resolved" };
+```
+<Callout type="tip"> Si vas a **transferir** usando `mutateTo`, considera también registrar variables clave con `context.set(...)` para que el **nuevo agente** herede el contexto necesario. </Callout>
+
+## Ejemplos de uso (plantillas)
+
+Puedes partir de estos y adaptarlos a tu caso.  
+Completa luego tus **propios ejemplos** en la documentación.
+
+### A) Confirmación con `impersonate`
+
+```javascript
+export default async function main({ controller, args }) {
+  const nombre = args.nombre ?? "cliente";
+  await controller.impersonate({
+    text: `Perfecto, ${nombre}. Ya validé tus datos. ¿Seguimos?`
+  });
+  return { status: "ok" };
+}
+```
+### B) Enrutamiento condicional con `mutateTo`
+
+```javascript
+export default async function main({ controller, args, context }) {
+  const categoria = args.categoria; // p. ej., "soporte" | "ventas"
+  if (categoria === "soporte") {
+    await controller.mutateTo({ agentId: "soporte_n1", reason: "Tópico soporte" });
+    return { status: "transferred" };
+  }
+  // Si no transfiere, seguir flujo normal
+  context.set("categoriaAtendida", categoria);
+  return { status: "ok" };
+}
+```
+
+### C) Resolución del flujo con `resolve`
+```javascript
+export default async function main({ controller, args }) {
+  // ... lógica de verificación
+  await controller.resolve({
+    reason: "Operación completada con éxito",
+    payload: { folio: "FOL-202501" }
+  });
+  return { status: "resolved" };
+}
+```
+
+## Buenas prácticas
+
+- **Diseña entradas claras** (Básico o JSON Schema).  
+  Cuanto mejor validadas estén, menos errores habrá en tiempo de ejecución.
+- **Evita latencia innecesaria**: corta la lógica, cachea resultados, evita loops o llamadas redundantes.
+- **Registra lo importante** con `logger.info`, `logger.warn` o `logger.error` para facilitar el troubleshooting.
+- **No dupliques lógica** de guion/reglas si puede resolverse de forma declarativa.
+- **Prueba en Playground** con distintos escenarios y variables de contexto.
+- **Documenta** claramente qué hace el controller y cuándo debe invocarse.
+
+---
+
+## Próximos pasos
+
+- **Define entradas** en **Interfaz de agente** (Básico o JSON Schema) y pruébalas a través de `args.*`.
+- **Crea y valida** tus propios snippets de `impersonate`, `mutateTo` y `resolve` en el **Playground**.
+- **Publica la herramienta** y monitorea su impacto en **[Reportes](../reporting/overview)**.
+

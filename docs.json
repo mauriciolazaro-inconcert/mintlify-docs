@@ -42,7 +42,8 @@
           },
           {
             "group": "Herramientas",
-            "pages": [              
+            "pages": [
+              "tools/overview",
               "tools/human-handoff",
               "tools/rest-api",
               "tools/code"
@@ -50,10 +51,12 @@
           },
           {
             "group": "Bases de conocimiento",
-            "pages": [              
+            "pages": [
+              "knowledge/overview",
               "knowledge/native-text",
               "knowledge/documents-pdf",
               "knowledge/external-sites",
+              "knowledge/videos",
               "knowledge/inheritance"
             ]
           },
@@ -64,6 +67,7 @@
               "supervision/live-monitoring",
               "supervision/whisper",
               "supervision/transfer",
+              "supervision/impersonate",
               "supervision/instant-stats"
             ]
           },
@@ -92,11 +96,11 @@
               "channels/voice/webcall-webrtc",
               "channels/voice/sip-trunk",
               "channels/voice/twilio",
-              "channels/whatsapp/setup",
-              "channels/webchat/setup",
-              "channels/instagram/setup",
-              "channels/facebook-messenger/setup",
-              "channels/sms/setup"
+              "channels/whatsapp",
+              "channels/webchat",
+              "channels/instagram",
+              "channels/facebook-messenger",
+              "channels/sms"
             ]
           },
           {
@@ -119,8 +123,7 @@
             "pages": [
               "api-reference/introduction",
               "api-reference/authentication",
-              "api-reference/errors",
-              "api-reference/sdks",
+              "api-reference/errors",              
               "api-reference/postman"
             ]
           },

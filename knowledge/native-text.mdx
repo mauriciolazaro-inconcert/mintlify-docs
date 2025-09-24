@@ -1,4 +1,74 @@
 ---
-title: "Artículos nativos"
-description: "Description of your new file."
+title: "Texto nativo"
+description: "El Texto nativo permite crear preguntas y respuestas directamente en Inagent, sin necesidad de subir documentos externos. Es ideal para FAQs, guías cortas o información puntual que deba estar siempre disponible."
 ---
+
+## Cómo cargar contenido de texto nativo
+
+Para añadir preguntas y respuestas:
+
+1. Ve a la sección **Bases de conocimiento**.
+2. Haz clic en **Añadir conocimiento** → **Listado de preguntas frecuentes**.
+3. Asigna un **nombre descriptivo** a esta nueva colección.
+4. En el editor, agrega cada **par de pregunta y respuesta** de manera individual.
+
+Cada pregunta/respuesta se indexa automáticamente para que el agente pueda utilizarla\
+cuando detecte una consulta relacionada.
+
+---
+
+## Metadatos de contexto (Tags)
+
+El **switch Contexto** permite agregar **Tags (clave–valor)**\
+que enriquecen la comprensión semántica y mejoran la precisión en el ranking de respuestas.
+
+En Texto nativo los Tags pueden definirse en dos niveles:
+
+### 1. A nivel de cada pregunta/respuesta
+
+- Se agrega un conjunto de Tags por **par individual**.
+- Ejemplo:
+  - `producto = seguros`
+  - `idioma = español`
+
+Esto permite que cada pregunta/response lleve metadatos específicos\
+y se priorice adecuadamente en el **top 5 de chunks**.
+
+### 2. A nivel global de la base de conocimiento
+
+- Define **Tags generales** que se aplican a todo el conjunto de preguntas.
+- Útil para metadatos comunes, como `departamento = atención al cliente`.
+
+<tip>
+  Definir Tags relevantes permite que el agente **entienda el contexto** y seleccione las respuestas más apropiadas
+  cuando haya varias preguntas similares en diferentes colecciones.
+</tip>
+
+---
+
+## Proceso de indexado
+
+Al guardar el contenido:
+
+- Cada pregunta y respuesta se **convierte en chunks** con overlapping interno.
+- Se generan **vectores semánticos** para permitir búsquedas por significado.
+- Los Tags, tanto individuales como globales, se integran en cada chunk para\
+  mejorar el ranking durante la recuperación.
+
+---
+
+## Buenas prácticas
+
+- **Redacta preguntas reales y variadas**: incluye sinónimos o formulaciones típicas de los usuarios.
+- **Incluye detalles claros en las respuestas**: así el agente no necesitará múltiples llamadas para aclarar.
+- **Usa Tags consistentes** entre entradas relacionadas para facilitar el filtrado semántico.
+- **Revisa en Playground** que las respuestas aparezcan correctamente en el top 5 de resultados.
+- **Agrupa por tema**: organiza las preguntas en colecciones lógicas (facturación, soporte, políticas).
+
+---
+
+## Próximos pasos
+
+- Aprende a integrar **Documentos PDF** en [Documentos PDF](./documents-pdf) para información más extensa.
+- Consulta [Sitios externos](./external-sites) si deseas mantener contenido actualizado en línea.
+- Descubre [Herencia de conocimiento](./inheritance) para reutilizar texto nativo entre equipos y agentes.

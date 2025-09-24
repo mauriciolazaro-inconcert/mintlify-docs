@@ -1,4 +1,109 @@
 ---
-title: "Sitios web externos"
-description: "Description of your new file."
+title: "Sitios externos"
+description: "La opción Sitios externos permite que Inagent use como fuente de conocimiento el contenido de páginas web específicas.
+
+El sistema descarga únicamente la URL indicada y la procesa como texto, sin rastrear enlaces ni otras páginas del mismo dominio."
 ---
+
+import { Callout } from "nextra-theme-docs"
+
+<warning>
+  Importante: Inagent **no realiza crawling**.\
+  Solo analiza el contenido **exacto de la URL que configures**.
+</warning>
+
+---
+
+## Cómo agregar un sitio externo
+
+Para añadir una página web como base de conocimiento:
+
+1. Ve a la sección **Bases de conocimiento**.
+2. Haz clic en **Añadir conocimiento** → **Sitio externo**.
+3. Completa los siguientes campos:
+   - **Nombre de la Base**: un título descriptivo para identificar la fuente.
+   - **URL exacta**: dirección completa de la página a utilizar.
+   - **Frecuencia de análisis**: selecciona cada cuánto tiempo Inagent volverá a descargar y procesar el contenido.
+   - **XPath (opcional)**: expresión para indicar **secciones específicas de la página** que se deben procesar.
+4. Activa el switch **Contexto** si deseas agregar **Tags (clave–valor)** como metadatos.
+5. Guarda los cambios.
+
+---
+
+## Frecuencia de análisis
+
+Define cada cuánto tiempo Inagent actualizará la información de la URL:
+
+| Frecuencia  | Descripción                                                 |
+| ----------- | ----------------------------------------------------------- |
+| **Mensual** | Reprocesa el contenido una vez al mes.                      |
+| **Semanal** | Reprocesa el contenido una vez por semana.                  |
+| **48 h**    | Reprocesa el contenido cada 48 horas.                       |
+| **24 h**    | Reprocesa el contenido una vez al día para máxima frescura. |
+
+<tip>
+  Selecciona la frecuencia según la **velocidad de actualización** del sitio.\
+  Por ejemplo, usa 24 h para blogs de noticias o 48 h/semana para políticas internas con pocos cambios.
+</tip>
+
+---
+
+## Uso de XPath
+
+El campo **XPath** permite extraer **secciones específicas de la página web** en lugar de todo el contenido.\
+Esto es útil cuando solo una parte de la página contiene la información relevante.
+
+- Ejemplo: `//div[@class='contenido-articulo']`\
+  Extrae únicamente el texto dentro del `<div>` con clase `contenido-articulo`.
+- Ejemplo: `//main//p`\
+  Extrae todos los párrafos dentro de la etiqueta `<main>`.
+
+<info>
+  Si no se especifica un XPath, Inagent procesará **todo el cuerpo de la página**.
+</info>
+
+---
+
+## Metadatos de contexto (Tags)
+
+El **switch Contexto** permite asignar **Tags (clave–valor)** que se asocian a todos los fragmentos de esta fuente.
+
+### Ejemplo de Tags
+
+| Clave     | Valor    |
+| --------- | -------- |
+| origen    | BlogCorp |
+| idioma    | Español  |
+| categoría | Soporte  |
+
+Estos metadatos se integran en cada chunk y se usan en la búsqueda semántica\
+para **priorizar la información** en el top 5 de resultados.
+
+---
+
+## Proceso de indexado
+
+Cuando se guarda la URL:
+
+- **Descarga del contenido** de la página indicada o de la sección especificada por XPath.
+- **División en chunks** con overlapping para preservar el contexto.
+- **Generación de embeddings semánticos** para permitir búsquedas por significado.
+- **Aplicación de Tags** a todos los fragmentos.
+
+---
+
+## Buenas prácticas
+
+- Usa una **URL estable** que no cambie su estructura o parámetros con frecuencia.
+- Si solo una parte de la página es relevante, **define un XPath** preciso para reducir ruido y optimizar el índice.
+- Asegúrate de que la página contenga **texto plano y accesible**; contenido dinámico (scripts, iframes) no se indexa.
+- Ajusta la **frecuencia de análisis** de acuerdo con la frecuencia real de actualización de la página.
+- **Combina** sitios externos con otros tipos de conocimiento (PDF, texto nativo, videos) para una base más completa.
+
+---
+
+## Próximos pasos
+
+- Complementa esta fuente con [Texto nativo](./native-text), [Documentos PDF](./documents-pdf) y [Videos](./videos) para enriquecer la base.
+- Usa [Herencia de conocimiento](./inheritance) si necesitas compartir este contenido entre equipos y agentes.
+- Prueba en el [**Playground**](../core/playground) cómo el agente aprovecha la información de sitios externos en sus respuestas.

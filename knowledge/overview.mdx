@@ -1,0 +1,75 @@
+---
+title: "Bases de conocimiento - Visión general"
+description: "Las Bases de conocimiento en Inagent permiten que un agente virtual responda
+preguntas de los usuarios utilizando información confiable y actualizada proveniente de documentos, texto nativo o sitios externos."
+---
+
+## Arquitectura basada en RAG
+
+El motor de conocimiento de Inagent se apoya en un enfoque **RAG (Retrieval-Augmented Generation)**:
+
+1. **Resumen de la pregunta**
+   - Cuando un usuario hace una pregunta, el agente **la resume y la contextualiza** para comprender la intención real.
+2. **Búsqueda semántica**
+   - El motor busca en un **índice semántico** los fragmentos de información (chunks) más relevantes.
+   - Esta búsqueda no depende solo de palabras exactas, sino de **significado**, aumentando la precisión.
+3. **Selección de top 5**
+   - Se seleccionan los **5 fragmentos más cercanos** al contexto de la pregunta.
+4. **Generación de respuesta**
+   - Con esos fragmentos, el agente **elabora una respuesta final**, citando y combinando la información encontrada.
+
+<info>
+  Este enfoque permite que el agente mantenga respuestas **contextuales y confiables**,\
+  incluso cuando los documentos son extensos o están en varios formatos.
+</info>
+
+---
+
+## Proceso de indexado (diseño de base)
+
+Cuando cargas un documento o agregas texto en la base de conocimiento,\
+Inagent realiza un **preprocesamiento automático** para optimizar la búsqueda:
+
+- **División en chunks**: los documentos se cortan en fragmentos manejables (por ejemplo, 500–1000 tokens).
+- **Overlapping**: cada fragmento se solapa con el siguiente para **preservar el contexto entre secciones**.
+- **Creación de embeddings semánticos**: se genera un vector para cada chunk que permite búsquedas por significado.
+- **Construcción del índice semántico**: la base queda lista para responder en milisegundos.
+
+<tip>
+  Este proceso es transparente para el usuario, pero entenderlo ayuda a optimizar la carga de contenido: documentos bien estructurados producen fragmentos más precisos.
+</tip>
+
+---
+
+## Tipos de conocimiento
+
+Las bases de conocimiento pueden alimentarse de distintas fuentes:
+
+- **Texto nativo**: contenido redactado directamente en Inagent.
+- **Documentos PDF**: manuales, políticas, presentaciones, etc.
+- **Sitios web externos**: URLs que se actualizan automáticamente para mantener la información vigente.
+
+Cada tipo se configura en su propia sección para un control más fino.\
+Consulta las páginas específicas para aprender a cargarlos:
+
+- [Texto nativo](./native-text)
+- [Documentos PDF](./documents-pdf)
+- [Sitios externos](./external-sites)
+
+---
+
+## Buenas prácticas
+
+- **Estructura los documentos**: títulos claros y secciones bien delimitadas facilitan el chunking.
+- **Actualiza periódicamente** para mantener la información confiable.
+- **Revisa los top 5 resultados** en pruebas de Playground para asegurar que las respuestas sean precisas.
+- **Combina fuentes**: aprovecha texto nativo, documentos y web para una base robusta.
+
+---
+
+## Próximos pasos
+
+- Aprende a **cargar y gestionar texto nativo** en [Texto nativo](./native-text).
+- Descubre cómo **subir y versionar PDFs** en [Documentos PDF](./documents-pdf).
+- Conecta **sitios externos** en [Sitios externos](./external-sites).
+- Consulta [Herencia de conocimiento](./inheritance) para entender cómo se comparte la información entre equipos y agentes.
