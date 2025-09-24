@@ -1,15 +1,7 @@
 ---
 title: "Contactos"
-description: "Define qué agentes de un equipo pueden transferirse conversaciones entre sí, cómo funcionan las transferencias y buenas prácticas."
----
-
-import { Callout } from "nextra-theme-docs"
-
-# Contactos
-
-Los **Contactos** determinan la **red de transferencias internas** de un equipo.\
-Son la lista de agentes que el **recepcionista** y los demás agentes pueden usar como destino cuando una conversación necesita ser derivada.
-
+description: "Los Contactos determinan la red de transferencias internas de un equipo.
+Son la lista de agentes que el recepcionista y los demás agentes pueden usar como destino cuando una conversación necesita ser derivada."
 ---
 
 ## Propósito de los Contactos
@@ -19,9 +11,9 @@ Son la lista de agentes que el **recepcionista** y los demás agentes pueden usa
 - **Soportar escalamiento automático** según **Tópicos** .
 - Mantener **trazabilidad** de todas las derivaciones.
 
-<Callout type="info">
-Los contactos se definen **a nivel de equipo**.Cada agente puede tener configuraciones específicas de visibilidad dentro de esa red.
-</Callout>
+<info>
+  Los contactos se definen **a nivel de equipo**.Cada agente puede tener configuraciones específicas de visibilidad dentro de esa red.
+</info>
 
 ---
 
@@ -40,7 +32,9 @@ Si un agente no está incluido como Contacto, **no podrá recibir transferencias
 ## Configuración de Contactos paso a paso
 
 1.**Abrir el equipo que se desea configurar**
-   - En la sección Equipos, localiza el **Contactos** que se desea configurar.
+
+- En la sección Equipos, localiza el **Contactos** que se desea configurar.
+
 2. **Abrir la sección Contactos**
    - En la configuración del equipo, localiza el botón **Contactos**.
 3. **Agregar agentes**
@@ -75,10 +69,10 @@ Cuando se inicia una transferencia:
 - **Usa nombres descriptivos**: facilita la búsqueda de contactos.
 - **Prueba con Playground**: simula flujos completos de transferencia y revisa logs.
 
-<Callout type="warning">
-Si se definen **contactos excesivos o relaciones complejas**, puede aumentar el tiempo de decisión para transferir.  
-Procura mantener la red de contactos optimizada.
-</Callout>
+<warning>
+  Si se definen **contactos excesivos o relaciones complejas**, puede aumentar el tiempo de decisión para transferir.\
+  Procura mantener la red de contactos optimizada.
+</warning>
 
 ---
 

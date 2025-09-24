@@ -1,21 +1,13 @@
 ---
-title: Comportamiento del Agente
-description: Define la personalidad, guion, reglas, guardrails y modificadores que controlan cómo un agente de Inagent conversa y actúa.
+title: "Comportamiento del Agente"
+description: "El Comportamiento es el corazón de cada agente.
+Aquí defines cómo habla, qué dice y qué procesos debe ejecutar en cada turno, incluyendo Reglas, Guardrails y Modificadores."
 ---
 
-import { Callout } from "nextra-theme-docs"
+## Propósito
 
-# Comportamiento del Agente
-
-El **Comportamiento** es el corazón de cada agente.  
-Aquí defines **cómo habla**, **qué dice** y **qué procesos debe ejecutar en cada turno**, incluyendo **Reglas**, **Guardrails** y **Modificadores**.
-
----
-
-## Objetivo del Comportamiento
-
-- Establecer la **personalidad** y el **tono de voz** del agente.  
-- Definir el **guion conversacional**: estructura, mensajes clave y rutas de diálogo.  
+- Establecer la **personalidad** y el **tono de voz** del agente.
+- Definir el **guion conversacional**: estructura, mensajes clave y rutas de diálogo.
 - Configurar **Reglas** transversales, **Guardrails** de seguridad/estilo y **Modificadores** que post-procesan las respuestas.
 
 El resultado es un agente que suena natural, respeta las políticas de negocio y se integra con herramientas y bases de conocimiento.
@@ -25,55 +17,60 @@ El resultado es un agente que suena natural, respeta las políticas de negocio y
 ## Componentes principales
 
 ### 1. Guion o Prompt principal
-Es el **plan maestro de conversación**.  
+
+Es el **plan maestro de conversación**.\
 Incluye:
 
-- Saludo inicial.  
-- Pasos para cumplir el objetivo (venta, soporte, cobranza, etc.).  
-- Mensajes de transición.  
+- Saludo inicial.
+- Pasos para cumplir el objetivo (venta, soporte, cobranza, etc.).
+- Mensajes de transición.
 - Respuestas de fallback.
 
 El guion puede invocar:
+
 - **Bases de conocimiento** globales o propias.
 - **Herramientas (Tools)** como API REST, Código o Transferencia a humano.
 
 ### 2. Reglas (agregados al guion)
+
 Las **Reglas** son **condiciones transversales** que se ejecutan **siempre**, sin importar en qué sección del guion esté el agente.
 
-- **Funciones**: verificar identidad, activar transferencias, prohibir términos, controlar flujos.  
+- **Funciones**: verificar identidad, activar transferencias, prohibir términos, controlar flujos.
 - **Evaluación**: en **cada turno** de la conversación.
 
 Para más detalle de diseño de Reglas, revisa [Definición de Agente](../agent-definition).
 
 ### 3. Guardrails (Moderadores)
+
 Los **Guardrails** son filtros de **seguridad, estilo o cumplimiento** que se aplican a cada respuesta generada.
 
 - Aseguran un **tono corporativo**.
 - Bloquean contenido sensible o no deseado.
 - Pueden heredarse del equipo y complementarse con guardrails propios del agente.
 
-<Callout type="warning">
-**Advertencia sobre rendimiento**
+<warning>
+  **Advertencia sobre rendimiento**
 
-Cada guardrail implica una revisión extra de la respuesta, lo que:
+  Cada guardrail implica una revisión extra de la respuesta, lo que:
 
-- **Aumenta el número de mensajes procesados**.
-- **Incrementa la latencia de respuesta**.
+  * **Aumenta el número de mensajes procesados**.
+  * **Incrementa la latencia de respuesta**.
 
-Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad es crítica.
-</Callout>
+  Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad es crítica.
+</warning>
 
 ### 4. Modificadores
+
 Los **Modificadores** actúan **después de los guardrails** y permiten ajustar o limpiar la respuesta final.
 
-- Ejemplos:  
-  - **Forzar traducción** al idioma del usuario.  
-  - **Quitar caracteres especiales** (asteriscos, tags HTML).  
+- Ejemplos:
+  - **Forzar traducción** al idioma del usuario.
+  - **Quitar caracteres especiales** (asteriscos, tags HTML).
   - **Normalizar formatos** (por ejemplo, números de teléfono).
 
-<Callout type="warning">
-Los modificadores también pueden **añadir latencia**, ya que se aplican a la respuesta final antes de enviarla.
-</Callout>
+<warning>
+  Los modificadores también pueden **añadir latencia**, ya que se aplican a la respuesta final antes de enviarla.
+</warning>
 
 ---
 
@@ -99,10 +96,10 @@ En cada turno, Inagent ejecuta el siguiente flujo:
 6. **Entrega al canal**
    - Se envía la respuesta final al usuario.
 
-<Callout type="info">
-La presencia de guardrails o modificadores puede aumentar ligeramente el tiempo de respuesta.  
-En canales de **voz**, se recomienda minimizar o deshabilitar estas capas para garantizar la fluidez de la conversación.
-</Callout>
+<info>
+  La presencia de guardrails o modificadores puede aumentar ligeramente el tiempo de respuesta.\
+  En canales de **voz**, se recomienda minimizar o deshabilitar estas capas para garantizar la fluidez de la conversación.
+</info>
 
 ---
 

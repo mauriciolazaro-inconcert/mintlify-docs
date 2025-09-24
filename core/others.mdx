@@ -1,17 +1,11 @@
 ---
-title: Otros
-description: Configuraciones adicionales del agente o equipo: cierre automático por inactividad, mensajes intermedios y estilo de habla con modificadores.
+title: "Otros"
+description: "La sección Otros concentra configuraciones adicionales que influyen en
+la finalización de las conversaciones y en el estilo de las respuestas del agente.
+Afecta tanto a la experiencia del usuario como al rendimiento de la interacción."
 ---
 
 import { Callout } from "nextra-theme-docs"
-
-# Otros
-
-La sección **Otros** concentra configuraciones adicionales que influyen en  
-la **finalización de las conversaciones** y en el **estilo de las respuestas** del agente.  
-Afecta tanto a la experiencia del usuario como al rendimiento de la interacción.
-
----
 
 ## 1. Finalización de conversación por inactividad
 
@@ -19,19 +13,18 @@ Permite definir **cuándo el agente debe cerrar la conversación** si el usuario
 
 ### Configuraciones principales
 
-- **Tiempo de inactividad**  
-  - Límite de tiempo sin mensajes por parte del usuario.  
+- **Tiempo de inactividad**
+  - Límite de tiempo sin mensajes por parte del usuario.
   - Al cumplirse, el agente procede al cierre.
-
-- **Mensaje final de cierre**  
+- **Mensaje final de cierre**\
   Dos modos disponibles:
-  - **Inteligente**: la IA genera un mensaje final teniendo en cuenta el contexto de la conversación (recomendado para cierres naturales).  
+  - **Inteligente**: la IA genera un mensaje final teniendo en cuenta el contexto de la conversación (recomendado para cierres naturales).
   - **Personalizado**: se envía un mensaje fijo escrito por el administrador (por ejemplo, “La sesión ha finalizado, gracias por contactarnos”).
 
 ### Ciclo típico
 
-1. El usuario deja de responder.  
-2. Transcurrido el tiempo de inactividad configurado, el agente envía los mensajes intermedios (si están habilitados).  
+1. El usuario deja de responder.
+2. Transcurrido el tiempo de inactividad configurado, el agente envía los mensajes intermedios (si están habilitados).
 3. Si no hay respuesta, se envía el mensaje final (inteligente o personalizado) y se **cierra la conversación**.
 
 ---
@@ -42,76 +35,75 @@ Antes de finalizar por inactividad, el agente puede **enviar recordatorios** par
 
 ### Configuraciones
 
-- **Cantidad de mensajes intermedios**: cuántos recordatorios enviar.  
+- **Cantidad de mensajes intermedios**: cuántos recordatorios enviar.
 - **Tiempo entre mensajes**: intervalo de espera entre cada recordatorio.
 
 Ejemplo:
 
-> Configurar 2 mensajes intermedios con 2 minutos entre cada uno:  
-> - Mensaje 1 a los 2 minutos.  
-> - Mensaje 2 a los 4 minutos.  
+> Configurar 2 mensajes intermedios con 2 minutos entre cada uno:
+>
+> - Mensaje 1 a los 2 minutos.
+> - Mensaje 2 a los 4 minutos.
 > - Cierre a los 6 minutos si no hay respuesta.
 
-<Callout type="tip">
-Usa mensajes intermedios para **mantener la conversación activa** en flujos de venta o soporte,  
-pero evita configuraciones excesivas que puedan resultar intrusivas.
-</Callout>
+<tip>
+  Usa mensajes intermedios para **mantener la conversación activa** en flujos de venta o soporte,\
+  pero evita configuraciones excesivas que puedan resultar intrusivas.
+</tip>
 
 ---
 
 ## 3. Estilo de habla (Modificadores)
 
-La sección **Estilo de habla** permite **forzar características específicas del lenguaje**  
+La sección **Estilo de habla** permite **forzar características específicas del lenguaje**\
 que el agente utiliza en sus respuestas, independientemente del guion.
 
 ### Opciones disponibles
 
-- **Forzar traducción**  
-  - Traduce automáticamente todas las respuestas a un idioma determinado,  
+- **Forzar traducción**
+  - Traduce automáticamente todas las respuestas a un idioma determinado,\
     incluso si la entrada del usuario está en otro idioma.
-
-- **Prompt de estilo de habla**  
-  - Permite definir en lenguaje natural el estilo que debe tener el agente,  
+- **Prompt de estilo de habla**
+  - Permite definir en lenguaje natural el estilo que debe tener el agente,\
     por ejemplo: “usa un estilo amigable y conversacional”.
-
-- **Tono de respuesta**  
+- **Tono de respuesta**
   - Selecciona un tono predefinido, por ejemplo:
     - Amigable
     - Conversacional
     - Formal
     - Persuasivo
 
-<Callout type="warning">
-Aplicar estilo de habla mediante **modificadores** implica un **paso extra de procesamiento**,  
-lo que puede **aumentar la latencia** y el **número de mensajes internos**.
-</Callout>
+<warning>
+  Aplicar estilo de habla mediante **modificadores** implica un **paso extra de procesamiento**,\
+  lo que puede **aumentar la latencia** y el **número de mensajes internos**.
+</warning>
 
 ---
 
 ## Recomendación clave
 
-Si bien es posible forzar el tono o la traducción desde **Estilo de habla**,  
-la **mejor práctica es definir el tono directamente en el Guion del agente**.  
+Si bien es posible forzar el tono o la traducción desde **Estilo de habla**,\
+la **mejor práctica es definir el tono directamente en el Guion del agente**.\
 De esa manera se reduce la latencia y se mantiene un flujo de respuesta más natural.
 
-<Callout type="tip">
-Usa la configuración de **Estilo de habla** solo cuando realmente necesites  
-**garantizar un tono o idioma en el 100 % de las respuestas**,  
-sin depender de la interpretación del Guion.
-</Callout>
+<tip>
+  Usa la configuración de **Estilo de habla** solo cuando realmente necesites\
+  **garantizar un tono o idioma en el 100 % de las respuestas**,\
+  sin depender de la interpretación del Guion.
+</tip>
 
 ---
 
 ## Buenas prácticas generales
 
-- **Evita cierres bruscos**: ajusta el tiempo de inactividad y los mensajes intermedios a tu caso de uso.  
-- **Mantén la coherencia**: si forzas un tono desde Estilo de habla, asegúrate de que el Guion no lo contradiga.  
+- **Evita cierres bruscos**: ajusta el tiempo de inactividad y los mensajes intermedios a tu caso de uso.
+- **Mantén la coherencia**: si forzas un tono desde Estilo de habla, asegúrate de que el Guion no lo contradiga.
 - **Prueba en Playground**: simula tiempos de inactividad y revisa la latencia cuando uses modificadores.
 
 ---
 
 ## Próximos pasos
 
-- Ajusta los valores de inactividad y mensajes intermedios en **Otros** según tu caso de uso.  
-- Define si es necesario un mensaje final **Inteligente** o **Personalizado**.  
+- Ajusta los valores de inactividad y mensajes intermedios en **Otros** según tu caso de uso.
+- Define si es necesario un mensaje final **Inteligente** o **Personalizado**.
 - Evalúa si tu escenario requiere forzar el **Estilo de habla** o si conviene manejar el tono directamente en el [Guion del agente](../agents/behavior).

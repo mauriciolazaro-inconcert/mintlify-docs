@@ -1,15 +1,8 @@
 ---
 title: "Recepcionista"
-description: "Agente que recibe las interacciones iniciales del equipo y decide continuar, consultar conocimiento o herramientas, o transferir a otro contacto."
----
+description: "El recepcionista es el agente de entrada del equipo: recibe todas las interacciones nuevas desde los canales asociados (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS).
 
-import { Callout } from "nextra-theme-docs"
-
-# Recepcionista
-
-El **recepcionista** es el **agente de entrada** del equipo: recibe **todas las interacciones nuevas** desde los canales asociados (Voz, WhatsApp, Webchat, Instagram, Facebook Messenger y SMS).\
-Su función es **acoger al usuario**, **entender la necesidad** y **decidir**: responder, **llamar herramientas**, consultar **bases de conocimiento**, o **transferir** la conversación a otro agente (un **Contacto**) más adecuado.
-
+Su función es acoger al usuario, entender la necesidad y decidir: responder, llamar herramientas, consultar bases de conocimiento, o transferir la conversación a otro agente (un Contacto) más adecuado."
 ---
 
 ## Responsabilidades del recepcionista
@@ -22,9 +15,9 @@ Su función es **acoger al usuario**, **entender la necesidad** y **decidir**: r
   - **Transferir** a un **Contacto** (otro agente del equipo).
 - **Mantener cumplimiento**: se aplican **Guardrails** (si están habilitados) y **Modificadores** de salida.
 
-<Callout type="info">
-El recepcionista **hereda** conocimientos, herramientas y guardrails definidos a nivel **equipo**, y puede tener ajustes propios como cualquier agente.
-</Callout>
+<info>
+  El recepcionista **hereda** conocimientos, herramientas y guardrails definidos a nivel **equipo**, y puede tener ajustes propios como cualquier agente.
+</info>
 
 ---
 
@@ -50,10 +43,10 @@ El recepcionista puede usar esta detección para **enrutar** automáticamente:
 - “Soporte técnico” → Transferir a **Soporte Nivel 1**.
 - “Ventas” → Transferir a **Ventas Inbound**.
 
-<Callout type="tip">
-Define Tópicos **con nombres claros** y **reglas de enrutamiento** simples (si tópico = X → transferir a Y).  
-Esto facilita el mantenimiento y la trazabilidad.
-</Callout>
+<tip>
+  Define Tópicos **con nombres claros** y **reglas de enrutamiento** simples (si tópico = X → transferir a Y).\
+  Esto facilita el mantenimiento y la trazabilidad.
+</tip>
 
 ---
 
@@ -70,11 +63,11 @@ Esto facilita el mantenimiento y la trazabilidad.
    - (Opcional) **Modificadores** (traducción, limpieza, formato).
 4. **Entrega de respuesta** por el canal correspondiente.
 
-<Callout type="warning">
-**Rendimiento**  
-Los **Guardrails** y **Modificadores** pueden **aumentar la latencia**.  
-En **canales de voz** se recomienda **minimizar** o **deshabilitar** guardrails para preservar fluidez.
-</Callout>
+<warning>
+  **Rendimiento**\
+  Los **Guardrails** y **Modificadores** pueden **aumentar la latencia**.\
+  En **canales de voz** se recomienda **minimizar** o **deshabilitar** guardrails para preservar fluidez.
+</warning>
 
 ---
 

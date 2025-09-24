@@ -1,37 +1,29 @@
 ---
-title: Tópicos
-description: Detecta temas de conversación de forma asíncrona y dispara acciones como respuestas, transferencias, análisis de reportes o finalización de la conversación.
----
+title: "Tópicos"
+description: "Los Tópicos permiten que un agente de Inagent identifique automáticamente el tema o intención principal de cada mensaje de usuario.
 
-import { Callout } from "nextra-theme-docs"
-
-# Tópicos
-
-Los **Tópicos** permiten que un agente de Inagent **identifique automáticamente el tema o intención principal** de cada mensaje de usuario.  
-Esta detección es **asíncrona**: se evalúa **cada mensaje de manera independiente**, sin depender del punto actual del guion.  
-Cuando un tópico se detecta, puede **ejecutar una o varias acciones** definidas.
-
+Esta detección es asíncrona: se evalúa cada mensaje de manera independiente, sin depender del punto actual del guion. Cuando un tópico se detecta, puede ejecutar una o varias acciones definidas."
 ---
 
 ## Propósito
 
-- **Clasificar interacciones en tiempo real**, sin que el usuario deba usar palabras exactas.  
-- **Activar automatizaciones o flujos** (responder, transferir, finalizar) de forma inmediata.  
-- **Enriquecer la reportería**, permitiendo segmentar conversaciones por tema o intención.  
+- **Clasificar interacciones en tiempo real**, sin que el usuario deba usar palabras exactas.
+- **Activar automatizaciones o flujos** (responder, transferir, finalizar) de forma inmediata.
+- **Enriquecer la reportería**, permitiendo segmentar conversaciones por tema o intención.
 - Mejorar la **eficiencia de enrutamiento**, combinando detección de intención y reglas de negocio.
 
 ---
 
 ## Herencia Equipo → Agente
 
-- Los tópicos se **definen a nivel equipo**.  
-- Están disponibles para **todos los agentes** de ese equipo sin configuración adicional.  
+- Los tópicos se **definen a nivel equipo**.
+- Están disponibles para **todos los agentes** de ese equipo sin configuración adicional.
 - Cada agente puede **usar estos tópicos en su guion, reglas o herramientas**.
 
-<Callout type="info">
-Un agente **no necesita crear tópicos propios** para beneficiarse de ellos:  
-los tópicos definidos en el equipo ya están listos para ser utilizados en cualquier regla o comportamiento.
-</Callout>
+<info>
+  Un agente **no necesita crear tópicos propios** para beneficiarse de ellos:\
+  los tópicos definidos en el equipo ya están listos para ser utilizados en cualquier regla o comportamiento.
+</info>
 
 ---
 
@@ -39,16 +31,13 @@ los tópicos definidos en el equipo ya están listos para ser utilizados en cual
 
 En cada mensaje recibido:
 
-1. **Entrada del usuario**  
+1. **Entrada del usuario**
    - Se analiza de forma independiente el texto del mensaje.
-
-2. **Evaluación de tópicos**  
+2. **Evaluación de tópicos**
    - Se compara con los ejemplos y el rango de coincidencia definidos para cada tópico.
-
-3. **Activación de acciones**  
+3. **Activación de acciones**
    - Si hay coincidencia, se ejecuta una **acción única** o una **secuencia de acciones**, sin esperar el flujo normal del guion.
-
-4. **Continuación de la conversación**  
+4. **Continuación de la conversación**
    - El guion y las reglas pueden continuar en paralelo, o la conversación puede terminar si la acción así lo indica.
 
 ---
@@ -57,32 +46,29 @@ En cada mensaje recibido:
 
 Al crear un tópico se definen los siguientes elementos:
 
-- **Nombre del tópico**  
+- **Nombre del tópico**\
   Un identificador claro, por ejemplo: `cobranza`, `soporte técnico`, `cancelar servicio`.
-
-- **Ejemplos de cómo se menciona**  
-  Frases de ejemplo que un usuario podría usar.  
+- **Ejemplos de cómo se menciona**\
+  Frases de ejemplo que un usuario podría usar.\
   Cuantos más ejemplos, mayor precisión de detección.
-
-- **Rango de coincidencia**  
-  Controla cuán estricta es la detección.  
-  - **Baja**: admite variaciones amplias de lenguaje.  
-  - **Normal**: equilibrio entre flexibilidad y precisión.  
-  - **Cercana**: requiere coincidencia más específica.  
+- **Rango de coincidencia**\
+  Controla cuán estricta es la detección.
+  - **Baja**: admite variaciones amplias de lenguaje.
+  - **Normal**: equilibrio entre flexibilidad y precisión.
+  - **Cercana**: requiere coincidencia más específica.
   - **Exacta**: solo coincide si la frase es prácticamente idéntica a los ejemplos.
-
-- **Acciones a realizar**  
-  Una **acción única** o una **secuencia de acciones**.  
+- **Acciones a realizar**\
+  Una **acción única** o una **secuencia de acciones**.\
   Las acciones disponibles son:
-  - **Enviar una respuesta exacta al cliente** (mensaje directo del agente).  
-  - **Transferir la conversación** a otro agente virtual (definido en Contactos).  
-  - **Analizar para reportería** (registrar la detección para reportes o KPIs).  
+  - **Enviar una respuesta exacta al cliente** (mensaje directo del agente).
+  - **Transferir la conversación** a otro agente virtual (definido en Contactos).
+  - **Analizar para reportería** (registrar la detección para reportes o KPIs).
   - **Finalizar la conversación**.
 
-<Callout type="tip">
-Las acciones pueden ejecutarse **en secuencia**, por ejemplo:  
-primero enviar una respuesta al usuario, luego transferir la conversación y finalmente registrar la detección para reportes.
-</Callout>
+<tip>
+  Las acciones pueden ejecutarse **en secuencia**, por ejemplo:\
+  primero enviar una respuesta al usuario, luego transferir la conversación y finalmente registrar la detección para reportes.
+</tip>
 
 ---
 
@@ -90,11 +76,11 @@ primero enviar una respuesta al usuario, luego transferir la conversación y fin
 
 **Tópico: Cancelación de servicio**
 
-- **Nombre**: `cancelar servicio`  
-- **Ejemplos**: “quiero dar de baja mi plan”, “cancelar suscripción”, “terminar contrato”.  
-- **Rango de coincidencia**: Normal.  
+- **Nombre**: `cancelar servicio`
+- **Ejemplos**: “quiero dar de baja mi plan”, “cancelar suscripción”, “terminar contrato”.
+- **Rango de coincidencia**: Normal.
 - **Acciones**:
-  1. Enviar mensaje: “Entiendo que deseas cancelar. Permíteme transferirte al área adecuada.”  
+  1. Enviar mensaje: “Entiendo que deseas cancelar. Permíteme transferirte al área adecuada.”
   2. Transferir a agente **Retención**.
   3. Analizar para reportería.
 
@@ -104,34 +90,34 @@ primero enviar una respuesta al usuario, luego transferir la conversación y fin
 
 La detección de tópicos se **combina con el guion, las reglas y las herramientas**:
 
-- Un tópico puede **activar acciones** independientemente del guión.  
-- Puede **disparar herramientas** como API REST o Transferencia a humano.  
+- Un tópico puede **activar acciones** independientemente del guión.
+- Puede **disparar herramientas** como API REST o Transferencia a humano.
 - Su detección queda **registrada en reportes avanzados**, útil para KPIs como volumen de intenciones.
 
-<Callout type="info">
-Aunque los tópicos se procesan de manera asíncrona,  
-las acciones que disparan (por ejemplo, transferir o finalizar) **afectan inmediatamente** el flujo de conversación.
-</Callout>
+<info>
+  Aunque los tópicos se procesan de manera asíncrona,\
+  las acciones que disparan (por ejemplo, transferir o finalizar) **afectan inmediatamente** el flujo de conversación.
+</info>
 
 ---
 
 ## Buenas prácticas
 
-- **Cubre variaciones naturales**: agrega sinónimos y frases típicas.  
-- **Elige el rango de coincidencia correcto**:  
-  - Usa *Normal* para la mayoría de los casos.  
-  - Usa *Exacta* solo cuando se requiera una frase literal (p. ej., códigos internos).  
-- **Mantén un número razonable**: demasiados tópicos pueden aumentar el tiempo de evaluación.  
+- **Cubre variaciones naturales**: agrega sinónimos y frases típicas.
+- **Elige el rango de coincidencia correcto**:
+  - Usa _Normal_ para la mayoría de los casos.
+  - Usa _Exacta_ solo cuando se requiera una frase literal (p. ej., códigos internos).
+- **Mantén un número razonable**: demasiados tópicos pueden aumentar el tiempo de evaluación.
 - **Combina con reglas claras**: por ejemplo, “si tópico = Cobranza → transferir a agente Cobros”.
 
-<Callout type="warning">
-Demasiados tópicos o ejemplos redundantes pueden **afectar el rendimiento** y aumentar la latencia de detección.
-</Callout>
+<warning>
+  Demasiados tópicos o ejemplos redundantes pueden **afectar el rendimiento** y aumentar la latencia de detección.
+</warning>
 
 ---
 
 ## Próximos pasos
 
-- Configura **[Contactos](../contacts)** para que las transferencias automáticas tengan destino válido.  
-- Diseña las **[Reglas](../agents/behavior)** que se activarán cuando se detecte cada tópico.  
-- Revisa los resultados en **[Reportes avanzados](../reporting/advanced-reports-kpis)** para medir su efectividad.
+- Configura [**Contactos**](../contacts) para que las transferencias automáticas tengan destino válido.
+- Diseña las [**Reglas**](../agents/behavior) que se activarán cuando se detecte cada tópico.
+- Revisa los resultados en [**Reportes avanzados**](../reporting/advanced-reports-kpis) para medir su efectividad.
