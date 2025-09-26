@@ -1,0 +1,96 @@
+---
+title: "Reportes de Sistema"
+description: "Guía para generar, visualizar y exportar reportes predefinidos sobre la actividad de los agentes virtuales."
+---
+
+## General
+
+Los **Reportes de Sistema** ofrecen una visión predefinida y en tiempo real del desempeño de los equipos y agentes virtuales en Inagent.  
+Permiten **monitorear la operación**, detectar tendencias y exportar la información para análisis externos.
+
+
+## Generar un reporte
+
+Para crear un nuevo reporte:
+
+1. **Selecciona el equipo**  
+   - Escoge el equipo de agentes virtuales que deseas analizar.
+
+2. **Define el rango de fechas**  
+   - Indica el período a evaluar: por ejemplo, un día, una semana o un rango personalizado.
+
+3. **Ejecuta el reporte**  
+   - Haz clic en **Generar** para obtener los datos actualizados.
+
+
+## Modos de visualización
+
+Existen **dos modalidades** para explorar la información:
+
+### 1️⃣ Modo Tabla
+
+Presenta el reporte en formato tabular y permite descargarlo en Excel.
+
+- **Descarga directa**:  
+  Utiliza el botón **Descargar reporte** para exportar el archivo en formato `.xlsx`.
+
+- **Columnas disponibles** (seleccionables mediante el botón de filtros):  
+  - ID de sesión  
+  - Inicio y fin de sesión  
+  - Duración en segundos  
+  - Análisis sentimental  
+  - Tema general de la conversación  
+  - Resumen de conversación  
+  - *Es saliente* (booleano)  
+  - Motivo de cierre  
+  - Cantidad de mensajes del asistente  
+  - Cantidad de mensajes del usuario  
+  - Promedio de tiempo de respuesta del asistente  
+  - Promedio de tiempo de respuesta del usuario  
+  - Herramientas utilizadas  
+  - Moderadores utilizados  
+  - Modificadores utilizados  
+  - Contexto de la sesión  
+  - Cerrada por inactividad (booleano)  
+  - Cantidad de consultas a la base de conocimiento  
+  - Motivo de abandono  
+  - Fue abandonada (booleano)  
+  - Fue transferida (booleano)  
+  - Transferida a (equipo o sistema destino)  
+  - Motivo de transferencia  
+  - Canal de origen (voz, WhatsApp, webchat, etc.)
+
+<Callout type="tip">
+Utiliza los filtros de columna para construir rápidamente vistas personalizadas sin necesidad de descargar el archivo.
+</Callout>
+
+
+### 2️⃣ Modo Dashboard
+
+Ofrece una visualización gráfica de los principales indicadores operativos.
+
+- **Métricas clave en tiempo real**:
+  - Cantidad total de sesiones
+  - Conversaciones cerradas por inactividad
+  - Tiempo de respuesta promedio del asistente
+  - Sesiones transferidas a humano
+
+- **Gráficas incluidas**:
+  - **Serie temporal**: tiempo promedio de operación vs. cantidad de sesiones.
+  - **Análisis sentimental**: distribución de emociones positivas, neutras o negativas.
+  - **Uso de herramientas, moderadores y modificadores**: frecuencia de ejecución y tendencias.
+
+<Callout type="info">
+El modo **Dashboard** es ideal para monitoreo en vivo o presentaciones ejecutivas, mientras que el modo **Tabla** permite un análisis detallado y exportable.
+</Callout>
+
+
+## Mejores prácticas
+
+- Usa la vista **Tabla** cuando necesites descargar datos completos o realizar análisis en Excel.  
+- Usa la vista **Dashboard** para detectar patrones de uso y métricas clave en tiempo real.  
+- Repite reportes periódicamente para medir evolución, cuellos de botella y calidad de servicio.
+
+<Callout type="tip">
+Combina los **Reportes de Sistema** con los [Reportes Avanzados](/reporting/advanced-reports-kpis) para crear KPIs personalizados y profundizar en métricas de negocio.
+</Callout>

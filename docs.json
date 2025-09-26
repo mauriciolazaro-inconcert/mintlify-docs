@@ -80,14 +80,13 @@
             "pages": [
               "reporting/overview",
               "reporting/system-reports",
-              "reporting/advanced-reports-kpis"
+              "reporting/advanced-reports"
             ]
           },
           {
             "group": "Canales",
             "pages": [
-              "channels/overview",
-              "channels/voice/overview",
+              "channels/overview",             
               "channels/voice/webcall-webrtc",
               "channels/voice/sip-trunk",
               "channels/whatsapp",
@@ -115,8 +114,7 @@
           {
             "group": "Introducción a la API",
             "pages": [
-              "api-reference/introduction",
-              "api-reference/errors"
+              "api-reference/introduction"
             ]
           },
           {
