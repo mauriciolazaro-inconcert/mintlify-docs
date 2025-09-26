@@ -99,11 +99,7 @@
           {
             "group": "Facturación",
             "pages": [
-              "billing/overview",
-              "billing/plans",
-              "billing/usage-voice",
-              "billing/usage-messaging",
-              "billing/invoices"
+              "billing/overview"              
             ]
           }
         ]

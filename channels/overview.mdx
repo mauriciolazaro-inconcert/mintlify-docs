@@ -1,5 +1,78 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: "Canales"
+description: "Visión general de la configuración de canales en Inagent."
 ---
 
+## Canales
+
+La sección **Canales** permite administrar todos los **puntos de contacto** a través de los cuales los usuarios finales interactúan con los agentes virtuales.  
+Desde aquí se configuran, actualizan y gestionan todos los canales soportados por la plataforma, y se asocian a los equipos de agentes correspondientes.
+
+
+## Gestión de canales
+
+En el **menú principal de Canales** se realiza la **gestión completa** de cada canal.  
+Este es el punto de partida para:
+
+- Crear y dar de alta nuevos canales (por ejemplo, Webchat o WhatsApp).  
+- Editar credenciales o parámetros técnicos de canales existentes.  
+- Eliminar canales que ya no se utilicen.  
+- Asociar cada canal a uno o varios equipos de agentes virtuales.
+
+<Callout type="info">
+Un equipo puede estar **asociado a múltiples canales**, lo que permite compartir el mismo Agente virtual con diferentes puntos de contacto. No es posible tener un canal asociado a más de 1 agente virtual.
+</Callout>
+
+---
+
+## Flujo de configuración
+
+Para configurar un canal:
+
+1. Accede al menú **Canales**.
+2. Haz clic en **Configurar canal**.
+3. Selecciona la pestaña correspondiente según el origen del canal.
+
+En la interfaz se presentan **dos pestañas principales**:
+
+### 1️⃣ Pestaña **Inagent**
+
+Incluye los canales **nativos de Inagent**, listos para usarse de forma inmediata:
+
+- **API**: para integraciones personalizadas vía REST.
+- **WebCall**: comunicación de voz en tiempo real basada en WebRTC.
+- **SIP Trunk**: conexión de voz mediante protocolo SIP.
+- **Webchat**: chat embebido en sitios web con soporte para burbuja flotante e icebreaker.
+- **WhatsApp**: canal oficial de WhatsApp Business para mensajería instantánea.
+
+Cada uno de estos canales cuenta con su propia página de documentación para detallar su configuración técnica:
+
+- [API](/channels/api)  
+- [WebCall](/channels/voice/webcall-webrtc)  
+- [SIP Trunk](/channels/voice/sip-trunk)  
+- [Webchat](/channels/webchat/setup)  
+- [WhatsApp](/channels/whatsapp/setup)
+
+### 2️⃣ Pestaña **Inconnect**
+
+Contiene los canales **integrados con Inconnect**, la plataforma omnicanal de inConcert, permitiendo utilizar de forma unificada otros canales de mensajería y voz gestionados desde Inconnect.
+
+---
+
+## Asociación con equipos
+
+En la configuración de cada canal:
+
+- **Seleccionar equipo** que atenderá las interacciones provenientes de ese canal.
+- La asociación permite que el **recepcionista del equipo** reciba las conversaciones entrantes y las transfiera a otros agentes virtuales si es necesario.
+
+<Callout type="tip">
+Revisa regularmente las asociaciones para asegurar que cada canal esté vinculado con los equipos correctos y evitar pérdida de interacciones.
+</Callout>
+
+---
+
+## Próximos pasos
+
+- Consulta la documentación específica de cada canal en esta sección para conocer los detalles técnicos de configuración y autenticación.  
+- Verifica en el Playground de cada equipo que los canales asociados funcionen correctamente antes de publicarlos en producción.
