@@ -116,39 +116,19 @@
             "group": "Introducción a la API",
             "pages": [
               "api-reference/introduction",
-              "api-reference/authentication",
               "api-reference/errors"
             ]
           },
           {
             "group": "Endpoints principales",
-            "pages": [
-              "api-reference/endpoints/crews",
-              "api-reference/endpoints/agents",
-              "api-reference/endpoints/administration",
-              "api-reference/endpoints/reporting"
+            "pages": [              
+              "api-reference/endpoints/administration"
             ]
           },
           {
             "group": "Eventos",
             "pages": [
               "api-reference/events/dictionary"
-            ]
-          },
-          {
-            "group": "Webhooks",
-            "pages": [
-              "api-reference/webhooks/overview",
-              "api-reference/webhooks/events",
-              "api-reference/webhooks/signing",
-              "api-reference/webhooks/retries"
-            ]
-          },
-          {
-            "group": "Ejemplos y SDKs",
-            "pages": [
-              "api-reference/examples",
-              "api-reference/sdks"
             ]
           }
         ]
@@ -204,9 +184,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/inagent",
-      "github": "https://github.com/inagent",
-      "linkedin": "https://linkedin.com/company/inagent"
+      "x": "https://x.com/inconcert",      
+      "linkedin": "https://linkedin.com/company/inconcert"
     }
   }
 }

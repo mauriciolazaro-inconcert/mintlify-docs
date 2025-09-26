@@ -1,23 +1,24 @@
 ---
-title: Eventos
-description: Referencia completa de los eventos generados por Inagent durante el ciclo de vida de una conversación.
+title: "Defición de eventos"
+description: "Referencia completa de los eventos generados por Inagent durante el ciclo de vida de una conversación."
 ---
 
 import { Callout } from "nextra-theme-docs"
 
-## Diccionario de eventos
+## General
 
-Los **eventos** representan cada acción o cambio de estado que ocurre durante el ciclo de vida de una conversación.  
-Pueden ser generados por el agente, el usuario, herramientas externas o la propia sesión.  
+Los **eventos** representan cada acción o cambio de estado que ocurre durante el ciclo de vida de una conversación.\
+Pueden ser generados por el agente, el usuario, herramientas externas o la propia sesión.\
 Todos los eventos quedan registrados en el **Historial de conversaciones**, y se pueden exportar en un archivo CSV (JSON) para auditoría y análisis.
 
-<Callout type="info">
-Cada evento incluye:
-- **identity**: usuario y tenant que lo originaron.  
-- **event**: tipo de evento.  
-- **level**: categoría o nivel de severidad.  
-- **payload**: datos específicos según el tipo de evento.
-</Callout>
+<info>
+  Cada evento incluye:
+
+  - **identity**: usuario y tenant que lo originaron.
+  - **event**: tipo de evento.
+  - **level**: categoría o nivel de severidad.
+  - **payload**: datos específicos según el tipo de evento.
+</info>
 
 ---
 
@@ -35,215 +36,255 @@ Cada evento incluye:
 
 Eventos generados por el agente virtual durante la generación de mensajes, aplicación de reglas, modificadores y guardrails.
 
-### assistant.response  
-Ocurre cada vez que el agente virtual termina de generar una respuesta completa, lista para ser enviada al usuario final.  
+### assistant.response
+
+Ocurre cada vez que el agente virtual termina de generar una respuesta completa, lista para ser enviada al usuario final.\
 **Entidades:** Message
 
-### assistant.message  
-Se produce cuando el asistente envía un mensaje final a un canal (por ejemplo WhatsApp o Webchat).  
+### assistant.message
+
+Se produce cuando el asistente envía un mensaje final a un canal (por ejemplo WhatsApp o Webchat).\
 **Entidades:** Message
 
-### assistant.partial.message  
-Se dispara cuando el agente envía fragmentos de su respuesta en tiempo real (streaming), útil en canales que admiten escritura progresiva o voz en vivo.  
+### assistant.partial.message
+
+Se dispara cuando el agente envía fragmentos de su respuesta en tiempo real (streaming), útil en canales que admiten escritura progresiva o voz en vivo.\
 **Entidades:** Message
 
-### assistant.modifier.triggered  
-Indica que un modificador configurado (por ejemplo, forzar un estilo de respuesta o traducción) fue aplicado antes de entregar el mensaje al usuario.  
+### assistant.modifier.triggered
+
+Indica que un modificador configurado (por ejemplo, forzar un estilo de respuesta o traducción) fue aplicado antes de entregar el mensaje al usuario.\
 **Entidades:** Message
 
-### assistant.modifier.error  
-Registra que hubo un fallo al aplicar un modificador, lo cual puede impactar en la forma final de la respuesta.  
+### assistant.modifier.error
+
+Registra que hubo un fallo al aplicar un modificador, lo cual puede impactar en la forma final de la respuesta.\
 **Entidades:** Message
 
-### assistant.guard.restriction.limit.reached  
-Señala que se alcanzó el máximo de evaluaciones configuradas para los guardrails en una interacción.  
+### assistant.guard.restriction.limit.reached
+
+Señala que se alcanzó el máximo de evaluaciones configuradas para los guardrails en una interacción.\
 **Entidades:** Evaluation
 
-### assistant.guard.restriction.triggered  
-Marca que una regla de seguridad o política (guardrail) se activó porque se cumplió una condición definida (por ejemplo, bloqueo de lenguaje inapropiado).  
+### assistant.guard.restriction.triggered
+
+Marca que una regla de seguridad o política (guardrail) se activó porque se cumplió una condición definida (por ejemplo, bloqueo de lenguaje inapropiado).\
 **Entidades:** Evaluation
 
-### assistant.attend.start  
-Delimita el inicio del proceso de atención de un mensaje, permitiendo medir tiempos de procesamiento.  
+### assistant.attend.start
+
+Delimita el inicio del proceso de atención de un mensaje, permitiendo medir tiempos de procesamiento.\
 **Entidades:** Message
 
-### assistant.attend.end  
-Marca el fin del proceso de atención de un mensaje.  
+### assistant.attend.end
+
+Marca el fin del proceso de atención de un mensaje.\
 **Entidades:** Message
 
-### user.talk  
-Se dispara al recibir un mensaje del usuario, iniciando un nuevo ciclo de procesamiento.  
-**Entidades:** Message
+### user.talk
 
+Se dispara al recibir un mensaje del usuario, iniciando un nuevo ciclo de procesamiento.\
+**Entidades:** Message
 
 ## Eventos de Crew
 
 Relacionados con el estado interno del equipo de agentes y su coordinación.
 
-### crew.status.writing  
-Informa que un agente está redactando una respuesta (estado “escribiendo”).  
+### crew.status.writing
+
+Informa que un agente está redactando una respuesta (estado “escribiendo”).\
 **Entidades:** Message
 
-### crew.status.waiting  
-Indica que el agente está a la espera de nueva información o de una condición (por ejemplo, una respuesta de herramienta) antes de continuar.  
+### crew.status.waiting
+
+Indica que el agente está a la espera de nueva información o de una condición (por ejemplo, una respuesta de herramienta) antes de continuar.\
 **Entidades:** Message
 
-### crew.modifier.triggered  
-Se dispara cuando un modificador a nivel de equipo entra en acción.  
+### crew.modifier.triggered
+
+Se dispara cuando un modificador a nivel de equipo entra en acción.\
 **Entidades:** Message
 
-### crew.modifier.error  
-Error al aplicar un modificador de equipo.  
-**Entidades:** Message
+### crew.modifier.error
 
+Error al aplicar un modificador de equipo.\
+**Entidades:** Message
 
 ## Eventos de Herramientas
 
 Generados cuando el agente llama a herramientas internas o externas.
 
-### external.resolver.request  
-Indica el inicio de una llamada a un resolver externo, útil para medir latencia y confiabilidad de integraciones.  
+### external.resolver.request
+
+Indica el inicio de una llamada a un resolver externo, útil para medir latencia y confiabilidad de integraciones.\
 **Entidades:** Resolver
 
-### external.resolver.response  
-Se produce cuando llega la respuesta de un resolver externo.  
+### external.resolver.response
+
+Se produce cuando llega la respuesta de un resolver externo.\
 **Entidades:** Resolver
 
-### tool.usage.request  
-Petición para usar una herramienta (REST API, código, transferencia a humano, etc.).  
+### tool.usage.request
+
+Petición para usar una herramienta (REST API, código, transferencia a humano, etc.).\
 **Entidades:** ToolUsage
 
-### tool.usage.result  
-Resultado de la ejecución de una herramienta.  
+### tool.usage.result
+
+Resultado de la ejecución de una herramienta.\
 **Entidades:** ToolUsage
 
-### tool.usage.error  
-Error al ejecutar una herramienta o recibir su resultado.  
-**Entidades:** ToolUsage
+### tool.usage.error
 
+Error al ejecutar una herramienta o recibir su resultado.\
+**Entidades:** ToolUsage
 
 ## Eventos de Sesión
 
 Controlan el ciclo de vida de cada sesión de conversación, incluyendo su contexto y mutaciones.
 
-### session.created  
-Se crea una nueva sesión, incluyendo la configuración inicial, contexto, canal y cualquier dato de arranque.  
+### session.created
+
+Se crea una nueva sesión, incluyendo la configuración inicial, contexto, canal y cualquier dato de arranque.\
 **Entidades:** Session
 
-### session.creation.error  
-Error al intentar crear la sesión, útil para detectar problemas de arranque o de configuración.  
+### session.creation.error
+
+Error al intentar crear la sesión, útil para detectar problemas de arranque o de configuración.\
 **Entidades:** Session
 
-### session.closed  
-La sesión finaliza, indicando si fue de forma normal, por error o por timeout de inactividad.  
+### session.closed
+
+La sesión finaliza, indicando si fue de forma normal, por error o por timeout de inactividad.\
 **Entidades:** Session
 
-### session.action.create  
-Acción para crear una sesión.  
+### session.action.create
+
+Acción para crear una sesión.\
 **Entidades:** Session
 
-### session.action.destroy  
-Acción para finalizar una sesión.  
+### session.action.destroy
+
+Acción para finalizar una sesión.\
 **Entidades:** Session
 
-### session.action.attend  
-Marca que la sesión fue atendida.  
+### session.action.attend
+
+Marca que la sesión fue atendida.\
 **Entidades:** Session
 
-### session.action.impersonate  
-Envía un mensaje en nombre del agente.  
+### session.action.impersonate
+
+Envía un mensaje en nombre del agente.\
 **Entidades:** Session
 
-### session.action.append.context  
-Agrega contexto a una sesión.  
+### session.action.append.context
+
+Agrega contexto a una sesión.\
 **Entidades:** Session
 
-### session.context.appended  
-Contexto agregado correctamente.  
+### session.context.appended
+
+Contexto agregado correctamente.\
 **Entidades:** Session
 
-### session.context.appended.error  
-Error al agregar contexto.  
+### session.context.appended.error
+
+Error al agregar contexto.\
 **Entidades:** Session
 
-### session.action.overwrite.context  
-Reemplaza el contexto de una sesión.  
+### session.action.overwrite.context
+
+Reemplaza el contexto de una sesión.\
 **Entidades:** Session
 
-### session.context.overwrited  
-Contexto reemplazado correctamente.  
+### session.context.overwrited
+
+Contexto reemplazado correctamente.\
 **Entidades:** Session
 
-### session.context.overwrited.error  
-Error al reemplazar contexto.  
+### session.context.overwrited.error
+
+Error al reemplazar contexto.\
 **Entidades:** Session
 
-### session.action.mutate  
-Ordena una mutación (cambio de estado) en una sesión.  
+### session.action.mutate
+
+Ordena una mutación (cambio de estado) en una sesión.\
 **Entidades:** Session
 
-### session.mutation  
-Confirmación de que la mutación fue realizada.  
+### session.mutation
+
+Confirmación de que la mutación fue realizada.\
 **Entidades:** Session
 
-### session.mutation.range.limit.error  
-Error por límite de rango al realizar una mutación.  
+### session.mutation.range.limit.error
+
+Error por límite de rango al realizar una mutación.\
 **Entidades:** Session
 
-### session.action.history  
-Solicitud para recuperar el historial completo de la sesión.  
+### session.action.history
+
+Solicitud para recuperar el historial completo de la sesión.\
 **Entidades:** Session
 
-### session.history  
-Historial devuelto correctamente.  
+### session.history
+
+Historial devuelto correctamente.\
 **Entidades:** Session
 
-### session.history.error  
-Error al recuperar el historial.  
+### session.history.error
+
+Error al recuperar el historial.\
 **Entidades:** Session
 
-### session.consumer.action.attach  
-Solicitud para adjuntar un consumidor (cliente o canal).  
+### session.consumer.action.attach
+
+Solicitud para adjuntar un consumidor (cliente o canal).\
 **Entidades:** Session
 
-### session.consumer.attached  
-Consumidor adjuntado correctamente.  
+### session.consumer.attached
+
+Consumidor adjuntado correctamente.\
 **Entidades:** Session
 
-### session.consumer.attach.error  
-Error al adjuntar un consumidor.  
+### session.consumer.attach.error
+
+Error al adjuntar un consumidor.\
 **Entidades:** Session
 
-### session.consumer.action.dettach  
-Solicitud para desadjuntar un consumidor.  
+### session.consumer.action.dettach
+
+Solicitud para desadjuntar un consumidor.\
 **Entidades:** Session
 
-### session.consumer.dettached  
-Consumidor desadjuntado de la sesión.  
+### session.consumer.dettached
+
+Consumidor desadjuntado de la sesión.\
 **Entidades:** Session
 
-### session.consumer.action.talk  
-Consumidor envía un mensaje durante la sesión.  
-**Entidades:** Session
+### session.consumer.action.talk
 
+Consumidor envía un mensaje durante la sesión.\
+**Entidades:** Session
 
 ## Eventos Custom
 
 Eventos definidos específicamente para casos particulares.
 
-### custom  
-Evento personalizado definido por el equipo de implementación.  
-Se utiliza para lógica de negocio o integraciones específicas que no encajan en las categorías anteriores.  
-**Entidades:** Custom
+### custom
 
+Evento personalizado definido por el equipo de implementación.\
+Se utiliza para lógica de negocio o integraciones específicas que no encajan en las categorías anteriores.\
+**Entidades:** Custom
 
 ## Buenas prácticas
 
-- Usa **filtros en Historial de conversaciones** para localizar rápidamente las interacciones relevantes.  
-- Descarga el **CSV/JSON completo** para auditorías o integraciones.  
-- Consulta esta página para interpretar correctamente cada tipo de evento.  
+- Usa **filtros en Historial de conversaciones** para localizar rápidamente las interacciones relevantes.
+- Descarga el **CSV/JSON completo** para auditorías o integraciones.
+- Consulta esta página para interpretar correctamente cada tipo de evento.
 - Integra los eventos con herramientas de monitoreo o reportes avanzados para detectar patrones, medir KPIs y anticipar incidencias.
 
-<Callout type="tip">
-Integra los eventos con reportes avanzados o sistemas de monitoreo para identificar cuellos de botella, medir tiempos de respuesta y mejorar la experiencia del usuario de forma continua.
-</Callout>
+<tip>
+  Integra los eventos con reportes avanzados o sistemas de monitoreo para identificar cuellos de botella, medir tiempos de respuesta y mejorar la experiencia del usuario de forma continua.
+</tip>

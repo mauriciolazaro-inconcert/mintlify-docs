@@ -1,33 +1,91 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "Introducción"
+description: "Visión general de la API de Inagent para integrar, administrar y escalar agentes virtuales."
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Bienvenido a la API de Inagent
 
-## Welcome
+La **API de Inagent** permite **crear, administrar y supervisar agentes virtuales**, así como integrar herramientas externas y automatizar procesos en tiempo real. Está diseñada para que desarrolladores y equipos técnicos puedan **orquestar sesiones, consultar información de reportes, integrar canales y manipular la experiencia del cliente** desde sus propias aplicaciones.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+<Callout type="info">
+Toda la API es **RESTful** y trabaja con datos en formato **JSON**.  
+Los endpoints están agrupados en categorías como **Gestión de agentes y equipos**, **Supervisión y administración de sesiones**, **Reportes**, **Herramientas** y **Webhooks**.
+</Callout>
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+## Autenticación
 
-## Authentication
+Todos los endpoints requieren **autenticación mediante Bearer Token**.  
+Debes incluir el header:
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+Authorization: Bearer ```<tu_token_de_api>```
+
+Puedes generar y administrar tus tokens en el **panel de Inagent**.
+
+<Callout type="tip">
+Protege siempre tus tokens.  
+Recomendamos almacenarlos en variables de entorno y **no incluirlos en repositorios**.
+</Callout>
+
+## Estructura de la API
+
+La API está organizada en grupos de endpoints:
+
+- **Equipos y Agentes**  
+  Creación y gestión de equipos de agentes virtuales, incluyendo canales, configuraciones y publicación.
+
+- **Sesiones y Administración**  
+  Control en tiempo real de conversaciones: pausar, reanudar, agregar contexto, transferir a otro agente, enviar mensajes en nombre del asistente o inyectar herramientas.
+
+- **Reportes y Métricas**  
+  Consulta de reportes del sistema, KPIs personalizados y exportación de datos de conversación.
+
+- **Herramientas y Webhooks**  
+  Integración de herramientas externas, notificaciones en tiempo real y automatizaciones basadas en eventos.
+
+## Formato de respuesta
+
+Todas las respuestas siguen una estructura estándar:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "data": { /* datos solicitados */ },
+  "meta": { /* información de paginación u otros metadatos */ }
+}
 ```
+En caso de error, se devuelve un código HTTP adecuado (4xx o 5xx) y un objeto con detalles del fallo:
+```json
+{
+  "error": "Descripción del error",
+  "code": "código_interno"
+}
+```
+Próximos pasos
+
+<Card
+title="Referencia de endpoints"
+icon="terminal"
+href="/api-reference/endpoints/teams"
+>
+Explora la lista completa de endpoints para equipos, agentes, sesiones, reportes y herramientas.
+</Card>
+
+<Card
+title="Webhooks"
+icon="bolt"
+href="/api-reference/webhooks/overview"
+>
+Aprende a recibir notificaciones en tiempo real de los eventos más importantes.
+</Card>
+
+<Card
+title="API de administración de sesiones"
+icon="sliders"
+href="/api-reference/endpoints/administration"
+>
+Controla y modifica conversaciones en vivo: agrega contexto, transfiere, pausa o finaliza sesiones.
+</Card>
+
+✅ Este texto:  
+- Da **contexto de uso real** (gestión de agentes, sesiones, reportes y herramientas).  
+- Incluye **estructura de autenticación y de respuesta JSON**.  
+- Añade **cards** con los principales puntos de entrada (endpoints, webhooks, administración de sesiones) para una navegación rápida.

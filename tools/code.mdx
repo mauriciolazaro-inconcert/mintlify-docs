@@ -1,5 +1,5 @@
 ---
-title: "Código"
+title: "Herramienta de código"
 description: "La herramienta Código (Controller) te permite ejecutar JavaScript para implementar lógica personalizada dentro del flujo conversacional: validar datos, transformar respuestas, orquestar llamadas a otros servicios, o enrutar a otro agente virtual de manera dinámica."
 ---
 
@@ -9,21 +9,21 @@ description: "La herramienta Código (Controller) te permite ejecutar JavaScript
 - **Orquestar** integraciones y decisiones complejas sin salir de Inagent.
 - **Controlar** el flujo: enviar mensajes, transferir a otros agentes, cerrar/resolver una interacción, etc.
 
-<Callout type="warning">
-El uso de código puede **añadir latencia**. Optimiza la lógica y evita operaciones costosas, especialmente en **canales de voz**.
+<Callout type="info">
+  El uso de código puede **añadir latencia**. Optimiza la lógica y evita operaciones costosas, especialmente en **canales de voz**.
 </Callout>
-
----
 
 ## Configuración de la herramienta
 
 ### 1) Nombre
 
-Identificador interno, ej.: `ValidadorDocumento`, `RouterSoporte`.
+Identificador interno que utiliza el agente virtual para poder entender el propósito de la herrameinta
+
+> Ej.: `ValidadorDocumento`, `RouterSoporte`.
 
 ### 2) Descripción
 
-Cuándo se debe usar esta herramienta y qué hace.
+Cuándo se debe usar esta herramienta y qué hace. El agente virtual utilizará la descripción para saber cuando utilizar la herramienta
 
 > Ej.: “Valida el documento del cliente y decide si enruta a KYC o continúa el flujo.”
 
@@ -33,7 +33,7 @@ Agentes virtuales autorizados a invocar esta herramienta.
 
 ### 4) Interfaz de agente (Entradas)
 
-Define **qué datos necesita** el script antes de ejecutarse. Dos modos:
+Define **qué datos necesita** la herramienta antes de ejecutarse. Dos modos:
 
 #### a. Modo Básico (Parámetros)
 
@@ -57,11 +57,11 @@ Para estructuras complejas y validaciones estrictas.
 }
 ```
 
-<Callout type="info"> Las entradas definidas aquí estarán disponibles como **`args.<nombre>`** dentro del código (ej.: `args.dni`, `args.email`). </Callout>
+ Las entradas definidas aquí estarán disponibles como **`args.<nombre>`** dentro del código (ej.: `args.dni`, `args.email`). 
 
 ## Variables dinámicas (`args.*`)
 
-Cualquier **parámetro definido en la Interfaz de agente**  
+Cualquier **parámetro definido en la Interfaz de agente**\
 (tanto en modo **Básico** como en **JSON Schema**) se accede en el código como:
 
 ```javascript
@@ -73,9 +73,9 @@ podrás usarlo en el código como `args.dni`.
 
 Estas variables también pueden emplearse en otras herramientas:
 
-- **URL** de una API REST  
-- **Query params**  
-- **Body** de la solicitud HTTP  
+- **URL** de una API REST
+- **Query params**
+- **Body** de la solicitud HTTP
 
 de forma que los datos se inyecten dinámicamente sin tener que codificarlos de manera fija.
 
@@ -83,14 +83,14 @@ de forma que los datos se inyecten dinámicamente sin tener que codificarlos de 
 
 ## Estructura del código JavaScript
 
-El editor permite escribir un **controller en JavaScript**.  
+El editor permite escribir un **controller en JavaScript**.\
 Debes **exportar las funciones** que utilices para que Inagent las ejecute.
 
 Dentro de la función principal tendrás acceso a utilidades del runtime, como:
 
-- `controller` – para enviar mensajes, transferir, resolver, etc.  
-- `args` – parámetros definidos en la Interfaz de agente.  
-- `context` – almacenamiento de variables durante la sesión.  
+- `controller` – para enviar mensajes, transferir, resolver, etc.
+- `args` – parámetros definidos en la Interfaz de agente.
+- `context` – almacenamiento de variables durante la sesión.
 - `logger` – registro de eventos para debugging.
 
 A continuación se muestran **patrones comunes** que puedes adaptar a tus nombres y a las APIs reales del runtime de Inagent.
@@ -120,106 +120,250 @@ export default async function main({ controller, args, context, logger }) {
 }
 ```
 
-## Métodos clave del controller
+## Métodos disponibles del controller
 
-Los nombres pueden variar según el runtime; aquí usamos las convenciones  
-**`impersonate`**, **`mutateTo`** y **`resolve`** tal como se definen en este documento.
+import { Callout } from "nextra-theme-docs"
 
-### 1) `controller.impersonate({...})`
+Esta sección documenta los **métodos y propiedades** disponibles en el controller de sesión de la herramienta **Code**.  
+Úsalo para **orquestar conversaciones** entre la IA y humanos, integrar procesos externos y manipular el contexto en tiempo real.
 
-Envía un **mensaje estático** “en nombre del agente”, **sin esperar generación de IA**.  
-Es útil para confirmaciones o mensajes breves completamente controlados.
-
-```javascript
-await controller.impersonate({
-  text: "He registrado tu pedido. ¿Deseas continuar con el pago?"
-});
-```
-En este ejemplo, el mensaje se envía de inmediato sin pasar por el modelo de IA,
-asegurando una respuesta predefinida y consistente.
-
-### 2) `controller.mutateTo({ agentId, reason, contextOverrides })`
-
-Transfiere la interacción a otro agente virtual del equipo (similar a un enrutamiento interno).
-
-```javascript
-await controller.mutateTo({
-  agentId: "agente_soporte_n2",
-  reason: "Derivación por complejidad técnica",
-  contextOverrides: { prioridad: "alta" } // opcional
-});
-return { status: "transferred" };
-```
-### 3) `controller.resolve({ reason, payload })`
-
-Marca la interacción como resuelta/finalizada (por ejemplo, tras un proceso exitoso o una transferencia).
-```javascript
-await controller.resolve({
-  reason: "Proceso completado",
-  payload: { ticketId: "TK-9123" } // opcional
-});
-return { status: "resolved" };
-```
-<Callout type="tip"> Si vas a **transferir** usando `mutateTo`, considera también registrar variables clave con `context.set(...)` para que el **nuevo agente** herede el contexto necesario. </Callout>
-
-## Ejemplos de uso (plantillas)
-
-Puedes partir de estos y adaptarlos a tu caso.  
-Completa luego tus **propios ejemplos** en la documentación.
-
-### A) Confirmación con `impersonate`
-
-```javascript
-export default async function main({ controller, args }) {
-  const nombre = args.nombre ?? "cliente";
-  await controller.impersonate({
-    text: `Perfecto, ${nombre}. Ya validé tus datos. ¿Seguimos?`
-  });
-  return { status: "ok" };
-}
-```
-### B) Enrutamiento condicional con `mutateTo`
-
-```javascript
-export default async function main({ controller, args, context }) {
-  const categoria = args.categoria; // p. ej., "soporte" | "ventas"
-  if (categoria === "soporte") {
-    await controller.mutateTo({ agentId: "soporte_n1", reason: "Tópico soporte" });
-    return { status: "transferred" };
-  }
-  // Si no transfiere, seguir flujo normal
-  context.set("categoriaAtendida", categoria);
-  return { status: "ok" };
-}
-```
-
-### C) Resolución del flujo con `resolve`
-```javascript
-export default async function main({ controller, args }) {
-  // ... lógica de verificación
-  await controller.resolve({
-    reason: "Operación completada con éxito",
-    payload: { folio: "FOL-202501" }
-  });
-  return { status: "resolved" };
-}
-```
-
-## Buenas prácticas
-
-- **Diseña entradas claras** (Básico o JSON Schema).  
-  Cuanto mejor validadas estén, menos errores habrá en tiempo de ejecución.
-- **Evita latencia innecesaria**: corta la lógica, cachea resultados, evita loops o llamadas redundantes.
-- **Registra lo importante** con `logger.info`, `logger.warn` o `logger.error` para facilitar el troubleshooting.
-- **No dupliques lógica** de guion/reglas si puede resolverse de forma declarativa.
-- **Prueba en Playground** con distintos escenarios y variables de contexto.
-- **Documenta** claramente qué hace el controller y cuándo debe invocarse.
+<Callout type="warning">
+El uso de código puede **añadir latencia**. Mantén las funciones cortas, evita I/O innecesario y, en **voz**, prioriza respuestas breves.
+</Callout>
 
 ---
 
-## Próximos pasos
+### `session.close(reason)`
 
-- **Define entradas** en **Interfaz de agente** (Básico o JSON Schema) y pruébalas a través de `args.*`.
-- **Crea y valida** tus propios snippets de `impersonate`, `mutateTo` y `resolve` en el **Playground**.
-- **Publica la herramienta** y monitorea su impacto en **[Reportes](../reporting/overview)**.
+**Descripción**  
+Finaliza **inmediatamente** la sesión de conversación. No es recuperable. No envía mensajes al usuario a menos que lo hagas explícitamente antes de cerrar. l campo `reason` se propaga en el evento de cierre y puede usarse para trazabilidad o auditoría.
+
+**Parámetros**
+- `reason` *(string, requerido)*: motivo del cierre. Comunes: `"finished"` (normal), `"error"`, `"idle"` (inactividad). Puedes usar cadenas personalizadas; se reflejan en el evento de cierre.
+
+**Ejemplo**
+```js
+session.close("finished");
+```
+
+Notas
+- El reason se propaga en el evento de cierre (útil para trazabilidad).
+- Una vez ejecutado, la sesión queda definitivamente cerrada.
+
+### `session.impersonate(text, applyModifiers)`
+
+**Descripción**  
+Inyecta un mensaje **como si viniera del asistente**. Útil en supervisión humana: un operador interviene sin que el usuario lo note.
+
+**Parámetros**
+- `text` *(string, requerido)*: mensaje a enviar.
+- `applyModifiers` *(boolean, opcional)*: si es true, pasa por modificadores (idioma, tono, etc.).
+
+**Ejemplo**
+```js
+session.impersonate("Estoy revisando la información...", true);
+```
+Notas
+- Con applyModifiers = true, el mensaje mantiene coherencia con la configuración del agente.
+
+### `mutateTo(assistant)`
+
+**Descripción**
+Cambia el **asistente activo** en medio de la sesión, manteniendo intacto el historial y el contexto.
+
+**Parámetros**
+- `assistant`*(string, requerido)*: identificador del nuevo agente virtual que asumirá el flujo.
+
+**Ejemplo**
+```typescript
+session.mutateTo("soporte");
+```
+
+### `session.attend()`
+
+**Descripción**
+Fuerza al asistente a **emitir un mensaje aunque no sea su turno**. Por defecto, las conversaciones siguen el patrón usuario → agente → usuario. Con `attend()` se puede romper esta secuencia.
+
+**Ejemplo**
+```typescript
+session.attend();
+```
+### `session.append(message)`
+
+**Descripción**
+Agrega un mensaje al contexto interno de la sesión **sin que cuente como intervención directa**. Es ideal para anotar información relevante que el agente debe considerar en turnos posteriores. Ej. permitir enriquecer el contexto sin interrumpir el flujo visible para el cliente.
+
+**Parámetros**
+- `text`*(string, requerido)*: es el mensaje que se inserta como parte del contexto de la conversación
+- `author`*(string, requerido)*: es el author del mensaje que en este caso es system
+
+**Ejemplo**
+```typescript
+session.append({
+  text: "Recordar que el cliente ya tiene un contrato activo.",
+  author: "system"
+});
+```
+<Callout type="info">
+No es un mensaje visible para el usuario; es contexto.
+Dispara un evento de append para auditoría.
+</Callout>
+
+### `session.createResolver(config)`
+
+**Descripción**
+Crea un resolver para **integrar procesos externos que responden asíncronamente**. La conversación queda en espera hasta que un tercero (vía API de administración) responde el resolver.
+
+**Parámetros**
+
+- `config`*(object, requerido)*: es el objeto que contiene la configuración del resolver
+
+- **key** (`string`, requerido): identificador único del resolver.  
+- **args** (`any`, opcional): payload enviado al evento del resolver.  
+- **resolverName** (`string`, opcional): nombre lógico (p. ej., `"buscarClienteDB"`).  
+- **timeoutSeconds** (`number`, opcional): tiempo máximo de espera (defecto `300`, no puede ser `0`).  
+- **callback** (`function`, opcional): se ejecuta al resolverse exitosamente.  
+- **timeoutCallback** (`function`, opcional): se ejecuta si expira el tiempo.
+
+**Ejemplo**
+```typescript
+session.createResolver({
+  key: "consultaCRM",
+  args: { clienteId: "12345" },
+  resolverName: "buscarClienteDB",
+  timeoutSeconds: 120,
+  callback: (data) => console.log("Resultado:", data),
+  timeoutCallback: () => console.error("Timeout")
+});
+```
+<Callout type="info">
+  Para completar el flujo, el sistema externo debe llamar al endpoint de **Resolver** en la API de administración con el `correlationUUID` correspondiente.
+</Callout>
+
+### `session.pause()`
+
+**Descripción**
+Pone la sesión en **estado de pausa**, bloqueando las reacciones del agente hasta que se reanude. Útil si se requiere intervención manual o validación externa antes de seguir.
+
+**Ejemplo**
+```typescript
+session.pause();
+```
+### `session.resume()`
+
+**Descripción**
+Quita la sesión del estado de pausa y permite que el asistente retome la interacción normalmente. Se emplea junto con `pause()` para coordinar pausas controladas.
+
+**Ejemplo**
+```typescript
+session.resume();
+```
+### `session.run(runnable, context)`
+
+**Descripción**
+Ejecuta un runnable, que es una unidad de lógica programable. Los runnables pueden ser usados para búsquedas, consultas FAQ, integraciones externas u otras acciones personalizadas.
+
+**Parámetros**
+- `runnable`*(RunnableDefinition, requerido)*: definición del runnable (tipo, nombre, configuración).
+- `context`*(RunnableContext, requerido)*: datos de entrada requeridos.
+
+**Definción base de runnable**
+```typescript
+export interface IRunnableDefinition {
+  type: Artifacts.Runnables.Types;
+  payloadOutputIsolationIdentifier?: string;
+  name: string;
+  configuration: any;
+  dataConfiguration?: IDataConfiguration;
+}
+```
+
+**Definición base de contexto**
+```typescript
+export interface RunnableContext<T> {
+  trigger: RunnableTriggers;
+  sessionContext?: SessionContext;
+  identity: { user: string, tenant: string };
+  input: any;
+  continue: boolean;
+  payload?: T;
+}
+```
+**Ejemplo de una llamada a Base de conocimiento**
+```typescript
+const qnaRunnable = {
+  type: Artifacts.Runnables.Types.QNA,
+  name: "consultaFAQ",
+  configuration: {
+    kbs: ["faq-soporte"],
+    questionKey: "query",
+    inferenceConfiguration: { threshold: 0.7 }
+  }
+};
+const result = await session.run(qnaRunnable, {
+  query: "¿Cuál es el horario de soporte técnico?"
+});
+console.log(result.output);
+
+}
+```
+<Callout type="info">
+Los runnables pueden encadenarse (comparten input/output).
+El atributo `questionKey` indica la clave del input donde está la consulta (p. ej., "query").
+</Callout>
+
+### `session.send(customEvent)`
+
+**Descripción**
+Emite un **evento personalizado** en la sesión. Puede ser consumido por automatizaciones internas, integraciones externas o reportería.
+
+**Ejemplo**
+```typescript
+session.send(new CrewEvent({
+  identity: { user: "juan", tenant: "inconcert" },
+  event: "custom_metric",
+  data: { clicks: 15 }
+}));
+```
+<Callout type="info">
+`identity` debe derivarse de configuration.creatorIdentity.
+Puedes usar patrones (*, #) para escuchar múltiples eventos.
+</Callout>
+
+### `session.configuration (propiedad)`
+
+**Descripción**
+Objeto con la **configuración de la sesión** (modo, contexto, identidad del creador, heartbeat, debug, etc.).
+
+**Referencia**
+```typescript
+export interface ISessionConfiguration {
+  id: string;
+  outbound?: boolean;
+  outboundConfiguration?: IOutbounConfiguration;
+  context?: SessionContext;
+  creatorIdentity: { user: string, tenant: string };
+  hearthbeat: { intervalTimeSeconds: number };
+  debugConfiguration?: { debug_mode?: boolean; show?: boolean };
+}
+```
+**Campos principales**
+
+- **id**: identificador único de la sesión.  
+- **outbound**: indica si la sesión es saliente.  
+- **outboundConfiguration**: parámetros de salida (p. ej., `dynamic` o `static`).  
+- **context**: bolsa de contexto de la sesión (variables).  
+- **creatorIdentity**: quién inició la sesión (`user`/`tenant`).  
+- **hearthbeat**: intervalo de latido para detectar inactividad.  
+- **debugConfiguration**: parámetros de depuración visibles en Playground.  
+
+---
+
+### Buenas prácticas
+
+- **Validación temprana**: verifica inputs (`text`, `assistant`, `key`, etc.) y falla con mensajes claros.  
+- **Idempotencia**: evita ejecutar dos veces acciones críticas (p. ej., cobros) si reintentas.  
+- **Logging con contexto**: incluye `sessionId`, `agentId`, canal y datos mínimos (sin PII sensible).  
+- **Performance**: mide `p95`/`p99`; cachea si necesitas datos externos; limita llamadas encadenadas.  
+- **Canales de voz**: evita lógica pesada; prioriza baja latencia.  
 
