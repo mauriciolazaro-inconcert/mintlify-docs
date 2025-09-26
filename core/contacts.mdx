@@ -11,11 +11,9 @@ Son la lista de agentes que el recepcionista y los demás agentes pueden usar co
 - **Soportar escalamiento automático** según **Tópicos** .
 - Mantener **trazabilidad** de todas las derivaciones.
 
-<info>
+<Callout type="info">
   Los contactos se definen **a nivel de equipo**.Cada agente puede tener configuraciones específicas de visibilidad dentro de esa red.
-</info>
-
----
+</Callout>
 
 ## Relación con el Recepcionista
 
@@ -26,8 +24,6 @@ El **recepcionista** se apoya en los Contactos para derivar las conversaciones e
 3. **Transfiere** a uno de los agentes que figuran en la lista de Contactos si aplica.
 
 Si un agente no está incluido como Contacto, **no podrá recibir transferencias**.
-
----
 
 ## Configuración de Contactos paso a paso
 
@@ -45,8 +41,6 @@ Si un agente no está incluido como Contacto, **no podrá recibir transferencias
 5. **Guardar y publicar**
    - Confirma los cambios y publica la nueva configuración.
 
----
-
 ## Ciclo de transferencia
 
 Cuando se inicia una transferencia:
@@ -60,8 +54,6 @@ Cuando se inicia una transferencia:
    - Registrando la transferencia para trazabilidad y reportes.
 5. El nuevo agente continúa la conversación, aplicando su propio **Guion + Reglas**, **Guardrails** y **Modificadores**.
 
----
-
 ## Buenas prácticas
 
 - **Mantén la lista actualizada**: revisa contactos cuando ingresen o se retiren agentes.
@@ -69,12 +61,10 @@ Cuando se inicia una transferencia:
 - **Usa nombres descriptivos**: facilita la búsqueda de contactos.
 - **Prueba con Playground**: simula flujos completos de transferencia y revisa logs.
 
-<warning>
+<Callout type="warning">
   Si se definen **contactos excesivos o relaciones complejas**, puede aumentar el tiempo de decisión para transferir.\
   Procura mantener la red de contactos optimizada.
-</warning>
-
----
+</Callout>
 
 ## Solución de problemas
 
@@ -84,8 +74,6 @@ Cuando se inicia una transferencia:
   - Revisa las reglas para evitar transferencias recíprocas o circulares.
 - **Lentitud en el enrutamiento**:
   - Reduce la cantidad de contactos o simplifica la matriz de relaciones.
-
----
 
 ## Próximos pasos
 

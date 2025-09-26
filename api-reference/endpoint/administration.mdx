@@ -1,0 +1,307 @@
+---
+title: "Administración de sesiones"
+description: "API de endpoints administrativos para gestionar, modificar y supervisar sesiones de conversación en tiempo real."
+---
+
+## General
+
+La **API de administración de sesiones** permite **gestionar y modificar en tiempo real** las conversaciones activas entre un agente (humano o IA) y un usuario.\
+Está diseñada para escenarios de soporte, orquestación avanzada o integraciones donde es necesario intervenir una sesión sin interrumpir al cliente final.
+
+<Callout type="info">
+  Cada endpoint requiere un `sessionId` válido y encabezados de autenticación correctos.\
+  Las respuestas exitosas devuelven `HTTP 200` (o `204` cuando la operación no produce contenido).\
+  Los errores comunes incluyen parámetros inválidos (400), credenciales incorrectas (401/403) o recursos inexistentes (404).
+</Callout>
+
+## Endpoints
+
+### 1. Append Context
+
+`PUT /administration/session/:sessionId/append`
+
+**Propósito**\
+Agrega nuevos mensajes o datos al **contexto existente de la sesión**, sin borrar la información previa.\
+Ideal para enriquecer el historial con datos obtenidos en paralelo, como información de CRM o variables de negocio que llegaron después del inicio de la conversación.
+
+**Body**\
+Debe contener un array `context` no vacío con objetos que incluyan autor y texto.
+
+```json
+{
+  "context": [
+    { "author": "system", "text": "string no vacía" }
+  ]
+}
+```
+
+**Validaciones**
+
+- `context` no puede estar vacío.
+- Cada `text` debe ser string no vacía.
+- `author` debe ser válido (`system`, `assistant`, `user` u otro permitido).
+
+**Respuesta**
+
+- `200` vacío: los nuevos mensajes quedan disponibles para el motor de IA y para futuras respuestas.
+
+### 2. Override Context
+
+`PUT /administration/session/:sessionId/override`
+
+**Propósito**\
+Reemplaza **todo el historial de la sesión** por un nuevo contexto.\
+Se usa cuando es necesario reiniciar o reescribir por completo la memoria conversacional, por ejemplo para reinicios de flujo o corrección de datos.
+
+**Body**
+
+```json
+{
+  "context": [
+    { "author": "system", "text": "string no vacía" }
+  ]
+}
+```
+
+**Respuesta**
+
+- `200` vacío: la sesión adopta únicamente el nuevo contexto.
+
+### 3. Attend
+
+`PUT /administration/session/:sessionId/attend`
+
+**Propósito**\
+Fuerza al asistente a generar una respuesta **aunque no sea su turno natural**.\
+Útil para impulsar el flujo cuando un sistema externo sabe que hay nueva información que debe ser procesada inmediatamente.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `200` vacío: el agente inicia una nueva salida inmediatamente.
+
+### 4. Whisper
+
+`PUT /administration/session/:sessionId/whisper`
+
+**Propósito**\
+Envía un mensaje **`oculto (rol system)`** que se registra en el historial pero **no es visible para el cliente final**.\
+Permite inyectar instrucciones internas, correcciones de contexto o notas para análisis posteriores.
+
+**Body**\
+Debe incluir `text` obligatorio y no vacío.
+
+```json
+{
+  "text": "string no vacía"
+}
+```
+
+**Validaciones**
+
+- `text` obligatorio y con contenido.
+
+**Respuesta**
+
+- `200` vacío: el mensaje queda en la sesión, solo visible para monitoreo y motores internos.
+
+### 5. Impersonate
+
+`PUT /administration/session/:sessionId/impersonate`
+
+**Propósito**\
+Envía un mensaje como si lo hubiera escrito el **asistente**, sin que este pase por generación de IA.\
+Sirve para mensajes de confirmación, respuestas preaprobadas o comunicaciones de emergencia donde la respuesta debe ser inmediata y controlada.
+
+**Body**\
+Debe incluir `text` obligatorio y puede incluir `applyModifiers` (para forzar o no los modificadores configurados).
+
+```json
+{
+  "text": "string no vacía",
+  "applyModifiers": false
+}
+```
+
+**Validaciones**
+
+- `text` obligatorio.
+
+**Respuesta**
+
+- `200` vacío: el mensaje se muestra al cliente como si viniera del agente.
+
+### 6. Tool Inject
+
+`PUT /administration/session/:sessionId/toolinject`
+
+**Propósito**\
+Fuerza la ejecución de una **herramienta disponible en la conversación**.\
+Permite activar flujos externos como cobros, consultas a bases de datos o integraciones sin esperar que el agente lo decida.
+
+**Body**\
+Debe especificar `tool` (ID de la herramienta) y `args` (argumentos que necesita esa herramienta).
+
+```json
+{
+  "tool": "id_tool",
+  "args": { "payload": "..." }
+}
+```
+
+**Validaciones**
+
+- `tool` obligatorio.
+- `args` se valida según los requisitos de la herramienta.
+
+**Respuesta**
+
+- `200` con el resultado devuelto por la herramienta.
+
+### 7. Transfer (Mutate)
+
+`PUT /administration/session/:sessionId/transfer`
+
+**Propósito**\
+Cambia el **agente virtual que atiende la sesión**.\
+Permite derivar la conversación a otro agente especializado sin que el usuario pierda continuidad.
+
+**Body**\
+Debe especificar `target`, el ID del nuevo agente que tomará la sesión.
+
+```json
+{
+  "target": "id_nuevo_asistente"
+}
+```
+
+**Validaciones**
+
+- `target` obligatorio y no vacío.
+
+**Respuesta**
+
+- `200` vacío: la sesión continúa bajo el nuevo agente.
+
+### 8. Pause
+
+`PUT /administration/session/:sessionId/pause`
+
+**Propósito**\
+Pone la sesión en **pausa**, suspendiendo temporalmente las acciones del asistente.\
+Se utiliza para revisiones manuales o cuando se requiere que ningún mensaje automático sea enviado hasta nueva orden.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `200` vacío: la sesión entra en estado pausado.
+
+### 9. Resume
+
+`PUT /administration/session/:sessionId/resume`
+
+**Propósito**\
+Reanuda una sesión previamente pausada, permitiendo que el asistente continúe su ciclo normal.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `200` vacío: la sesión vuelve a su flujo de trabajo habitual.
+
+### 10. History
+
+`GET /administration/session/:sessionId/history`
+
+**Propósito**\
+Devuelve el **historial completo de eventos** (mensajes, herramientas, transferencias, guardrails, etc.) en la sesión.\
+Es clave para auditoría, soporte y análisis de desempeño.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `200` con JSON que describe toda la línea de tiempo de la sesión.
+
+### 11. Snapshot
+
+`GET /administration/session/:sessionId/snapshot`
+
+**Propósito**\
+Devuelve un **estado instantáneo** de la sesión, incluyendo memoria, contexto y configuraciones activas.\
+Útil para respaldar, migrar o reproducir una conversación en otro entorno sin interrumpirla.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `200` con JSON que representa el estado actual de la sesión.
+
+### 12. Resolver (External Tool Result)
+
+`PUT /administration/session/:sessionId/external/:correlationUUID`
+
+**Propósito**\
+Recibe y cierra el **resultado de una herramienta que se ejecutó externamente**, por ejemplo a través de un webhook.\
+Permite que el agente continúe su flujo una vez que la herramienta externa terminó.
+
+**Body**\
+Debe contener el payload con el resultado final de la herramienta.
+
+```json
+{
+  /* payload del resultado */
+}
+```
+
+**Validaciones**
+
+- `correlationUUID` debe ser válido.
+- El body depende de los datos que devuelva la herramienta.
+
+**Respuesta**
+
+- `200` vacío: el agente puede usar el resultado inmediatamente.
+
+### 13. Destroy Session
+
+`DELETE /administration/session/:sessionId`
+
+**Propósito**\
+Elimina por completo la sesión y todos sus recursos asociados.\
+Se utiliza para limpieza, control de costos o cuando una conversación finaliza de manera definitiva.
+
+**Body**\
+N/A
+
+**Respuesta**
+
+- `204` vacío: la sesión se elimina sin dejar rastro operativo.
+
+## Errores comunes
+
+<Callout type="warning">
+  * **400 Bad Request**: Falta de `HttpHeaders.UserId`, `sessionId` o `correlationUUID` inválidos, o body con campos vacíos o mal formados.
+  * **401 / 403**: Autenticación fallida o permisos insuficientes.
+  * **404 Not Found**: La sesión o el recurso no existen.
+  * **500 Internal Server Error**: Error inesperado del servidor.
+</Callout>
+
+## Buenas prácticas
+
+- Valida siempre los parámetros de entrada antes de llamar a los endpoints.
+- Registra las operaciones críticas para facilitar auditoría.
+- Usa **Snapshot** para clonar sesiones o analizar contexto sin interrumpir al usuario.
+- Utiliza **Tool Inject** solo cuando la herramienta sea idempotente o esté preparada para reintentos.
+- Aplica `Transfer` únicamente cuando se confirme que el nuevo agente está disponible para evitar sesiones huérfanas.
+
+<Callout type="tip">
+  Combina los endpoints `history` y `snapshot` para reconstruir el flujo completo de una sesión o depurar incidencias en tiempo real, y usa `whisper` e `impersonate` para intervenciones controladas sin afectar la experiencia del usuario.
+</Callout>

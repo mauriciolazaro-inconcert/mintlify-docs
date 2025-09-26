@@ -1,0 +1,48 @@
+---
+title: Vista detallada
+description: Descubre cómo explorar cada conversación en profundidad y descargar el archivo CSV (JSON de eventos) para análisis y auditoría.
+---
+
+## General
+
+La **Vista detallada** permite abrir una conversación específica del  
+[Historial de conversaciones](./overview) y revisar en profundidad su contenido y ejecución.
+
+En esta vista puedes:
+
+- Ver el **diálogo completo** entre el cliente y el agente, incluyendo marcas grises que señalan ejecuciones de herramientas, uso de modificadores, consultas a la base de conocimiento, transferencias o guardrails.
+- Analizar el **flujo completo** en el orden cronológico exacto en el que se produjo.
+
+## Descargar eventos en CSV / JSON
+
+Dentro de la Vista detallada encontrarás el botón **Descargar CSV**.  
+Este botón genera un **archivo CSV que contiene un JSON estructurado** con **todos los eventos de la conversación**.
+
+- El archivo se descarga listo para ser utilizado en análisis forense, auditorías o integración con herramientas externas.
+- Incluye el **detalle completo de cada evento**, sin necesidad de navegar entre diferentes pantallas.
+
+<Callout type="tip">
+El CSV es ideal para **auditoría técnica**, análisis de desempeño, depuración avanzada y para mantener un registro histórico fuera de Inagent.
+</Callout>
+
+## Tipos de eventos
+
+La definición y descripción de cada tipo de evento (por ejemplo, inicios y cierres de sesión, llamadas a herramientas, consultas de conocimiento, transferencias, etc.) se encuentra documentada en  
+**[Referencia API → Eventos](../api-reference/events/dictionary)**.
+
+Allí podrás encontrar:
+
+- El listado completo de eventos posibles.
+- Su significado y campos asociados.
+- Ejemplos de uso para debugging o integraciones.
+
+## Buenas prácticas
+
+- **Descarga las conversaciones críticas** para conservar evidencia y cumplir con políticas de cumplimiento.
+- **Usa el JSON** para integrar con sistemas de monitoreo o análisis de datos externos.
+- **Consulta la sección de eventos** para interpretar correctamente cada tipo y su estructura.
+
+## Próximos pasos
+
+- Vuelve a **[Historial de conversaciones](./overview)** para localizar otras interacciones.
+- Consulta **[Eventos](../core/events)** para conocer la estructura detallada de los datos descargados.

@@ -1,63 +1,58 @@
 ---
-title: "Historial de conversaciones"
-description: "El módulo Historial de conversaciones almacena todas las interacciones atendidas por los agentes virtuales en un solo lugar, ofreciendo una visión completa y ordenada de lo que sucede con cada cliente a lo largo del tiempo.
-
-Aquí puedes buscar, filtrar, auditar y analizar cualquier conversación pasada
-sin afectar el funcionamiento en producción."
+title: "General"
+description: "El Historial de conversaciones centraliza todas las interacciones finalizadas en Inagent.
+Su diseño permite buscar, filtrar y auditar conversaciones, y a la vez inspeccionar en detalle
+cada paso que ocurrió en tiempo real."
 ---
 
-## Capacidades principales
+## Qué ofrece esta vista
 
-1. **Registro completo de interacciones**
-   - Cada conversación se guarda con:
-     - **Fecha y hora de inicio y fin**
-     - **Canal utilizado** (voz, WhatsApp, webchat, etc.)
-     - **Agente virtual o equipo que intervino**
-     - **Variables de contexto** generadas o modificadas durante la sesión
-     - **Transcripciones completas** (incluyendo mensajes del cliente y del agente)
-2. **Búsqueda y filtrado avanzado**
-   - Localiza conversaciones por:
-     - **Palabras clave** del contenido
-     - **Rango de fechas**
-     - **Canal**
-     - **Agente o equipo**
-     - **Estado de resolución** (resuelto, transferido, finalizado por inactividad, etc.)
-3. **Detalle conversacional**
-   - Abre cada registro para ver el flujo completo:
-     - Mensajes enviados y recibidos en orden cronológico
-     - Uso de herramientas (por ejemplo, API REST, Transferencias a humano)
-     - Consultas a bases de conocimiento
-     - Aplicación de guardrails o modificadores
-4. **Auditoría**
-   - Revisa cambios de estado, publicaciones de nuevas versiones y transferencias de equipo.
-   - Ideal para procesos de cumplimiento, calidad o revisiones posteriores.
+1. **Listado completo ordenado por equipo**
+   - Todas las conversaciones quedan clasificadas por el **equipo** al que pertenecen.
+2. **Diálogo enriquecido en un solo lugar**
+   - Al abrir una conversación, ves **todo el diálogo cronológico** entre el cliente y el agente.
+   - Cada acción relevante se muestra **embebida en color gris**, incluyendo:
+     - **Ejecución de herramientas** (API REST, Código, Transferencia a humano).
+     - **Aplicación de modificadores** (traducción, estilo, etc.).
+     - **Consultas a bases de conocimiento** y sus fragmentos.
+     - **Guardrails** aplicados (si corresponde).
+     - **Transferencias** entre agentes o canales.
+3. **Información clave de contexto**
+   - Variables de sesión creadas/actualizadas, inicio y cierre, y eventos especiales como `Session.destroy`.
 
----
+<Callout type="info">
+Toda esta información está integrada **en la misma línea de conversación**,  
+lo que facilita comprender el flujo completo sin cambiar de pantalla.
+</Callout>
+
+## Búsqueda y filtrado
+
+Puedes **combinar** los siguientes criterios para encontrar exactamente lo que necesitas:
+
+- **Equipo**
+- **Rango de fechas**
+- **ID de interacción**
+- **Palabras clave** (texto del diálogo)
+
+> Los filtros se pueden usar de manera conjunta (por ejemplo, _Equipo + Rango de fechas + Palabras clave_).
+
+## Descarga y análisis offline
+
+Desde cada conversación puedes **descargar un archivo CSV** que contiene un **JSON detallado**\
+con todos los eventos, incluyendo timestamps, tipo de evento y payload. Por mas detalles ver [**Vista detallada**](./detail-view).
+
+<Callout type="info">
+  El CSV/JSON es ideal para **auditorías**, análisis en herramientas externas o para conservar evidencia histórica.
+</Callout>
 
 ## Casos de uso
 
-- **Atención al cliente**: responder dudas sobre interacciones anteriores.
-- **Calidad y entrenamiento**: analizar cómo se resolvió un caso y retroalimentar a los equipos.
-- **Cumplimiento normativo**: almacenar evidencia en sectores regulados (banca, salud, educación).
-- **Análisis de negocio**: identificar patrones de demanda, horas pico o motivos de contacto.
-
----
-
-## Integración con otros módulos
-
-- **Supervisión en vivo**: las conversaciones terminadas pasan automáticamente al historial.
-- **Reportes y reportes avanzados**: generan métricas a partir de las conversaciones almacenadas.
-- **Playground**: permite replicar interacciones para probar ajustes en guion o herramientas.
-
-<info>
-  Toda la información almacenada respeta los estándares de **seguridad y privacidad**,\
-  incluyendo cifrado en reposo y en tránsito, para proteger datos sensibles de clientes y empresas.
-</info>
-
----
+- **Control de calidad**: revisar ejecución de herramientas y cumplimiento de reglas.
+- **Cumplimiento normativo**: mantener trazabilidad de cada evento.
+- **Optimización de flujos**: analizar cuántas consultas a conocimiento hubo y dónde se aplicaron modificadores.
 
 ## Próximos pasos
 
-- Aprende a **buscar y filtrar conversaciones** en [Búsqueda y filtrado](./search-filter).
-- Descubre cómo revisar cada detalle en [Vista detallada](./detail-view).
-- Conoce las capacidades de **auditoría** en [Auditoría](./audit).
+- Aprende a realizar búsquedas avanzadas en [**Búsqueda y filtrado**](./search-filter).
+- Consulta [**Vista detallada**](./detail-view) para explorar todos los eventos y acciones de una conversación específica.
+- Revisa [**Auditoría**](./audit) para profundizar en cambios de configuración y control de versiones.

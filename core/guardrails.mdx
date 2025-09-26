@@ -10,8 +10,6 @@ description: "Los Moderadores son filtros automáticos que se aplican a las resp
 - **Cumplir políticas y regulaciones** (por ejemplo, protección de datos o normativas de privacidad).
 - Servir como **último control de calidad** antes de entregar la respuesta final.
 
----
-
 ## Herencia Equipo → Agente
 
 Los guardrails pueden definirse en:
@@ -23,12 +21,10 @@ Los guardrails pueden definirse en:
    - Se agregan guardrails adicionales o se ajustan los heredados.
    - Útiles cuando un agente requiere filtros más estrictos (por ejemplo, un bot de finanzas).
 
-<info>
+<Callout type="info">
   La herencia asegura que las políticas corporativas se cumplan en todo el equipo,\
   permitiendo a la vez que cada agente defina reglas de seguridad o estilo específicas.
-</info>
-
----
+</Callout>
 
 ## Rol en el ciclo conversacional
 
@@ -43,7 +39,7 @@ Durante cada turno de conversación, los guardrails intervienen en la fase final
 5. **Modificadores** (si están habilitados)
 6. **Entrega de la respuesta final**
 
-<warning>
+<Callout type="warning">
   **Advertencia de rendimiento**
 
   Cada guardrail implica una revisión extra de la respuesta, lo que:
@@ -52,9 +48,7 @@ Durante cada turno de conversación, los guardrails intervienen en la fase final
   - **Incrementa la latencia de respuesta**.
 
   Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad de interacción es crítica.
-</warning>
-
----
+</Callout>
 
 ## Ejemplos de moderadores más comunes
 
@@ -63,8 +57,6 @@ Durante cada turno de conversación, los guardrails intervienen en la fase final
 - **Limitación de temas**: impedir que el agente responda a consultas fuera de su dominio.
 - **Prevención de lenguaje inapropiado**: filtrar insultos, lenguaje discriminatorio o expresiones violentas.
 
----
-
 ## Buenas prácticas
 
 - **Configura en el equipo lo que es política global** (privacidad, estilo corporativo).
@@ -72,11 +64,9 @@ Durante cada turno de conversación, los guardrails intervienen en la fase final
 - **Prueba exhaustivamente** en Playground: verifica que las correcciones se apliquen sin romper la intención original.
 - **Monitorea el impacto en latencia**, especialmente si el canal principal es **voz**.
 
-<tip>
+<Callout type="tip">
   Utiliza **testers guardados** en el Playground para reproducir escenarios críticos y comprobar cómo actúan los guardrails en tiempo real.
-</tip>
-
----
+</Callout>
 
 ## Próximos pasos
 

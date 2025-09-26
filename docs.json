@@ -24,7 +24,7 @@
           },
           {
             "group": "Conceptos Core",
-            "pages": [              
+            "pages": [
               "core/team-definition",
               "core/agent-definition",
               "core/agents/behavior",
@@ -37,7 +37,7 @@
               "core/others",
               "core/channels",
               "core/playground",
-              "core/publishing"                            
+              "core/publishing"
             ]
           },
           {
@@ -60,7 +60,7 @@
           {
             "group": "Supervisión de equipos",
             "pages": [
-              "supervision/overview",              
+              "supervision/overview",
               "supervision/whisper",
               "supervision/transfer",
               "supervision/impersonate",
@@ -72,8 +72,7 @@
             "group": "Historial de conversaciones",
             "pages": [
               "conversation-history/overview",
-              "conversation-history/search-filter",
-              "conversation-history/detail-view"              
+              "conversation-history/detail-view"
             ]
           },
           {
@@ -90,7 +89,7 @@
               "channels/overview",
               "channels/voice/overview",
               "channels/voice/webcall-webrtc",
-              "channels/voice/sip-trunk",              
+              "channels/voice/sip-trunk",
               "channels/whatsapp",
               "channels/webchat",
               "channels/instagram",
@@ -118,17 +117,22 @@
             "pages": [
               "api-reference/introduction",
               "api-reference/authentication",
-              "api-reference/errors",              
-              "api-reference/postman"
+              "api-reference/errors"
             ]
           },
           {
             "group": "Endpoints principales",
             "pages": [
-              "api-reference/endpoints/teams",
+              "api-reference/endpoints/crews",
               "api-reference/endpoints/agents",
-              "api-reference/endpoints/conversations",
+              "api-reference/endpoints/administration",
               "api-reference/endpoints/reporting"
+            ]
+          },
+          {
+            "group": "Eventos",
+            "pages": [
+              "api-reference/events/dictionary"
             ]
           },
           {
