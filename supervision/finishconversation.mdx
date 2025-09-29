@@ -1,0 +1,65 @@
+```mdx
+---
+title: "Finalizar conversación"
+description: "Permite a un supervisor cerrar de inmediato una conversación en curso."
+---
+
+## General
+
+La acción **Finalizar conversación** en la sección de **Supervisión de equipos** permite que un **supervisor** cierre de forma inmediata una interacción activa, sin depender del flujo natural del agente virtual ni del tiempo de inactividad configurado.
+
+---
+
+## Propósito
+
+- **Control inmediato:** Terminar una conversación cuando se considere que ya no es necesario continuar.  
+- **Gestión de incidencias:** Cerrar interacciones que presenten errores, mensajes inapropiados o cualquier situación que requiera intervención urgente.  
+- **Liberar recursos:** Evitar que el asistente siga procesando mensajes innecesarios y optimizar el uso de la plataforma.
+
+---
+
+## Flujo de uso
+
+1. Accede a **Supervisión de equipos**.  
+2. Selecciona el **equipo** y ubica la conversación en curso que deseas finalizar.  
+3. Haz clic en la acción **Finalizar conversación**.  
+4. Confirma la operación en la ventana de confirmación que se mostrará.
+
+Una vez confirmada:
+
+- La sesión se cierra inmediatamente.
+- Se registra un **evento de cierre** en el Historial de conversaciones con el motivo `finished` y la marca de supervisor.
+- Se dispara cualquier automatización configurada para la finalización de conversaciones.
+
+<Callout type="info">
+El cierre por parte de un supervisor **no envía un mensaje adicional al usuario**, a menos que el supervisor previamente lo haya hecho mediante la acción **Intervenir**.
+</Callout>
+
+---
+
+## Impacto en reportes
+
+- La conversación aparecerá como **cerrada manualmente** en los [Reportes de sistema](/reporting/system-reports).  
+- Se registrará el motivo de cierre, el usuario supervisor que ejecutó la acción y la hora exacta.  
+- Se incluyen las métricas habituales: duración, cantidad de mensajes, uso de herramientas, entre otros.
+
+---
+
+## Buenas prácticas
+
+- Utiliza esta acción solo cuando sea realmente necesario, para no afectar la continuidad del servicio ni el análisis de métricas.  
+- Si la conversación requiere un mensaje de despedida para el usuario final, **envíalo primero** con la acción [Intervenir](/supervision/impersonate).  
+- Documenta internamente el motivo del cierre para seguimiento y auditoría.
+
+---
+
+## KPIs recomendados
+
+- **Cantidad de cierres manuales por supervisor.**  
+- **Motivos de cierre** más frecuentes (ej. error técnico, conversación irrelevante).  
+- **Tiempo promedio** entre el inicio de la sesión y el cierre manual.
+
+<Callout type="tip">
+Integra estos datos con los [Reportes avanzados](/reporting/advanced-reports-kpis) para detectar patrones y optimizar los procesos de supervisión.
+</Callout>
+```

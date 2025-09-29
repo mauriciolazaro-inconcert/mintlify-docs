@@ -1,5 +1,118 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: "Reportes avanzados"
+description: "Genera reportes personalizados con columnas, disparadores y análisis asistido por IA, para obtener métricas profundas de conversaciones, herramientas y eventos."
 ---
 
+## General
+
+Los **reportes avanzados** permiten crear informes completamente personalizados sobre la actividad de Inagent, combinando columnas a medida, análisis con IA y disparadores de eventos. Son ideales para medir **KPIs específicos del negocio**, como motivos de abandono, eficiencia de herramientas o análisis de flujos complejos que no se cubren con los reportes de sistema.
+
+## Tipos de reporte
+
+Al crear un nuevo reporte puedes elegir el **tipo de análisis principal**, que determina qué constituye una fila o una métrica global:
+
+- **Detalle**  
+  - Cada fila representa **una interacción individual**.  
+  - Permite seleccionar columnas personalizadas basadas en conversaciones, herramientas o eventos.  
+  - Es el formato recomendado para análisis finos y exportación detallada.
+
+- **Numérico**  
+  - Genera **métricas agregadas** de todo el conjunto de interacciones cerradas en el período.  
+  - Solo permite los orígenes **Conversaciones** o **Uso de herramientas**.  
+  - Ideal para cuadros de mando y KPIs globales (por ejemplo, porcentaje de transferencias o promedio de duración).
+
+## Origen de datos
+
+Dentro de cada tipo de reporte se puede elegir la fuente principal de datos:
+
+- **Conversaciones**  
+  Basado en las sesiones completas.  
+  Útil para métricas como: cantidad de mensajes, tiempos de respuesta, cierres por inactividad o motivos de transferencia.
+
+- **Uso de herramientas**  
+  Centrado en la ejecución de herramientas (REST API, código, transferencia a humano).  
+  Permite medir frecuencia, errores o resultados específicos de cada invocación.
+
+- **Eventos personalizados**  
+  Considera los eventos emitidos por herramientas de código o definidos por el usuario.  
+  Permite generar métricas ad-hoc como “clicks detectados”, “intentos de login fallidos” u otras señales de negocio.
+
+## Creación de un reporte
+
+1. **Crear reporte**  
+   - Haz clic en **Crear reporte**.  
+   - Asigna **nombre** y **descripción** claros para identificar el propósito.
+
+2. **Elegir tipo de reporte**  
+   - Selecciona **Detalle** o **Numérico**.  
+   - Elige el **origen de datos**: Conversaciones, Uso de herramientas o Eventos personalizados.  
+   - Haz clic en **Siguiente**.
+
+3. **Asignar a un equipo**  
+   - Selecciona el **equipo** al que quedará vinculado el reporte.  
+   - Un reporte solo puede estar asociado a **un equipo**.  
+   - Confirma la creación.
+
+## Configuración de columnas
+
+Cada columna define qué dato se registrará y cómo se mostrará.
+
+- **Nombre de la columna:** etiqueta descriptiva.  
+- **Contexto o descripción:** explica el propósito o el dato que se espera.  
+- **Formato:** tipo de dato (string, datetime, boolean, int, float, etc.).
+
+### Edición y agregados
+
+- Usa el botón **Editar** para ajustar nombre, contexto o formato de una columna existente.
+- Usa **Agregar columna** para incorporar nuevas métricas.
+
+Cuando agregas una nueva columna debes definir su **disparador**.
+
+## Disparadores de análisis (triggers)
+
+Un **trigger** define el evento que hará que se calcule o capture la información en esa columna.  
+Los principales disparadores son:
+
+- **En base a atributos:** analiza atributos de los mensajes de la conversación (por ejemplo, texto, autor, idioma).  
+- **Nuevo mensaje del usuario:** se activa cada vez que el usuario envía un mensaje.  
+- **Nuevo mensaje del asistente:** cuando el asistente responde.  
+- **Uso de una herramienta:** se dispara al invocar una herramienta.  
+- **Resultado de una herramienta:** cuando se recibe la respuesta de una herramienta.  
+- **Uso de un modificador:** cuando se aplica un modificador.  
+- **Error al usar un modificador:** captura fallas en modificadores.  
+- **Nuevo susurro del supervisor:** cuando un supervisor interviene con un mensaje oculto.
+
+Cada disparador ofrece **atributos propios** que puedes seleccionar para las columnas (por ejemplo, texto del mensaje, duración de ejecución de una herramienta, tipo de error).
+
+## Acciones de análisis
+
+Para cada columna, además del disparador, puedes definir **qué hacer con el dato capturado**:
+
+- **Analizar con IA**  
+  - Escribe en lenguaje natural lo que la IA debe detectar o clasificar.  
+  - Opcionalmente agrega **opciones específicas** que la IA debe asignar (por ejemplo, “Venta concretada”, “Reclamo”, “Consulta técnica”).  
+  - Permite análisis semánticos, clasificación de intenciones o detección de sentimientos.
+
+- **Flujo de proceso**  
+  - Diseña una acción automática en base a la detección (por ejemplo, iniciar un workflow, enviar una alerta o modificar el contexto).
+
+## Ejemplo de flujo de creación
+
+1. Crear un reporte de tipo **Detalle** basado en **Conversaciones**.  
+2. Agregar una columna **Motivo de abandono**.  
+3. Definir disparador **Nuevo mensaje del usuario**.  
+4. Acción **Analizar con IA**, especificando: “Identificar si el motivo corresponde a problemas técnicos, desinterés o finalización exitosa”.  
+5. Guardar y confirmar.
+
+El reporte resultante mostrará cada interacción en una fila, con una columna que clasifica automáticamente el motivo de abandono según el análisis de IA.
+
+## Buenas prácticas
+
+- **Nombra y describe claramente** cada reporte y sus columnas para facilitar el mantenimiento.  
+- Usa **Analizar con IA** cuando requieras clasificación semántica o interpretación de lenguaje natural.  
+- Agrupa triggers relacionados para evitar duplicados y mantener consistencia.  
+- Revisa periódicamente los resultados en [Reportes avanzados](/reporting/advanced-reports-kpis) para optimizar columnas y reglas.
+
+<Callout type="tip">
+Los reportes avanzados son una herramienta poderosa para **crear KPIs de negocio específicos** sin depender de desarrollos adicionales, convirtiendo datos de conversación en inteligencia estratégica.
+</Callout>

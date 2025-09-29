@@ -1,5 +1,100 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: "WebCall"
+description: "Configura el canal WebCall para permitir conversaciones de voz en tiempo real directamente desde tu sitio web."
 ---
 
+## General
+
+El **canal WebCall** permite ofrecer atención de voz en tiempo real desde una página web, sin necesidad de que el usuario llame por teléfono.  
+Puedes personalizar la voz del asistente, el comportamiento de detección de voz, el estilo del botón de acceso y otros parámetros clave.
+
+## Paso 1: Acceder a la configuración
+
+1. Ve a **Canales** en el menú principal.  
+2. Haz clic en **Configurar canal**.  
+3. En la pestaña **Inagent**, selecciona la opción **WebCall**.
+
+## Paso 2: Configuración básica
+
+Completa los datos principales del canal:
+
+- **Equipo asociado**: selecciona el equipo de agentes virtuales que atenderá las llamadas.  
+- **Descripción del canal**: describe el lugar o tipo de atención (por ejemplo: “Ventas LATAM” o “Soporte 24/7”).  
+- **Mensaje inicial**: define si el asistente debe iniciar la conversación con un saludo o esperar a que el usuario hable.
+
+## Paso 3: Personalización de voz
+
+Controla la naturalidad y la velocidad de la voz del agente virtual:
+
+- **Modelo de voz**:  
+  - **Avanzado**: máxima calidad de síntesis.  
+  - **Tradicional**: optimizado para entornos de baja latencia.  
+- **Lenguaje de detección**: idioma principal para reconocer la voz del usuario.  
+- **Versión del modelo**:  
+  - **Más preciso**: mejor comprensión, ideal para entornos ruidosos.  
+  - **Más rápido**: menor latencia, recomendado para conversaciones ágiles.  
+- **Estilo de voz**:  
+  - **Hiperrealista**: voz muy natural, ideal para experiencias premium.  
+  - **Realista**: equilibrada entre naturalidad y velocidad.  
+- **Voz específica**: elige entre las opciones de voces disponibles.  
+- **Velocidad de locución**: normal, muy lento, lento, rápido o muy rápido.
+
+<Callout type="tip">
+Combina un modelo más rápido con velocidad de locución adecuada para reducir la latencia en conversaciones dinámicas.
+</Callout>
+
+## Paso 4: Detección de actividad de voz
+
+Ajusta cómo se detecta y gestiona la conversación hablada:
+
+- **Sensibilidad de interrupción**:  
+  - Muy sensible, Sensible (normal) o Poco sensible.  
+  - Determina la rapidez con la que el asistente interrumpe su locución al detectar que el usuario habla.  
+- **Velocidad de respuesta**: define el tiempo máximo antes de que el asistente comience a responder.  
+- **Umbral de reconocimiento de voz**: nivel mínimo de volumen para considerar que hay voz.
+
+<Callout type="info">
+Una sensibilidad alta mejora la fluidez de los diálogos, pero puede reaccionar a ruidos de fondo.
+</Callout>
+
+## Paso 5: Opciones extra de sonido y experiencia
+
+Enriquece o ajusta la interacción de audio:
+
+- **Permitir interrupciones**: si está activado, el usuario puede hablar mientras el asistente responde.  
+- **Incluir sonido de entorno de oficina**: añade un ambiente de fondo para dar sensación de naturalidad.  
+- **Volumen del sonido de entorno**: ajusta el nivel del ruido ambiente.  
+- **Incluir sonido durante el pensamiento**: emite un sutil sonido mientras el asistente procesa una respuesta.
+
+## Paso 6: Estilo del WebCall y botón de acceso
+
+Personaliza la experiencia visual:
+
+- **Estilo de la ventana WebCall**: define colores, tipografía y fondo para adaptarlos a tu sitio web.  
+- **Burbuja de acceso**:  
+  - Posición en pantalla (inferior derecha o izquierda).  
+  - Imagen o ícono del botón.  
+  - Color y tamaño del botón.
+
+## Paso 7: Integración
+
+Una vez completada la configuración:
+
+1. Haz clic en **Guardar** para aplicar los cambios.  
+2. Se generará automáticamente un **código de integración**.  
+3. Copia este código y pégalo en el HTML del sitio web donde desees habilitar el WebCall.
+
+<Callout type="tip">
+Puedes utilizar el mismo código en varias páginas del mismo dominio siempre que estén autorizadas como orígenes permitidos.
+</Callout>
+
+## Buenas prácticas
+
+- **Prueba la latencia**: verifica que la voz responda en el tiempo esperado, especialmente con configuraciones hiperrealistas.  
+- **Ajusta la sensibilidad de interrupción** según el entorno (silencioso o con ruido).  
+- **Usa un sonido de entorno sutil** para mejorar la percepción de naturalidad, pero evita niveles altos que dificulten la comprensión.  
+- **Incluye un mensaje inicial claro** para dar contexto al usuario antes de que empiece a hablar.
+
+---
+
+Con estos ajustes, el canal **WebCall** quedará listo para ofrecer conversaciones de voz naturales, fluidas y con una experiencia inmersiva directamente desde tu sitio web.
