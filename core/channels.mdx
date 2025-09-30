@@ -10,16 +10,20 @@ En Inagent cada equipo puede tener uno o varios canales asociados, lo que permit
 - **Centralizar la lógica de negocio**: sin importar el canal, los agentes comparten guiones, reglas, herramientas y conocimiento.
 - **Escalar sin fricción**: se pueden habilitar nuevos canales sin modificar el comportamiento central del agente.
 
+---
+
 ## Niveles de configuración
 
 - Los canales se **configuran a nivel de equipo**.
 - Una vez asociados, **todos los agentes del equipo heredan su disponibilidad**, pudiendo interactuar en esos canales sin configuraciones adicionales.
 - Cada agente puede usar los mismos guiones, reglas y herramientas, independientemente del canal que origine la conversación.
 
-<Callout type="info">
+<info>
   Esto asegura que la lógica y las políticas de negocio se mantengan consistentes\
   sin importar el canal de entrada.
-</Callout>
+</info>
+
+---
 
 ## Rol en el ciclo conversacional
 
@@ -32,6 +36,8 @@ Los canales son la **puerta de entrada** a cada interacción:
 
 Este flujo es el mismo sin importar el tipo de canal.
 
+---
+
 ## Tipos de canales en Inagent
 
 Actualmente disponibles o planificados:
@@ -40,7 +46,6 @@ Actualmente disponibles o planificados:
 
 - [WebCall WebRTC](../channels/voice/webcall-webrtc): llamadas de voz desde navegador.
 - [Troncal SIP](../channels/voice/sip-trunk): integración con redes PSTN (próximamente).
-- [Twilio](../channels/voice/twilio): conexión para voz y mensajería (próximamente).
 
 ### Mensajería
 
@@ -53,11 +58,15 @@ Actualmente disponibles o planificados:
 
 - [Webchat](../channels/webchat/setup): chat embebido en sitios web.
 
+---
+
 ## Buenas prácticas generales
 
 - **Centraliza la configuración de canales en el equipo** para simplificar mantenimiento.
 - **Prueba en Playground** antes de publicar para validar que los agentes respondan igual de bien en cada canal.
 - **Planifica la expansión**: diseña guiones y reglas que puedan reutilizarse en futuros canales.
+
+---
 
 ## Próximos pasos
 

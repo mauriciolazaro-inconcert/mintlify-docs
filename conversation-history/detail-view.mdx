@@ -1,48 +1,72 @@
 ---
-title: Vista detallada
-description: Descubre cómo explorar cada conversación en profundidad y descargar el archivo CSV (JSON de eventos) para análisis y auditoría.
+title: "Vista detallada de la conversación"
+description: "En la sección Historial de conversaciones, cada interacción almacenada cuenta con una vista detallada que permite explorar todos los eventos, mensajes y acciones que ocurrieron durante la sesión."
 ---
 
-## General
+## Qué encontrarás en la vista detallada
 
-La **Vista detallada** permite abrir una conversación específica del  
-[Historial de conversaciones](./overview) y revisar en profundidad su contenido y ejecución.
+- **Línea de tiempo completa** de los mensajes entre el cliente y el agente virtual.
+- **Ejecuciones de herramientas** (por ejemplo, API REST, Transferencia a humano, Código).
+- **Consultas a bases de conocimiento**, incluyendo resultados relevantes.
+- **Aplicación de guardrails o modificadores** en cada respuesta.
+- **Transferencias de agente o de canal**, cuando correspondan.
+- **Variables de contexto** creadas o actualizadas en el transcurso de la conversación.
 
-En esta vista puedes:
+<info>
+  Esta vista es ideal para **auditorías**, **análisis de calidad** y **debugging avanzado**,\
+  ya que expone cada paso que se ejecutó en tiempo real.
+</info>
 
-- Ver el **diálogo completo** entre el cliente y el agente, incluyendo marcas grises que señalan ejecuciones de herramientas, uso de modificadores, consultas a la base de conocimiento, transferencias o guardrails.
-- Analizar el **flujo completo** en el orden cronológico exacto en el que se produjo.
+---
 
-## Descargar eventos en CSV / JSON
+## Descarga de eventos en CSV/JSON
 
-Dentro de la Vista detallada encontrarás el botón **Descargar CSV**.  
-Este botón genera un **archivo CSV que contiene un JSON estructurado** con **todos los eventos de la conversación**.
+En la parte superior de la vista detallada encontrarás el botón **Descargar CSV**.
 
-- El archivo se descarga listo para ser utilizado en análisis forense, auditorías o integración con herramientas externas.
-- Incluye el **detalle completo de cada evento**, sin necesidad de navegar entre diferentes pantallas.
+- Al hacer clic, se descarga un **archivo CSV** que en realidad contiene un **JSON completo**\
+  con todos los **eventos registrados** durante la conversación.
+- Cada evento incluye:
+  - **Timestamp exacto**
+  - **Tipo de evento**
+  - **Payload detallado** (datos enviados, respuestas de herramientas, etc.)
 
-<Callout type="tip">
-El CSV es ideal para **auditoría técnica**, análisis de desempeño, depuración avanzada y para mantener un registro histórico fuera de Inagent.
-</Callout>
+Esto permite **análisis offline**, integración con sistemas externos o\
+trazabilidad avanzada en auditorías.
 
-## Tipos de eventos
+---
 
-La definición y descripción de cada tipo de evento (por ejemplo, inicios y cierres de sesión, llamadas a herramientas, consultas de conocimiento, transferencias, etc.) se encuentra documentada en  
-**[Referencia API → Eventos](../api-reference/events/dictionary)**.
+## Tipos de eventos conocidos
 
-Allí podrás encontrar:
+El archivo JSON puede incluir varios tipos de eventos que describen el ciclo de vida de la conversación.\
+Algunos de los más comunes son:
 
-- El listado completo de eventos posibles.
-- Su significado y campos asociados.
-- Ejemplos de uso para debugging o integraciones.
+| Evento             | Descripción                                                                  |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `Session.destroy`  | Indica que el cliente solicitó cerrar la conversación.                       |
+| `Session.start`    | Marca el inicio de una nueva interacción.                                    |
+| `Message.sent`     | Mensaje enviado por el agente virtual.                                       |
+| `Message.received` | Mensaje recibido del cliente.                                                |
+| `Tool.executed`    | Ejecución de una herramienta (por ejemplo, API REST o Código).               |
+| `Knowledge.query`  | Consulta a una base de conocimiento y recuperación de fragmentos relevantes. |
+| `Transfer.done`    | Transferencia de la conversación a otro agente o equipo.                     |
+
+<tip>
+  Los nombres de eventos pueden ampliarse en el futuro;\
+  revisa siempre el JSON para ver la lista completa en cada caso.
+</tip>
+
+---
 
 ## Buenas prácticas
 
-- **Descarga las conversaciones críticas** para conservar evidencia y cumplir con políticas de cumplimiento.
-- **Usa el JSON** para integrar con sistemas de monitoreo o análisis de datos externos.
-- **Consulta la sección de eventos** para interpretar correctamente cada tipo y su estructura.
+- **Descarga y conserva los eventos críticos** para cumplir políticas de auditoría o compliance.
+- **Filtra por tipo de evento** para depurar rápidamente (por ejemplo, solo transferencias o errores).
+- **Relaciona eventos con KPIs** en [Reportes avanzados](../reporting/advanced-reports-kpis)\
+  para identificar patrones de calidad o desempeño.
+
+---
 
 ## Próximos pasos
 
-- Vuelve a **[Historial de conversaciones](./overview)** para localizar otras interacciones.
-- Consulta **[Eventos](../core/events)** para conocer la estructura detallada de los datos descargados.
+- Aprende a **buscar y filtrar conversaciones** en [Búsqueda y filtrado](./search-filter).
+- Explora [Auditoría](./audit) para ver cómo estos eventos se utilizan en procesos de control y cumplimiento.

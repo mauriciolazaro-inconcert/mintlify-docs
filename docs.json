@@ -24,7 +24,7 @@
           },
           {
             "group": "Conceptos Core",
-            "pages": [
+            "pages": [              
               "core/team-definition",
               "core/agent-definition",
               "core/agents/behavior",
@@ -37,12 +37,13 @@
               "core/others",
               "core/channels",
               "core/playground",
-              "core/publishing"
+              "core/publishing"                            
             ]
           },
           {
             "group": "Herramientas",
             "pages": [
+              "tools/overview",
               "tools/human-handoff",
               "tools/rest-api",
               "tools/code"
@@ -51,6 +52,7 @@
           {
             "group": "Bases de conocimiento",
             "pages": [
+              "knowledge/overview",
               "knowledge/native-text",
               "knowledge/documents-pdf",
               "knowledge/external-sites",
@@ -60,11 +62,10 @@
           {
             "group": "Supervisión de equipos",
             "pages": [
-              "supervision/overview",
+              "supervision/overview",              
               "supervision/whisper",
               "supervision/transfer",
               "supervision/impersonate",
-              "supervision/finishconversation",
               "supervision/instant-stats"
             ]
           },
@@ -72,7 +73,8 @@
             "group": "Historial de conversaciones",
             "pages": [
               "conversation-history/overview",
-              "conversation-history/detail-view"
+              "conversation-history/search-filter",
+              "conversation-history/detail-view"              
             ]
           },
           {
@@ -80,27 +82,32 @@
             "pages": [
               "reporting/overview",
               "reporting/system-reports",
-              "reporting/advanced-reports"
+              "reporting/advanced-reports-kpis"
             ]
           },
           {
             "group": "Canales",
             "pages": [
-              "channels/overview",             
+              "channels/overview",
+              "channels/voice/overview",
               "channels/voice/webcall-webrtc",
               "channels/voice/sip-trunk",
+              "channels/voice/twilio",
               "channels/whatsapp",
               "channels/webchat",
               "channels/instagram",
               "channels/facebook-messenger",
-              "channels/sms",
-              "channels/inconnect"
+              "channels/sms"
             ]
           },
           {
             "group": "Facturación",
             "pages": [
-              "billing/overview"              
+              "billing/overview",
+              "billing/plans",
+              "billing/usage-voice",
+              "billing/usage-messaging",
+              "billing/invoices"
             ]
           }
         ]
@@ -111,19 +118,35 @@
           {
             "group": "Introducción a la API",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/errors",              
+              "api-reference/postman"
             ]
           },
           {
             "group": "Endpoints principales",
-            "pages": [              
-              "api-reference/endpoints/administration"
+            "pages": [
+              "api-reference/endpoints/teams",
+              "api-reference/endpoints/agents",
+              "api-reference/endpoints/conversations",
+              "api-reference/endpoints/reporting"
             ]
           },
           {
-            "group": "Eventos",
+            "group": "Webhooks",
             "pages": [
-              "api-reference/events/dictionary"
+              "api-reference/webhooks/overview",
+              "api-reference/webhooks/events",
+              "api-reference/webhooks/signing",
+              "api-reference/webhooks/retries"
+            ]
+          },
+          {
+            "group": "Ejemplos y SDKs",
+            "pages": [
+              "api-reference/examples",
+              "api-reference/sdks"
             ]
           }
         ]
@@ -139,14 +162,14 @@
         {
           "anchor": "Soporte",
           "href": "mailto:soporte@inconcertcx.com",
-          "icon": "support"
+          "icon": "lifebuoy"
         }
       ]
     }
   },
   "logo": {
-    "light": "/logo/Inconcert_Logotipo_negro.png",
-    "dark": "/logo/Inconcert_Logotipo_blanco.png"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "navbar": {
     "links": [
@@ -179,8 +202,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/inconcert",      
-      "linkedin": "https://linkedin.com/company/inconcert"
+      "x": "https://x.com/inagent",
+      "github": "https://github.com/inagent",
+      "linkedin": "https://linkedin.com/company/inagent"
     }
   }
 }
