@@ -138,7 +138,7 @@
         },
         {
           "anchor": "Soporte",
-          "href": "mailto:soporte@inconcertcx.com",
+          "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals",
           "icon": "support"
         }
       ]
@@ -152,7 +152,8 @@
     "links": [
       {
         "label": "Soporte",
-        "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals"
+        "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals",
+        "icon": "support"
       },
       {
         "label": "Blog",
