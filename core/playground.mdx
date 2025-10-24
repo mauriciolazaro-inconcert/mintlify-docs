@@ -69,22 +69,61 @@ Los **datos de prueba** (incluyendo variables de contexto y configuraciones de d
 
 ---
 
-## Flujo de prueba recomendado
+## Conversaciones de pruebas para testing
 
-1. **Seleccionar el agente** a probar.
-2. **Activar las opciones de debug** deseadas: inicio/fin, herramientas, modificadores, transferencias, consultas de conocimiento, guardrails.
-3. **Definir variables de contexto** en formato JSON para simular entradas reales.
-4. **Interactuar con el agente** enviando mensajes como lo haría un usuario final.
-5. **Revisar las marcas grises** que muestran:
-   - Inicio y final de la interacción.
-   - Uso de herramientas, guardrails, modificadores.
-   - Transferencias entre agentes.
-   - Consultas a bases de conocimiento.
-6. **Guardar el escenario de prueba** si se quiere reutilizar.
+El chat del Playground permite **manipular y reutilizar conversaciones de prueba** de forma más flexible.  Estas mejoras están pensadas para agilizar el proceso de iteración, depuración y validación de los agentes sin necesidad de reiniciar el flujo cada vez.
+
+### ✏️ Editar mensajes enviados  
+Permite **corregir un mensaje ya enviado** y el asistente retomará la conversación automáticamente con el nuevo contexto, sin necesidad de reiniciar la sesión.
+
+### 🔁 Retomar desde cualquier punto  
+Puedes **volver a un mensaje anterior** y continuar la conversación desde allí, evitando repetir pasos intermedios o volver a configurar el contexto.
+
+### 📤 Exportar conversaciones  
+Guarda tus conversaciones de prueba y **reutilízalas como plantillas** en otros equipos, proyectos o versiones del agente.
+
+### 📥 Importar conversaciones  
+**Restaura flujos de prueba** previamente exportados para replicar escenarios, validar regresiones o comparar versiones.
 
 <tip>
-  Prueba distintos contextos (por ejemplo, usuarios con planes distintos o idiomas diferentes) para asegurar que el agente responda correctamente en todos los casos.
+💡 Coloca el cursor sobre cualquier mensaje para editarlo o retomarlo.  
+Usa el menú contextual (arriba a la derecha del Playground) para exportar o importar tus conversaciones.
 </tip>
+
+---
+
+## Flujo de prueba recomendado
+
+1. **Seleccionar el agente** que se desea probar.  
+   Asegúrate de elegir la versión o entorno correcto antes de iniciar la sesión.
+
+2. **Activar las opciones de debug** necesarias: inicio/fin de interacción, uso de herramientas, modificadores, transferencias, consultas de conocimiento y guardrails.  
+   Esto te permitirá visualizar el flujo interno de ejecución durante la conversación.
+
+3. **Definir variables de contexto** en formato JSON para simular entradas reales (por ejemplo, datos provenientes de WhatsApp, CRM u otros sistemas externos).
+
+4. **Interactuar con el agente** enviando mensajes como lo haría un usuario final.  
+   Observa en tiempo real cómo el asistente aplica reglas, herramientas y guardrails.
+
+5. **Editar o retomar mensajes** para iterar más rápido:  
+   - Corrige mensajes ya enviados para ver cómo cambia la respuesta del agente sin reiniciar la conversación.  
+   - Retoma desde cualquier punto de la conversación para probar rutas alternativas o validar ajustes en el guion.
+
+6. **Revisar las marcas grises** de debug que indican:
+   - Inicio y final de la interacción.  
+   - Uso de herramientas, guardrails o modificadores.  
+   - Transferencias entre agentes o contactos.  
+   - Consultas a bases de conocimiento.
+
+7. **Guardar, exportar o importar escenarios de prueba** según necesidad:  
+   - Guarda tus configuraciones y variables para repetir pruebas críticas.  
+   - Exporta conversaciones para compartir con otros equipos.  
+   - Importa escenarios anteriores para validar regresiones o comparar versiones del agente.
+
+<tip>
+  💡 Combina la edición y retomado de mensajes con el uso de escenarios guardados para acelerar la depuración y reducir el tiempo de iteración en pruebas complejas.
+</tip>
+
 
 ---
 
