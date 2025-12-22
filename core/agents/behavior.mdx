@@ -48,7 +48,7 @@ Los **Guardrails** son filtros de **seguridad, estilo o cumplimiento** que se ap
 - Bloquean contenido sensible o no deseado.
 - Pueden heredarse del equipo y complementarse con guardrails propios del agente.
 
-<warning>
+<Callout type="warning">
   **Advertencia sobre rendimiento**
 
   Cada guardrail implica una revisión extra de la respuesta, lo que:
@@ -57,7 +57,7 @@ Los **Guardrails** son filtros de **seguridad, estilo o cumplimiento** que se ap
   * **Incrementa la latencia de respuesta**.
 
   Por esta razón, **se recomienda no habilitar guardrails en canales de voz**, donde la velocidad es crítica.
-</warning>
+</Callout>
 
 ### 4. Modificadores
 
@@ -68,9 +68,9 @@ Los **Modificadores** actúan **después de los guardrails** y permiten ajustar 
   - **Quitar caracteres especiales** (asteriscos, tags HTML).
   - **Normalizar formatos** (por ejemplo, números de teléfono).
 
-<warning>
+<Callout type="warning">
   Los modificadores también pueden **añadir latencia**, ya que se aplican a la respuesta final antes de enviarla.
-</warning>
+</Callout>
 
 ---
 
