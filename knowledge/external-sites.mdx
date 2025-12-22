@@ -7,10 +7,10 @@ El sistema descarga únicamente la URL indicada y la procesa como texto, sin ras
 
 import { Callout } from "nextra-theme-docs"
 
-<warning>
+<Callout type="warning">
   Importante: Inagent **no realiza crawling**.\
   Solo analiza el contenido **exacto de la URL que configures**.
-</warning>
+</Callout>
 
 ---
 
@@ -41,10 +41,10 @@ Define cada cuánto tiempo Inagent actualizará la información de la URL:
 | **48 h**    | Reprocesa el contenido cada 48 horas.                       |
 | **24 h**    | Reprocesa el contenido una vez al día para máxima frescura. |
 
-<tip>
+<Callout type="info">
   Selecciona la frecuencia según la **velocidad de actualización** del sitio.\
   Por ejemplo, usa 24 h para blogs de noticias o 48 h/semana para políticas internas con pocos cambios.
-</tip>
+</Callout>
 
 ---
 
@@ -58,9 +58,9 @@ Esto es útil cuando solo una parte de la página contiene la información relev
 - Ejemplo: `//main//p`\
   Extrae todos los párrafos dentro de la etiqueta `<main>`.
 
-<info>
+<Callout type="info">
   Si no se especifica un XPath, Inagent procesará **todo el cuerpo de la página**.
-</info>
+</Callout>
 
 ---
 
