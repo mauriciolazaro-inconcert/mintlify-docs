@@ -1,14 +1,123 @@
 ---
-title: "SIP Trunk (Próximamente)"
-description: "Integración con tu central telefónica SIP para voz en tiempo real."
+title: "SIP Trunk"
+description: "Integra Inagent con tu infraestructura de telefonía SIP para voz en tiempo real."
 ---
 
 ## General
 
-El subcanal **SIP Trunk** conecta Inagent con tu **infraestructura de telefonía SIP** existente, permitiendo:
+El subcanal **SIP Trunk** conecta Inagent con tu **infraestructura de telefonía SIP** (PBX, carrier o proveedor VoIP), permitiendo enrutar llamadas hacia agentes virtuales.
 
-- Escalabilidad para grandes volúmenes de llamadas.  
-- Compatibilidad con PBX y carriers estándar SIP.  
-- Integración directa con herramientas de transferencia a humano y reportería avanzada.
+Este canal es ideal para:
 
-Para activarlo, coordina con el **equipo de soporte** para validar rutas, credenciales y calidad de audio.
+- Integraciones con centrales telefónicas existentes  
+- Altos volúmenes de llamadas entrantes o salientes  
+- Escenarios enterprise con carriers o contact centers  
+
+---
+
+## Paso 1: Acceder a la configuración
+
+1. Ve a **Canales** en el menú principal  
+2. Haz clic en **Configurar canal**  
+3. En la pestaña **Inagent**, selecciona **SIP Trunk**
+
+---
+
+## Paso 2: Configuración básica
+
+- **Equipo que atiende el canal**: selecciona el equipo de agentes virtuales  
+- **Inicia la conversación**: define si el asistente habla primero o espera al usuario  
+
+---
+
+## Paso 3: Configuración de audio
+
+La configuración de audio es equivalente a WebCall:
+
+- Modelo de voz  
+- Idioma  
+- Velocidad de locución  
+- Configuración de fluidez conversacional  
+- Parámetros avanzados de detección de voz  
+- Opciones de transcripción (ASR)
+
+<Callout type="info">
+Para detalles completos sobre fluidez conversacional, endpointing y transcripción avanzada, revisa:
+
+👉 [Configuración de voz](../voice-configuration)
+</Callout>
+
+---
+
+## Paso 4: Integración con SIP Trunk
+
+Aquí se configuran los datos necesarios para conectar tu proveedor SIP con Inagent.
+
+### Parámetros requeridos
+
+- **Servidor SIP (host)**  
+  Dirección del servidor al que debes enviar las llamadas.
+
+- **Usuario SIP (user)**  
+  Identificador de autenticación.
+
+- **Contraseña (password)**  
+  Credencial asociada al usuario SIP.
+
+- **Header SIP (obligatorio)**  
+  Header requerido para enrutar correctamente la llamada dentro de Inagent.  
+  Ejemplo: `X-Channel-Id`
+
+<Callout type="warning">
+El header SIP es obligatorio.  
+Si no se envía correctamente, la llamada no podrá ser enroutada al canal correspondiente.
+</Callout>
+
+---
+
+## Paso 5: Configuración en tu proveedor SIP
+
+Debes configurar tu PBX o proveedor SIP para enviar las llamadas hacia Inagent utilizando los datos anteriores.
+
+### Flujo general
+
+1. Configura el **host SIP** como destino de las llamadas  
+2. Usa el **usuario y contraseña** provistos  
+3. Asegúrate de incluir el **header obligatorio (`X-Channel-Id`)**  
+4. Verifica que el códec de audio sea compatible (ej. G.711)
+
+---
+
+## Consideraciones técnicas
+
+- **Latencia**: el uso de SIP puede introducir mayor latencia que WebRTC  
+- **Códecs**: generalmente se utilizan G.711 o G.729  
+- **Calidad de red**: depende del carrier y routing configurado  
+- **Interrupciones**: pueden variar según el proveedor SIP  
+
+<Callout type="tip">
+Para mejorar la experiencia, prioriza redes estables y evita transcodificación innecesaria en tu proveedor SIP.
+</Callout>
+
+---
+
+## Paso 6: Validación
+
+Una vez configurado:
+
+- Realiza llamadas de prueba desde tu PBX  
+- Verifica que el agente responde correctamente  
+- Ajusta parámetros de voz si detectas latencia o cortes  
+
+---
+
+## Buenas prácticas
+
+- Mantén credenciales SIP seguras  
+- Verifica que el header esté correctamente configurado en todos los calls  
+- Monitorea la calidad de audio en producción  
+- Usa reportes para analizar duración, transferencias y desempeño  
+
+---
+
+Con esta configuración, el canal **SIP Trunk** permite integrar Inagent directamente con tu infraestructura de voz existente, manteniendo control total sobre routing, volumen y calidad de llamadas.

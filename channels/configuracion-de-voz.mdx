@@ -1,0 +1,86 @@
+---
+title: "Configuración de voz"
+---
+
+## Configuración de fluidez y transcripción
+
+El canal de voz incorpora controles avanzados para optimizar la **fluidez conversacional**, el **endpointing** y la **calidad de transcripción (ASR)**.
+
+---
+
+### 🎙️ Fluidez conversacional (presets)
+
+Puedes definir el comportamiento general de la conversación mediante presets preconfigurados que ajustan automáticamente parámetros internos de **VAD (Voice Activity Detection)** y **endpointing**:
+
+- **Ágil**
+  - Menor tiempo de espera antes de responder
+  - Mayor reactividad del asistente
+  - Permite interrupciones frecuentes
+  - Ideal para conversaciones dinámicas (ventas, atención rápida)
+- **Equilibrado (default)**
+  - Balance entre latencia y precisión
+  - Buen comportamiento en la mayoría de los casos
+  - Recomendado como configuración estándar
+- **Paciente**
+  - Mayor tiempo de espera antes de responder
+  - Evita interrupciones innecesarias
+  - Más tolerante a pausas del usuario
+  - Ideal para soporte o usuarios menos técnicos
+
+<info>
+  Estos presets modifican internamente múltiples parámetros de audio, por lo que se recomienda utilizarlos como punto de partida antes de aplicar ajustes avanzados.
+</info>
+
+---
+
+### ⚙️ Configuración avanzada (fine-tuning)
+
+Si necesitas mayor control, puedes **sobrescribir el preset seleccionado** y ajustar manualmente los parámetros de detección de voz:
+
+- **Tiempo de espera antes de responder**\
+  Define cuánto tiempo espera el sistema antes de asumir que el usuario terminó de hablar.
+- **Duración mínima para detectar voz**\
+  Cantidad mínima de audio necesaria para considerar que hay una intervención válida del usuario.
+- **Nivel de confianza para clasificar audio como habla**\
+  Umbral de sensibilidad para distinguir entre voz y ruido de fondo.
+- **Audio previo preservado antes de cambio de turno**\
+  Define cuánto audio previo se conserva para mejorar la interpretación del contexto antes de responder.
+
+<warning>
+  Un ajuste incorrecto puede generar interrupciones excesivas o latencias elevadas.\
+  Se recomienda probar los cambios en el Playground antes de llevarlos a producción.
+</warning>
+
+---
+
+### 🧠 Mejoras en transcripción (ASR)
+
+Se incorporan nuevas opciones para mejorar la calidad, legibilidad y utilidad de la transcripción de voz:
+
+- **Puntuación automática**\
+  Agrega signos de puntuación (comas, puntos) para mejorar la lectura del texto.
+- **Priorización de velocidad**\
+  Reduce la latencia de transcripción, sacrificando levemente la precisión.
+- **Inclusión de muletillas**\
+  Conserva expresiones como “eh”, “mm”, etc., útil para análisis conversacional.
+- **Formato inteligente**\
+  Estructura automáticamente elementos como fechas, emails, números, etc.
+- **Filtro de lenguaje ofensivo**\
+  Detecta y bloquea o modera contenido inapropiado.
+- **Números como dígitos**\
+  Convierte texto hablado (“veinte”) en formato numérico (“20”).
+- **Vocabulario personalizado**\
+  Permite mejorar el reconocimiento de términos específicos del negocio (marcas, productos, nombres propios).
+
+<tip>
+  El uso de vocabulario personalizado puede mejorar significativamente la precisión en industrias con terminología específica (finanzas, salud, telco, etc.).
+</tip>
+
+---
+
+## Recomendaciones
+
+- Usa **Equilibrado** como configuración base y ajusta solo si detectas problemas de latencia o interrupciones.
+- Para entornos ruidosos, aumenta el **nivel de confianza de voz** y la **duración mínima de detección**.
+- Si tu caso requiere análisis de conversación, activa **muletillas** y **formato inteligente**.
+- Para canales de voz en tiempo real, prioriza configuraciones que minimicen la latencia.

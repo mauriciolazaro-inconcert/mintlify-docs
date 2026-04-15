@@ -9,6 +9,20 @@
   },
   "favicon": "/favicon.png",
   "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Estado del servicio",
+          "icon": "signal",
+          "href": "https://stats.uptimerobot.com/e65RjhwUee"
+        },
+        {
+          "anchor": "Soporte",
+          "icon": "support",
+          "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals"
+        }
+      ]
+    },
     "tabs": [
       {
         "tab": "Documentación",
@@ -86,7 +100,8 @@
           {
             "group": "Canales",
             "pages": [
-              "channels/overview",             
+              "channels/overview",
+              "channels/configuracion-de-voz",
               "channels/voice/webcall-webrtc",
               "channels/voice/sip-trunk",
               "channels/whatsapp",
@@ -100,7 +115,7 @@
           {
             "group": "Facturación",
             "pages": [
-              "billing/overview"              
+              "billing/overview"
             ]
           }
         ]
@@ -116,7 +131,7 @@
           },
           {
             "group": "Endpoints principales",
-            "pages": [              
+            "pages": [
               "api-reference/endpoints/administration"
             ]
           },
@@ -128,21 +143,7 @@
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Estado del servicio",
-          "href": "https://stats.uptimerobot.com/e65RjhwUee",
-          "icon": "signal"
-        },
-        {
-          "anchor": "Soporte",
-          "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals",
-          "icon": "support"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/Inconcert_Logotipo_negro.png",
