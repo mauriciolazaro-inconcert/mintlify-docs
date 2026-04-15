@@ -9,21 +9,125 @@ cada paso que ocurrió en tiempo real."
 
 1. **Listado completo ordenado por equipo**
    - Todas las conversaciones quedan clasificadas por el **equipo** al que pertenecen.
+
 2. **Diálogo enriquecido en un solo lugar**
    - Al abrir una conversación, ves **todo el diálogo cronológico** entre el cliente y el agente.
+   - Incluye:
+     - Mensajes del usuario
+     - Respuestas del asistente
+     - Transcripción en tiempo real (en canales de voz)
+
    - Cada acción relevante se muestra **embebida en color gris**, incluyendo:
-     - **Ejecución de herramientas** (API REST, Código, Transferencia a humano).
-     - **Aplicación de modificadores** (traducción, estilo, etc.).
-     - **Consultas a bases de conocimiento** y sus fragmentos.
-     - **Guardrails** aplicados (si corresponde).
-     - **Transferencias** entre agentes o canales.
-3. **Información clave de contexto**
-   - Variables de sesión creadas/actualizadas, inicio y cierre, y eventos especiales como `Session.destroy`.
+     - **Ejecución de herramientas** (API REST, Código, Transferencia a humano)
+     - **Aplicación de modificadores** (traducción, estilo, etc.)
+     - **Consultas a bases de conocimiento**
+     - **Guardrails** aplicados
+     - **Transferencias** entre agentes o canales
+
+3. **Reproductor de audio avanzado (voz)**
+   - Para conversaciones de voz, se incluye un reproductor integrado que permite:
+     - Visualizar la **onda de audio**
+     - Controlar la **velocidad de reproducción**
+     - Ajustar el **volumen**
+     - Navegar la conversación mediante un timeline sincronizado
+
+   - Esto permite analizar pausas, interrupciones y fluidez real de la interacción.
+
+4. **Información clave de contexto**
+   - Variables de sesión creadas/actualizadas
+   - Inicio y cierre de la sesión
+   - Eventos especiales como `Session.destroy`
 
 <Callout type="info">
-Toda esta información está integrada **en la misma línea de conversación**,  
-lo que facilita comprender el flujo completo sin cambiar de pantalla.
+Toda esta información está integrada **en la misma vista de conversación**,  
+permitiendo entender tanto el diálogo como la ejecución interna sin cambiar de pantalla.
 </Callout>
+
+---
+
+## Métricas de la conversación
+
+Cada interacción incluye una pestaña de **Métricas** con información clave de rendimiento:
+
+### ⏱️ Latencias
+
+- **Locución (TTS)**: tiempo de generación de audio del asistente  
+- **Transcripción (STT)**: tiempo de reconocimiento de voz  
+- **Agente (LLM)**: tiempo de respuesta del modelo  
+
+Se incluyen métricas como promedio, mínimo, máximo y percentiles (P95).
+
+### 📊 Uso
+
+- Duración total del audio  
+- Cantidad de caracteres procesados en transcripción  
+
+### 😊 Análisis de sentimiento
+
+- Distribución de la conversación en:
+  - Positivo  
+  - Neutral  
+  - Negativo  
+
+Esto permite evaluar la calidad de la interacción desde la perspectiva del usuario.
+
+---
+
+## Eventos
+
+La pestaña **Eventos** muestra el detalle completo del flujo interno de la conversación.
+
+Incluye:
+
+- Mensajes del usuario y del asistente  
+- Estados del agente (escribiendo, atendiendo, finalizando)  
+- Uso de herramientas y sus respuestas  
+- Aplicación de modificadores  
+- Mutaciones entre agentes  
+- Eventos internos del sistema  
+
+Esto permite realizar un **debug exhaustivo**, entendiendo no solo qué ocurrió, sino **cómo ocurrió** a nivel técnico.
+
+<Callout type="info">
+Los eventos incluyen tanto acciones visibles como procesos internos del sistema, permitiendo trazabilidad completa.
+</Callout>
+
+---
+
+## Contexto
+
+La pestaña **Contexto** permite inspeccionar la configuración técnica y datos asociados a la sesión.
+
+Incluye:
+
+### 📞 Configuración de llamada
+
+- Identificadores de sesión (Room ID)  
+- Información de conexión  
+
+### 🎙️ Speech-to-Text (STT)
+
+- Idioma utilizado  
+- Configuración de reconocimiento  
+
+### 🔊 Text-to-Speech (TTS)
+
+- Voz configurada  
+- Parámetros de síntesis  
+
+### ⏳ Tiempos de inicio
+
+- Timestamp de solicitud  
+- Inicio de sesión  
+- Delay de inicio  
+
+### 📦 Datos adicionales
+
+- Variables de contexto  
+- Identificadores externos (ej. contactId)  
+- Datos personalizados del negocio  
+
+---
 
 ## Búsqueda y filtrado
 
@@ -36,23 +140,32 @@ Puedes **combinar** los siguientes criterios para encontrar exactamente lo que n
 
 > Los filtros se pueden usar de manera conjunta (por ejemplo, _Equipo + Rango de fechas + Palabras clave_).
 
+---
+
 ## Descarga y análisis offline
 
 Desde cada conversación puedes **descargar un archivo CSV** que contiene un **JSON detallado**\
-con todos los eventos, incluyendo timestamps, tipo de evento y payload. Por mas detalles ver [**Vista detallada**](./detail-view).
+con todos los eventos, incluyendo timestamps, tipo de evento y payload.  
+Para más detalles ver [**Vista detallada**](./detail-view).
 
 <Callout type="info">
-  El CSV/JSON es ideal para **auditorías**, análisis en herramientas externas o para conservar evidencia histórica.
+El CSV/JSON es ideal para **auditorías**, análisis en herramientas externas o para conservar evidencia histórica.
 </Callout>
+
+---
 
 ## Casos de uso
 
-- **Control de calidad**: revisar ejecución de herramientas y cumplimiento de reglas.
-- **Cumplimiento normativo**: mantener trazabilidad de cada evento.
-- **Optimización de flujos**: analizar cuántas consultas a conocimiento hubo y dónde se aplicaron modificadores.
+- **Control de calidad**: revisar ejecución de herramientas y cumplimiento de reglas  
+- **Debug técnico**: analizar eventos internos y latencias  
+- **Optimización de voz**: evaluar tiempos de respuesta y fluidez  
+- **Cumplimiento normativo**: mantener trazabilidad completa  
+- **Análisis de experiencia**: revisar sentimiento y comportamiento del usuario  
+
+---
 
 ## Próximos pasos
 
-- Aprende a realizar búsquedas avanzadas en [**Búsqueda y filtrado**](./search-filter).
-- Consulta [**Vista detallada**](./detail-view) para explorar todos los eventos y acciones de una conversación específica.
-- Revisa [**Auditoría**](./audit) para profundizar en cambios de configuración y control de versiones.
+- Aprende a realizar búsquedas avanzadas en [**Búsqueda y filtrado**](./search-filter)  
+- Consulta [**Vista detallada**](./detail-view) para explorar todos los eventos  
+- Revisa [**Auditoría**](./audit) para control de cambios y configuraciones  

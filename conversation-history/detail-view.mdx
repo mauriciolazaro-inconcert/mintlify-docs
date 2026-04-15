@@ -40,15 +40,15 @@ trazabilidad avanzada en auditorías.
 El archivo JSON puede incluir varios tipos de eventos que describen el ciclo de vida de la conversación.\
 Algunos de los más comunes son:
 
-| Evento             | Descripción                                                                  |
-| ------------------ | ---------------------------------------------------------------------------- |
-| `Session.destroy`  | Indica que el cliente solicitó cerrar la conversación.                       |
-| `Session.start`    | Marca el inicio de una nueva interacción.                                    |
-| `Message.sent`     | Mensaje enviado por el agente virtual.                                       |
-| `Message.received` | Mensaje recibido del cliente.                                                |
-| `Tool.executed`    | Ejecución de una herramienta (por ejemplo, API REST o Código).               |
-| `Knowledge.query`  | Consulta a una base de conocimiento y recuperación de fragmentos relevantes. |
-| `Transfer.done`    | Transferencia de la conversación a otro agente o equipo.                     |
+| Evento | Descripción |
+| --- | --- |
+| `Session.destroy` | Indica que el cliente solicitó cerrar la conversación. |
+| `Session.start` | Marca el inicio de una nueva interacción. |
+| `Message.sent` | Mensaje enviado por el agente virtual. |
+| `Message.received` | Mensaje recibido del cliente. |
+| `Tool.executed` | Ejecución de una herramienta (por ejemplo, API REST o Código). |
+| `Knowledge.query` | Consulta a una base de conocimiento y recuperación de fragmentos relevantes. |
+| `Transfer.done` | Transferencia de la conversación a otro agente o equipo. |
 
 <tip>
   Los nombres de eventos pueden ampliarse en el futuro;\
@@ -57,16 +57,137 @@ Algunos de los más comunes son:
 
 ---
 
+## Eventos en detalle
+
+A continuación se describen los eventos reales que ocurren durante una conversación:
+
+### 🧠 Asistente
+
+- **assistant.attend.started** → el agente comienza a procesar un turno
+- **assistant.attend.end** → finaliza el procesamiento
+- **assistant.response** → respuesta generada por el modelo
+- **assistant.message** → mensaje final enviado al usuario
+- **assistant.partial.message** → streaming de respuesta
+
+---
+
+### 👤 Usuario
+
+- **user.talk** → mensaje recibido (texto o voz)
+
+---
+
+### 🛠️ Herramientas
+
+- **tool.usage.request** → el agente decide usar una herramienta
+- **tool.usage.result** → respuesta de la herramienta
+
+---
+
+### 🔄 Mutaciones
+
+- **mutation** → cambio de agente dentro de la conversación (multiagente)
+
+---
+
+### ⚙️ Sistema (Crew)
+
+- **crew.status.writing** → el agente está escribiendo
+- **crew.status.waiting** → el agente está en espera
+
+---
+
+### 📡 Sesión
+
+- **session.consumer.attach** → conexión del usuario
+- **session.consumer.talk** → evento previo a mensaje
+- **session.hearthbeat** → señal de actividad
+
+---
+
+### 🎙️ Voz
+
+- **speech\_started** → inicio de habla
+- **speech\_stopped** → fin de habla
+- **transcription\_calculated** → resultado STT
+- **playout\_finished** → audio del agente reproducido
+
+---
+
+### 😊 Análisis
+
+- **custom (sentiment)** → análisis de sentimiento u otros eventos personalizados
+
+---
+
+## Filtrado por categorías y vistas
+
+Dentro de la pestaña **Eventos**, puedes analizar la conversación utilizando filtros y vistas especializadas.
+
+### Categorías
+
+Los eventos se agrupan automáticamente en:
+
+- **Sesión**
+- **Agente**
+- **Usuario**
+- **Llamada**
+- **Herramientas**
+- **Sentimiento**
+
+Puedes expandir o contraer cada grupo para enfocarte en lo relevante.
+
+---
+
+### Vistas de análisis
+
+#### 🔄 Flujo
+
+- Visualiza la secuencia completa de la conversación
+- Permite analizar turnos y dinámica
+
+#### ⚡ Latencia
+
+- Muestra tiempos de respuesta del sistema
+- Permite detectar cuellos de botella
+
+#### 🛠️ Herramientas
+
+- Aísla invocaciones y resultados de tools
+- Ideal para validar integraciones
+
+#### 😊 Sentimiento
+
+- Muestra evolución emocional de la conversación
+- Útil para calidad y experiencia de usuario
+
+---
+
+## Cómo interpretar el flujo
+
+Una conversación típica sigue este patrón:
+
+1. Usuario → `user.talk`
+2. Agente inicia → `assistant.attend.started`
+3. (Opcional) Tool → `tool.usage.request`
+4. Tool responde → `tool.usage.result`
+5. (Opcional) Mutación → `mutation`
+6. Respuesta → `assistant.response`
+7. Mensaje → `assistant.message`
+8. Audio → `playout_finished`
+
+---
+
 ## Buenas prácticas
 
-- **Descarga y conserva los eventos críticos** para cumplir políticas de auditoría o compliance.
-- **Filtra por tipo de evento** para depurar rápidamente (por ejemplo, solo transferencias o errores).
-- **Relaciona eventos con KPIs** en [Reportes avanzados](../reporting/advanced-reports-kpis)\
-  para identificar patrones de calidad o desempeño.
+- Usa **Eventos** para debugging profundo
+- Usa **Latencia** para optimizar performance
+- Usa **Herramientas** para validar integraciones
+- Usa **Sentimiento** para control de calidad
+- Exporta conversaciones complejas para análisis offline
 
 ---
 
 ## Próximos pasos
 
-- Aprende a **buscar y filtrar conversaciones** en [Búsqueda y filtrado](./search-filter).
-- Explora [Auditoría](./audit) para ver cómo estos eventos se utilizan en procesos de control y cumplimiento.
+- Aprende a **buscar y filtrar conversaciones** en [Búsqueda y filtrado](./search-filter)
