@@ -1,43 +1,68 @@
-# Mintlify Starter Kit
+# Documentación de Inagent
 
-Use the starter kit to get your docs deployed and ready to customize.
+Este repositorio contiene la documentación oficial de **Inagent**, construida con Mintlify. Incluye guías de uso, conceptos principales, configuración de canales, herramientas, bases de conocimiento, supervisión, reportes, facturación y referencia de API.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Estructura del proyecto
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+- `docs.json`: configuración principal de Mintlify, navegación, marca, tabs y enlaces globales.
+- `index.mdx`: página inicial de la documentación.
+- `getting-started/`: guías iniciales, quickstart, checklist de producción y glosario.
+- `core/`: conceptos centrales de equipos, agentes, contactos, herramientas, conocimiento, guardrails y publicación.
+- `tools/`: documentación de herramientas como handoff humano, API REST y código.
+- `knowledge/`: fuentes de conocimiento nativas y externas.
+- `channels/`: configuración de canales como voz, WhatsApp, Webchat, Instagram, Facebook Messenger, SMS e Inconnect.
+- `supervision/`, `conversation-history/`, `reporting/` y `billing/`: módulos operativos y administrativos.
+- `api-reference/`: introducción, endpoints, eventos y especificación OpenAPI en `api-reference/openapi.json`.
+- `images/`, `logo/`, `favicon.png`: recursos estáticos.
+- `snippets/`: fragmentos MDX reutilizables.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+## Desarrollo local
 
-## Development
+Instala la CLI de Mintlify si todavía no está disponible:
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
-
-```
+```bash
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+Ejecuta la vista previa desde la raíz del repositorio, donde está `docs.json`:
 
-```
+```bash
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+La documentación local se sirve normalmente en:
 
-## Publishing changes
+```text
+http://localhost:3000
+```
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+Si la vista previa falla o el comportamiento parece desactualizado, actualiza la CLI:
 
-## Need help?
+```bash
+mint update
+```
 
-### Troubleshooting
+## Flujo de trabajo recomendado
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+1. Edita o crea páginas `.mdx` en la carpeta temática correspondiente.
+2. Si agregas una página nueva, incorpórala en `docs.json` para que aparezca en la navegación.
+3. Ejecuta `mint dev` y revisa manualmente las páginas modificadas.
+4. Verifica que los enlaces internos no generen 404.
+5. Para cambios de API, valida que `api-reference/openapi.json` siga siendo JSON válido.
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+## Convenciones de contenido
+
+- Usa nombres de archivo en kebab-case, por ejemplo `production-checklist.mdx`.
+- Mantén frontmatter al inicio de cada página con `title` y, cuando aporte contexto, `description`.
+- Reutiliza componentes Mintlify existentes como `Card`, `Columns`, `info` y `tip`.
+- Mantén el contenido en español para páginas de producto, salvo que estés actualizando una página que ya esté en inglés.
+- Guarda imágenes inspeccionables en `images/` o `logo/`; evita incrustar recursos grandes directamente en MDX.
+
+## Publicación
+
+Mintlify despliega los cambios desde el repositorio conectado mediante su integración de GitHub. Los cambios enviados a la rama principal se publican automáticamente según la configuración del proyecto en Mintlify.
+
+## Recursos
+
+- [Documentación de Mintlify](https://mintlify.com/docs)
+- [Mintlify CLI en npm](https://www.npmjs.com/package/mint)
