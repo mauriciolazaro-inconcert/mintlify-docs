@@ -1,0 +1,238 @@
+---
+title: "Reportes personalizados"
+description: "Ejecuta reportes configurados para necesidades específicas."
+api: 'GET https://api.backend.inconcertcc.com/engine/v1/api/reports/execute-report/{REPORT_ID}'
+auth: 'key'
+---
+
+Los reportes personalizados son reportes configurados específicamente para tus necesidades. Requieren el ID del reporte además de los parámetros estándar.
+
+## Endpoint
+
+```
+GET /engine/v1/api/reports/execute-report/{REPORT_ID}
+```
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  Tu API Key de autenticación proporcionada por Inconcert.
+</ParamField>
+
+## Parámetros de Ruta
+
+<ParamField path="REPORT_ID" type="string" required>
+  Identificador único del reporte personalizado que deseas ejecutar.
+  
+  <Note>Puedes obtener el Report ID desde la sección de reportes personalizados en tu panel de administración.</Note>
+</ParamField>
+
+## Parámetros de Query
+
+<ParamField query="crew_id" type="string" required>
+  Identificador único del equipo (crew) para el cual se solicita el reporte.
+  
+  <Note>Puedes obtener el Crew ID desde tu panel de administración en la plataforma InConcert.</Note>
+</ParamField>
+
+<ParamField query="groupByTime" type="string">
+  Permite agrupar los resultados por período de tiempo.
+  
+  **Valores posibles:** `hour`, `day`, `week`, `month`
+  
+  **Por defecto:** Sin agrupación (dejar vacío)
+</ParamField>
+
+<ParamField query="start_ts" type="long" required>
+  Fecha y hora de inicio del período del reporte en formato Unix timestamp (milisegundos).
+  
+  **Ejemplo:** `1762297200000`
+</ParamField>
+
+<ParamField query="end_ts" type="long" required>
+  Fecha y hora de fin del período del reporte en formato Unix timestamp (milisegundos).
+  
+  **Ejemplo:** `1762988399999`
+</ParamField>
+
+<ParamField query="page" type="integer" required>
+  Número de página para paginación de resultados. Comienza en `0` para la primera página.
+  
+  **Ejemplo:** `0`
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Cantidad de registros a retornar por página.
+  
+  **Ejemplo:** `25`, `50`, `100`
+</ParamField>
+
+<ParamField query="timeZone" type="string" required>
+  Zona horaria para la interpretación de las fechas. Debe estar codificada en formato URL.
+  
+  **Ejemplos:** 
+  - `Europe%2FMadrid` (Europa/Madrid)
+  - `America%2FNew_York` (América/Nueva York)
+  - `America%2FSantiago` (América/Santiago)
+</ParamField>
+
+## Ejemplo de Petición
+
+<CodeGroup>
+
+```bash cURL
+curl --location --max-time 10 \
+'https://api.backend.inconcertcc.com/engine/v1/api/reports/execute-report/REPORTID?crew_id=CREWID&groupByTime=&start_ts=1762297200000&end_ts=1762988399999&page=0&pageSize=25&timeZone=Europe%2FMadrid' \
+--header 'apikey: XXXXXX'
+```
+
+```javascript JavaScript
+const reportId = 'REPORTID';
+const crewId = 'CREWID';
+
+const params = new URLSearchParams({
+  crew_id: crewId,
+  groupByTime: '',
+  start_ts: '1762297200000',
+  end_ts: '1762988399999',
+  page: '0',
+  pageSize: '25',
+  timeZone: 'Europe/Madrid'
+});
+
+const response = await fetch(
+  `https://api.backend.inconcertcc.com/engine/v1/api/reports/execute-report/${reportId}?${params}`,
+  {
+    method: 'GET',
+    headers: {
+      'apikey': 'XXXXXX'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+report_id = "REPORTID"
+crew_id = "CREWID"
+
+url = f"https://api.backend.inconcertcc.com/engine/v1/api/reports/execute-report/{report_id}"
+
+params = {
+    "crew_id": crew_id,
+    "groupByTime": "",
+    "start_ts": 1762297200000,
+    "end_ts": 1762988399999,
+    "page": 0,
+    "pageSize": 25,
+    "timeZone": "Europe/Madrid"
+}
+
+headers = {
+    "apikey": "XXXXXX"
+}
+
+response = requests.get(url, params=params, headers=headers, timeout=10)
+data = response.json()
+
+print(data)
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Response
+{
+  "reportId": "REPORTID",
+  "data": [
+    {
+      "date": "2025-01-15",
+      "metrics": {
+        "total_calls": 150,
+        "avg_duration": 320,
+        "satisfaction_score": 4.5
+      }
+    }
+  ],
+  "pagination": {
+    "page": 0,
+    "pageSize": 25,
+    "total": 100,
+    "hasMore": true
+  }
+}
+```
+
+</ResponseExample>
+
+## Notas Importantes
+
+<AccordionGroup>
+
+<Accordion title="Formato de Timestamps" icon="clock">
+  Los parámetros `start_ts` y `end_ts` deben estar en formato **Unix timestamp expresado en milisegundos** (13 dígitos).
+  
+  Para convertir una fecha a timestamp en JavaScript:
+  ```javascript
+  const timestamp = new Date('2025-01-15').getTime();
+  // Resultado: 1736899200000
+  ```
+</Accordion>
+
+<Accordion title="Codificación de URL" icon="code">
+  Los parámetros que contengan caracteres especiales (como `timeZone`) deben estar **codificados en formato URL**.
+  
+  Ejemplos de codificación:
+  - `/` se codifica como `%2F`
+  - `Europe/Madrid` → `Europe%2FMadrid`
+  - `America/New_York` → `America%2FNew_York`
+</Accordion>
+
+<Accordion title="Agrupación por Tiempo" icon="calendar">
+  El parámetro `groupByTime` te permite agrupar los resultados:
+  
+  - `hour` - Agrupa por hora
+  - `day` - Agrupa por día
+  - `week` - Agrupa por semana
+  - `month` - Agrupa por mes
+  - *(vacío)* - Sin agrupación
+</Accordion>
+
+<Accordion title="Zonas Horarias" icon="globe">
+  El parámetro `timeZone` **afecta la interpretación de las fechas**.
+  
+  Asegúrate de usar la zona horaria correcta para tus necesidades, especialmente si operas en múltiples regiones.
+  
+  Zonas horarias comunes:
+  - España: `Europe%2FMadrid`
+  - Chile: `America%2FSantiago`
+  - Argentina: `America%2FBuenos_Aires`
+  - México: `America%2FMexico_City`
+</Accordion>
+
+<Accordion title="Paginación" icon="list">
+  Para obtener todos los resultados de un reporte grande, debes realizar **múltiples peticiones** incrementando el parámetro `page` mientras haya más resultados disponibles.
+  
+  La API te indicará en la respuesta si hay más páginas disponibles mediante el campo `hasMore`.
+</Accordion>
+
+<Accordion title="Obtener Report ID" icon="id-card">
+  El **Report ID** lo obtienes desde tu panel de administración:
+  
+  1. Accede a la sección "Reportes Personalizados"
+  2. Selecciona el reporte que deseas ejecutar
+  3. Copia el ID del reporte desde los detalles
+</Accordion>
+
+</AccordionGroup>
+
+## Soporte
+
+<Card title="¿Necesitas ayuda?" icon="question" href="mailto:soporte@inconcertcc.com">
+  Para configurar reportes personalizados o resolver dudas sobre la integración, contacta a nuestro equipo de soporte.
+</Card>

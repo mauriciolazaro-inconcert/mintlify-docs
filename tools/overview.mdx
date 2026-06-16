@@ -1,0 +1,59 @@
+---
+title: "Herramientas"
+description: "Visión general de las herramientas que extienden las capacidades de los agentes virtuales en Inagent."
+---
+
+## Qué son las herramientas
+
+Las herramientas permiten que un agente virtual ejecute acciones durante una conversación: transferir a un humano, consultar servicios externos o aplicar lógica personalizada.
+
+<Callout type="info">
+  Cada herramienta debe tener una descripción clara. El agente usa esa descripción para decidir cuándo invocarla y con qué datos.
+</Callout>
+
+## Tipos disponibles
+
+<Columns cols={2}>
+  <Card title="Transferencia a humano" icon="headset" href="/tools/human-handoff">
+    Deriva una conversación a un operador o cola de atención con contexto estructurado.
+  </Card>
+  <Card title="API REST" icon="plug" href="/tools/rest-api">
+    Ejecuta solicitudes HTTP hacia sistemas externos y mapea respuestas a variables.
+  </Card>
+  <Card title="Código" icon="code" href="/tools/code">
+    Ejecuta lógica JavaScript para validar, transformar u orquestar pasos avanzados.
+  </Card>
+  <Card title="Credenciales" icon="key" href="/tools/credentials">
+    Recupera API keys, tokens y otros secretos desde código sin hardcodearlos en la herramienta.
+  </Card>
+</Columns>
+
+## Flujo de configuración
+
+<Steps>
+  <Step title="Define el propósito">
+    Escribe un nombre y una descripción que indiquen exactamente cuándo debe usarse la herramienta.
+  </Step>
+  <Step title="Declara entradas">
+    Configura parámetros en modo básico o JSON Schema para que el agente recopile los datos necesarios.
+  </Step>
+  <Step title="Configura la acción">
+    Completa destino humano, URL REST, headers, body o código según el tipo de herramienta.
+  </Step>
+  <Step title="Prueba y publica">
+    Valida la herramienta en Playground, revisa resultados y publica cuando el comportamiento sea consistente.
+  </Step>
+</Steps>
+
+## Buenas prácticas
+
+- Usa nombres estables y descriptivos.
+- Evita pedir datos que el agente no pueda obtener de la conversación o del contexto.
+- Prueba casos exitosos y de error antes de publicar.
+- Revisa en Historial de conversaciones cómo se ejecutó cada herramienta.
+
+## Próximos pasos
+
+<Card title="Configurar una herramienta REST" icon="plug" href="/tools/rest-api">
+  Aprende a llamar APIs externas desde una conversación.
+</Card>

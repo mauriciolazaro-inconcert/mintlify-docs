@@ -14,16 +14,14 @@ Los endpoints están agrupados en categorías como **Gestión de agentes y equip
 
 ## Autenticación
 
-Todos los endpoints requieren **autenticación mediante Bearer Token**.  
-Debes incluir el header:
+La autenticación puede variar por familia de endpoints. La referencia de **Reportes** usa el header `apikey` y cada página indica explícitamente los headers requeridos.
 
-Authorization: Bearer ```<tu_token_de_api>```
-
-Puedes generar y administrar tus tokens en el **panel de Inagent**.
+```http
+apikey: TU_API_KEY
+```
 
 <Callout type="tip">
-Protege siempre tus tokens.  
-Recomendamos almacenarlos en variables de entorno y **no incluirlos en repositorios**.
+Protege siempre tus credenciales. Almacénalas como variables de entorno y no las incluyas en repositorios, logs o ejemplos compartidos.
 </Callout>
 
 ## Estructura de la API
@@ -44,7 +42,7 @@ La API está organizada en grupos de endpoints:
 
 ## Formato de respuesta
 
-Todas las respuestas siguen una estructura estándar:
+Cuando un endpoint devuelve contenido, la respuesta se entrega en JSON. Revisa la página de cada endpoint para confirmar la estructura exacta.
 
 ```json
 {
@@ -59,22 +57,22 @@ En caso de error, se devuelve un código HTTP adecuado (4xx o 5xx) y un objeto c
   "code": "código_interno"
 }
 ```
-Próximos pasos
+## Próximos pasos
 
 <Card
-title="Referencia de endpoints"
+title="API de reportes"
 icon="terminal"
-href="/api-reference/endpoints/teams"
+href="/api-reference/reports/reportes-estandar"
 >
-Explora la lista completa de endpoints para equipos, agentes, sesiones, reportes y herramientas.
+Consulta reportes estándar y personalizados mediante endpoints autenticados con `apikey`.
 </Card>
 
 <Card
-title="Webhooks"
+title="Diccionario de eventos"
 icon="bolt"
-href="/api-reference/webhooks/overview"
+href="/api-reference/events/dictionary"
 >
-Aprende a recibir notificaciones en tiempo real de los eventos más importantes.
+Interpreta los eventos que aparecen en el historial y en integraciones técnicas.
 </Card>
 
 <Card
@@ -84,8 +82,3 @@ href="/api-reference/endpoints/administration"
 >
 Controla y modifica conversaciones en vivo: agrega contexto, transfiere, pausa o finaliza sesiones.
 </Card>
-
-✅ Este texto:  
-- Da **contexto de uso real** (gestión de agentes, sesiones, reportes y herramientas).  
-- Incluye **estructura de autenticación y de respuesta JSON**.  
-- Añade **cards** con los principales puntos de entrada (endpoints, webhooks, administración de sesiones) para una navegación rápida.

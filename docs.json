@@ -1,188 +1,147 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Inagent",
-  "colors": {
-    "primary": "#661aff",
-    "light": "#9966ff",
-    "dark": "#884dff"
-  },
-  "favicon": "/favicon.png",
-  "navigation": {
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Estado del servicio",
-          "icon": "signal",
-          "href": "https://stats.uptimerobot.com/e65RjhwUee"
-        },
-        {
-          "anchor": "Soporte",
-          "icon": "support",
-          "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals"
-        }
-      ]
-    },
-    "tabs": [
-      {
-        "tab": "Documentación",
-        "groups": [
-          {
-            "group": "Guías",
-            "pages": [
-              "getting-started/overview",
-              "getting-started/quickstart",
-              "getting-started/production-checklist",
-              "getting-started/glossary"
-            ]
-          },
-          {
-            "group": "Conceptos Core",
-            "pages": [
-              "core/team-definition",
-              "core/agent-definition",
-              "core/agents/behavior",
-              "core/receptionist",
-              "core/contacts",
-              "core/knowledge",
-              "core/tools",
-              "core/guardrails",
-              "core/topics",
-              "core/others",
-              "core/channels",
-              "core/playground",
-              "core/publishing"
-            ]
-          },
-          {
-            "group": "Herramientas",
-            "pages": [
-              "tools/human-handoff",
-              "tools/rest-api",
-              "tools/code"
-            ]
-          },
-          {
-            "group": "Bases de conocimiento",
-            "pages": [
-              "knowledge/native-text",
-              "knowledge/documents-pdf",
-              "knowledge/external-sites",
-              "knowledge/videos"
-            ]
-          },
-          {
-            "group": "Supervisión de equipos",
-            "pages": [
-              "supervision/overview",
-              "supervision/whisper",
-              "supervision/transfer",
-              "supervision/impersonate",
-              "supervision/finishconversation",
-              "supervision/instant-stats"
-            ]
-          },
-          {
-            "group": "Historial de conversaciones",
-            "pages": [
-              "conversation-history/overview",
-              "conversation-history/detail-view"
-            ]
-          },
-          {
-            "group": "Reportes",
-            "pages": [
-              "reporting/overview",
-              "reporting/system-reports",
-              "reporting/advanced-reports"
-            ]
-          },
-          {
-            "group": "Canales",
-            "pages": [
-              "channels/overview",
-              "channels/configuracion-de-voz",
-              "channels/voice/webcall-webrtc",
-              "channels/voice/sip-trunk",
-              "channels/whatsapp",
-              "channels/webchat",
-              "channels/instagram",
-              "channels/facebook-messenger",
-              "channels/sms",
-              "channels/inconnect"
-            ]
-          },
-          {
-            "group": "Facturación",
-            "pages": [
-              "billing/overview"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Referencia de API",
-        "groups": [
-          {
-            "group": "Introducción a la API",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoints principales",
-            "pages": [
-              "api-reference/endpoints/administration"
-            ]
-          },
-          {
-            "group": "Eventos",
-            "pages": [
-              "api-reference/events/dictionary"
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "logo": {
-    "light": "/logo/Inconcert_Logotipo_negro.png",
-    "dark": "/logo/Inconcert_Logotipo_blanco.png"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Soporte",
-        "href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals",
-        "icon": "support"
-      },
-      {
-        "label": "Blog",
-        "href": "https://www.inconcertcx.com/es/blog"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Ingresar",
-      "href": "https://app.virtualagents.inconcertcc.com/"
-    }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
-    ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/inconcert",      
-      "linkedin": "https://linkedin.com/company/inconcert"
-    }
-  }
+	"$schema": "https://mintlify.com/docs.json",
+	"theme": "mint",
+	"name": "Inagent",
+	"colors": {
+		"primary": "#661aff",
+		"light": "#9966ff",
+		"dark": "#884dff"
+	},
+	"favicon": "/favicon.png",
+	"navigation": {
+		"global": {
+			"anchors": [
+				{
+					"anchor": "Estado del servicio",
+					"icon": "signal",
+					"href": "https://stats.uptimerobot.com/e65RjhwUee"
+				},
+				{
+					"anchor": "Soporte",
+					"icon": "headset",
+					"href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals"
+				}
+			]
+		},
+		"tabs": [
+			{
+				"tab": "Documentación",
+				"groups": [
+					{
+						"group": "Guías",
+						"pages": ["getting-started/overview", "getting-started/quickstart", "getting-started/production-checklist", "getting-started/glossary"]
+					},
+					{
+						"group": "Conceptos Core",
+						"pages": [
+							"core/team-definition",
+							"core/agent-definition",
+							"core/agents/behavior",
+							"core/receptionist",
+							"core/contacts",
+							"core/knowledge",
+							"core/tools",
+							"core/guardrails",
+							"core/topics",
+							"core/others",
+							"core/channels",
+							"core/playground",
+							"core/publishing"
+						]
+					},
+					{
+						"group": "Herramientas",
+						"pages": ["tools/overview", "tools/human-handoff", "tools/rest-api", "tools/code", "tools/credentials"]
+					},
+					{
+						"group": "Bases de conocimiento",
+						"pages": ["knowledge/overview", "knowledge/native-text", "knowledge/documents-pdf", "knowledge/external-sites", "knowledge/videos"]
+					},
+					{
+						"group": "Supervisión de equipos",
+						"pages": ["supervision/overview", "supervision/whisper", "supervision/transfer", "supervision/impersonate", "supervision/finishconversation", "supervision/instant-stats"]
+					},
+					{
+						"group": "Historial de conversaciones",
+						"pages": ["conversation-history/overview", "conversation-history/search-filter", "conversation-history/detail-view"]
+					},
+					{
+						"group": "Reportes",
+						"pages": ["reporting/overview", "reporting/system-reports", "reporting/advanced-reports"]
+					},
+					{
+						"group": "Canales",
+						"pages": [
+							"channels/overview",
+							"channels/configuracion-de-voz",
+							"channels/voice/webcall-webrtc",
+							"channels/voice/sip-trunk",
+							"channels/whatsapp",
+							"channels/webchat",
+							"channels/instagram",
+							"channels/facebook-messenger",
+							"channels/sms",
+							"channels/inconnect"
+						]
+					},
+					{
+						"group": "Facturación",
+						"pages": ["billing/overview"]
+					}
+				]
+			},
+			{
+				"tab": "Referencia de API",
+				"groups": [
+					{
+						"group": "Introducción a la API",
+						"pages": ["api-reference/introduction"]
+					},
+					{
+						"group": "Endpoints principales",
+						"pages": ["api-reference/endpoints/administration"]
+					},
+					{
+						"group": "Eventos",
+						"pages": ["api-reference/events/dictionary"]
+					},
+					{
+						"group": "Reportes",
+						"pages": ["api-reference/reports/authentication", "api-reference/reports/reportes-estandar", "api-reference/reports/reportes-personalizados"]
+					}
+				]
+			}
+		]
+	},
+	"logo": {
+		"light": "/logo/Inconcert_Logotipo_negro.png",
+		"dark": "/logo/Inconcert_Logotipo_blanco.png"
+	},
+	"navbar": {
+		"links": [
+			{
+				"label": "Soporte",
+				"href": "https://inconcert.atlassian.net/servicedesk/customer/user/login?destination=portals",
+				"icon": "headset"
+			},
+			{
+				"label": "Blog",
+				"href": "https://www.inconcertcx.com/es/blog"
+			}
+		],
+		"primary": {
+			"type": "button",
+			"label": "Ingresar",
+			"href": "https://app.virtualagents.inconcertcc.com/"
+		}
+	},
+	"contextual": {
+		"options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
+	},
+	"footer": {
+		"socials": {
+			"x": "https://x.com/inconcert",
+			"linkedin": "https://linkedin.com/company/inconcert"
+		}
+	}
 }

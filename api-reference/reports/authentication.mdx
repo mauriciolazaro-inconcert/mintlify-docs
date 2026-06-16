@@ -1,0 +1,71 @@
+---
+title: "Autenticación de reportes"
+description: "Aprende cómo autenticarte en los endpoints de reportes de Inagent."
+---
+
+## API Key
+
+Los endpoints de reportes documentados en esta sección requieren autenticación mediante API Key. Incluye la clave en el header de cada petición.
+
+### Header de Autenticación
+
+```http
+apikey: TU_API_KEY
+```
+
+<Warning>
+  Mantén tu API Key segura y no la compartas públicamente ni en repositorios de código.
+</Warning>
+
+## Obtener tu API Key
+
+Tu API Key es proporcionada por el equipo de Inconcert. Solicítala a través de tu gestor de cuenta o del canal de soporte definido para tu organización.
+
+## Ejemplo de Uso
+
+<CodeGroup>
+
+```bash cURL
+curl --location 'https://api.backend.inconcertcc.com/endpoint' \
+--header 'apikey: TU_API_KEY'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.backend.inconcertcc.com/endpoint', {
+  headers: {
+    'apikey': 'TU_API_KEY'
+  }
+});
+```
+
+```python Python
+import requests
+
+headers = {
+    'apikey': 'TU_API_KEY'
+}
+
+response = requests.get('https://api.backend.inconcertcc.com/endpoint', headers=headers)
+```
+
+</CodeGroup>
+
+## Seguridad
+
+<AccordionGroup>
+
+<Accordion title="No compartas tu API Key" icon="shield">
+  Nunca subas tu API Key a repositorios públicos, GitHub, o cualquier sistema de control de versiones.
+  
+  Usa variables de entorno para almacenarla de forma segura:
+  
+  ```bash
+  export INCONCERT_API_KEY="tu_api_key"
+  ```
+</Accordion>
+
+<Accordion title="Monitorea el uso" icon="chart-line">
+  Mantén un registro de dónde usas tu API Key para detectar cualquier uso no autorizado.
+</Accordion>
+
+</AccordionGroup>
