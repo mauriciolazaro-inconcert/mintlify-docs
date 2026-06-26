@@ -99,7 +99,14 @@
 					},
 					{
 						"group": "Endpoints principales",
-						"pages": ["api-reference/endpoints/administration"]
+						"pages": [
+							"api-reference/endpoints/channel",
+							"api-reference/endpoints/channel-init",
+							"api-reference/endpoints/channel-talk",
+							"api-reference/endpoints/channel-listen",
+							"api-reference/endpoints/channel-destroy",
+							"api-reference/endpoints/administration"
+						]
 					},
 					{
 						"group": "Eventos",

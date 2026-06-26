@@ -1,0 +1,107 @@
+---
+title: "Destruir sesión EventStream"
+description: "Finaliza una sesión activa del Canal API EventStream."
+api: "DELETE https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}"
+auth: "key"
+---
+
+Finaliza una sesión activa y cierra el stream SSE asociado.
+
+## Endpoint
+
+```http
+DELETE /assistants-channel/api/v1/channel/api/eventstream/{sessionId}
+```
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API Key proporcionada para tu integración.
+</ParamField>
+
+## Parámetros de ruta
+
+<ParamField path="sessionId" type="string" required>
+  Identificador de la sesión que se desea destruir.
+</ParamField>
+
+## Body
+
+<ParamField body="reason" type="string">
+  Razón del cierre.
+
+  **Por defecto:** `finished`
+</ParamField>
+
+```json Request
+{
+  "reason": "user_closed"
+}
+```
+
+## Ejemplos
+
+<CodeGroup>
+
+```bash cURL
+curl -X DELETE "https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}" \
+  -H "Content-Type: application/json" \
+  -H "apikey: tu-api-key-aqui" \
+  -d '{"reason":"user_closed"}'
+```
+
+```javascript JavaScript
+const sessionId = "uuid-de-sesion";
+
+const response = await fetch(
+  `https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/${sessionId}`,
+  {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: process.env.INCONCERT_API_KEY
+    },
+    body: JSON.stringify({
+      reason: "user_closed"
+    })
+  }
+);
+
+if (!response.ok) {
+  throw new Error(`Error cerrando sesión: ${response.status}`);
+}
+```
+
+```python Python
+import os
+import requests
+
+session_id = "uuid-de-sesion"
+url = f"https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{session_id}"
+
+headers = {
+    "Content-Type": "application/json",
+    "apikey": os.environ["INCONCERT_API_KEY"]
+}
+
+payload = {
+    "reason": "user_closed"
+}
+
+response = requests.delete(url, headers=headers, json=payload, timeout=10)
+response.raise_for_status()
+```
+
+</CodeGroup>
+
+## Respuesta
+
+| Código | Descripción |
+| --- | --- |
+| `201` | Sesión destruida correctamente. |
+| `400` | Error en la petición. |
+
+<Info>
+  Cierra explícitamente las sesiones cuando la conversación termine para liberar recursos asociados.
+</Info>
+
