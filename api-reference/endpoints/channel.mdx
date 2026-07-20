@@ -66,16 +66,16 @@ sequenceDiagram
 ## Endpoints del canal
 
 <CardGroup cols={2}>
-  <Card title="Crear sesión" icon="play" href="/api-reference/endpoints/channel-init">
+  <Card title="Crear sesión" icon="play" href="./channel-init">
     Abre una sesión de inferencia y recibe los eventos mediante SSE.
   </Card>
-  <Card title="Enviar mensaje" icon="message" href="/api-reference/endpoints/channel-talk">
+  <Card title="Enviar mensaje" icon="message" href="./channel-talk">
     Envía texto del usuario a una sesión activa.
   </Card>
-  <Card title="Escuchar sesión" icon="radio" href="/api-reference/endpoints/channel-listen">
+  <Card title="Escuchar sesión" icon="radio" href="./channel-listen">
     Conecta un nuevo consumer al stream de una sesión existente.
   </Card>
-  <Card title="Destruir sesión" icon="trash" href="/api-reference/endpoints/channel-destroy">
+  <Card title="Destruir sesión" icon="trash" href="./channel-destroy">
     Finaliza una sesión activa y cierra sus recursos asociados.
   </Card>
 </CardGroup>
@@ -147,4 +147,3 @@ Si el servidor necesita reiniciarse, enviará el evento `reconnect_required` ant
 ## Límite de sesiones
 
 El canal aplica control de sesiones simultáneas por tenant. Si se alcanza el límite configurado, el endpoint **Init** responde con `HTTP 429`.
-

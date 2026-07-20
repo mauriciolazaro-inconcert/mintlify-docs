@@ -29,7 +29,7 @@
 				"groups": [
 					{
 						"group": "Guías",
-						"pages": ["getting-started/overview", "getting-started/quickstart", "getting-started/production-checklist", "getting-started/glossary"]
+						"pages": ["getting-started/overview", "getting-started/quickstart", "getting-started/access-regions", "getting-started/production-checklist", "getting-started/glossary"]
 					},
 					{
 						"group": "Conceptos Core",
@@ -139,7 +139,7 @@
 		"primary": {
 			"type": "button",
 			"label": "Ingresar",
-			"href": "https://app.virtualagents.inconcertcc.com/"
+			"href": "/getting-started/access-regions"
 		}
 	},
 	"contextual": {
