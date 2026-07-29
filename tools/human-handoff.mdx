@@ -1,137 +1,169 @@
 ---
 title: "Transferencia a humano"
-description: "La herramienta Transferencia a humano permite que un agente virtual de Inagent
-derive la conversación a un agente humano cuando se cumplen ciertas condiciones.
-
-Es fundamental para ofrecer una experiencia omnicanal donde la IA y los operadores humanos colaboran."
+description: "Configura una herramienta para transferir interacciones de Inagent a un agente humano."
 ---
 
-## Propósito
+La herramienta **Transferencia a humano** permite que un agente virtual derive una interacción a un agente humano cuando se cumple una condición definida en su guion o en sus reglas.
 
-- Permitir que el agente virtual **reconozca cuándo se requiere intervención humana**.
-- Transferir la conversación con **contexto suficiente** para que el operador continúe sin pérdida de información.
-- Mantener una **trazabilidad completa** de las acciones de transferencia para reportes y análisis.
+En interacciones telefónicas, Inagent puede realizar una transferencia en frío mediante **SIP REFER** hacia una extensión, un DID u otro destino SIP.
 
----
+## Configurar la herramienta
 
-## Configuración de la herramienta
+Al crear o editar la herramienta completa estos campos:
 
-Al crear o editar una herramienta de tipo **Transferencia a humano**, se definen los siguientes campos:
+### Nombre
 
-### 1. Nombre
+Introduce un nombre único que permita identificar la herramienta dentro del equipo, por ejemplo `TransferenciaCobros` o `EscalamientoSoporte`.
 
-Nombre único para identificar esta herramienta dentro del equipo.\
-Por ejemplo: `TransferenciaCobros` o `EscalamientoSoporte`.
+### Descripción
 
-### 2. Descripción
+Explica de forma precisa cuándo debe utilizarse la transferencia. El agente virtual utiliza esta descripción para decidir si debe invocar la herramienta.
 
-Texto explicativo que indica **cuándo** debe utilizarse esta transferencia.\
-Esto es fundamental, ya que el agente virtual usa esta descripción para decidir el momento adecuado para activar la transferencia.
+> **Ejemplo:** “Usar cuando el cliente solicite hablar con un agente humano para resolver un problema de facturación”.
 
-> **Ejemplo de descripción:**\
-> “Usar esta transferencia cuando el cliente solicite hablar con un humano para resolver un problema de facturación.”
+### Agentes asociados
 
-### 3. Agentes asociados
+Selecciona los agentes virtuales que podrán utilizar la herramienta durante una interacción.
 
-Lista de **agentes humanos o colas de destino** que pueden recibir la conversación.\
-El agente virtual derivará el contacto a uno de estos destinos según la configuración del equipo.
+### Parámetros de la transferencia telefónica
 
----
+| Parámetro      | Tipo      | Descripción                                                                                                                                                  |
+| -------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sip_trunk_id` | `string`  | Identificador del trunk SIP utilizado para la transferencia. Inconcert proporciona este identificador al configurar la primera herramienta de transferencia. |
+| `transfer_did` | `string`  | Extensión, DID o destino SIP que recibirá la llamada.                                                                                                        |
+| `caller_id`    | `string`  | Identificador de llamada que se presentará en el destino. Utiliza `"*"` para conservar el caller ID original.                                                |
+| `message`      | `string`  | Mensaje que Inagent reproduce al usuario mientras inicia la transferencia.                                                                                   |
+| `is_cold`      | `boolean` | Con `true`, Inagent solicita una transferencia en frío mediante SIP REFER.                                                                                   |
+| `X-*`          | `string`  | Cabeceras SIP personalizadas que acompañan a la solicitud de transferencia.                                                                                  |
 
-## Parámetros de transferencia
+<Callout type="info">Si es la primera herramienta de transferencia de tu entorno, solicita a Inconcert el valor de `sip_trunk_id`.</Callout>
 
-Los **parámetros** son datos que el agente virtual enviará junto con la conversación\
-para que el agente humano reciba **todo el contexto necesario**.
+## Mensaje de transferencia
 
-### Modos de configuración de parámetros
-
-Los parámetros pueden definirse de dos maneras:
-
-#### a. Modo Básico
-
-Permite configurar cada parámetro de forma sencilla, campo por campo:
-
-- **Nombre**: identificador del parámetro.
-- **Tipo**: tipo de dato esperado.
-  - **Texto**: cadenas de caracteres. Ejemplo: motivo de la transferencia.
-  - **Número**: valores numéricos. Ejemplo: monto de deuda.
-  - **Objeto**: estructura con varios campos clave-valor. Ejemplo: `{ "plan": "premium", "saldo": 20 }`.
-  - **Array**: lista de valores homogéneos. Ejemplo: `["pedido-123", "pedido-456"]`.
-- **Descripción**: explica qué representa el parámetro y cómo se completará.
-
-<Callout type="tip">
-  El modo **Básico** es ideal para la mayoría de los casos,\
-  ya que permite una configuración clara y fácil de mantener.
-</Callout>
-
-#### b. Formato JSON Schema
-
-Ofrece **total libertad de definición**, siguiendo el estándar [JSON Schema](https://json-schema.org/).\
-Permite crear estructuras complejas, anidadas o con validaciones personalizadas.
-
-Ejemplo de un esquema en JSON Schema:
+El parámetro `message` contiene la locución que escucha el usuario al comenzar el traspaso.
 
 ```json
 {
-  "type": "object",
-  "properties": {
-    "motivoTransferencia": { "type": "string" },
-    "datosCliente": {
-      "type": "object",
-      "properties": {
-        "plan": { "type": "string" },
-        "saldo": { "type": "number" }
-      }
-    }
-  },
-  "required": ["motivoTransferencia"]
+	"message": "Te estoy transfiriendo con un asesor. Un momento, por favor."
 }
 ```
 
- El modo **JSON Schema** es útil cuando se necesita un **formato avanzado**, por ejemplo validaciones específicas, estructuras anidadas o tipos de datos complejos. 
+Utiliza un mensaje breve y directo. No incluyas información que dependa del resultado de la transferencia, ya que la locución se reproduce mientras se inicia el proceso.
 
-## Ejemplo de configuración
+## Transferencia en frío con SIP REFER
 
-**Nombre:** `TransferenciaCobros`\
-**Descripción:** “Usar cuando el cliente quiera renegociar su deuda o reclamar un pago no aplicado.”\
-**Agentes asociados:** `EquipoCobros`
+**SIP REFER** es un método del protocolo SIP que solicita al sistema de telefonía receptor que contacte con un tercer destino. En una transferencia de llamada, Inagent envía una solicitud `REFER` con el destino indicado en `transfer_did`, y el sistema receptor continúa el establecimiento de la llamada hacia el agente humano.
 
-### Parámetros (modo Básico)
+Se denomina **transferencia en frío** porque el agente virtual no conversa previamente con el agente humano ni realiza una presentación antes del traspaso. Cuando la transferencia se completa, el agente virtual deja de participar en la llamada.
 
-| Nombre              | Tipo   | Descripción                                         |
-| ------------------- | ------ | --------------------------------------------------- |
-| motivoTransferencia | Texto  | Motivo que el cliente expresa para la transferencia |
-| saldoPendiente      | Número | Monto de deuda pendiente                            |
-| datosCliente        | Objeto | Información relevante del cliente (plan, historial) |
+Para utilizar este método, establece:
 
----
+```json
+{
+	"is_cold": true
+}
+```
 
-## Uso en el ciclo conversacional
+El sistema de telefonía que recibe la llamada debe admitir el método SIP REFER definido en [RFC 3515](https://www.rfc-editor.org/rfc/rfc3515.html).
 
-Cuando el agente virtual decide transferir:
+### Flujo de la transferencia
 
-1. **Evalúa guion y reglas** para determinar si se cumple la condición de transferencia.
-2. **Rellena los parámetros** con la información disponible (por ejemplo, variables de contexto o datos del CRM).
-3. **Activa la herramienta Transferencia a humano**, enviando:
-   - Mensaje de aviso al cliente (opcional).
-   - Parámetros de contexto para el agente humano.
-4. La conversación **continúa en manos del agente humano** sin pérdida de historial.
+1. El agente virtual determina que la interacción requiere atención humana.
+2. Inagent reproduce el texto configurado en `message`.
+3. Inagent envía una solicitud SIP `REFER` con el destino de `transfer_did`.
+4. El sistema de telefonía receptor procesa el `REFER` e inicia la comunicación con el destino humano.
+5. El resultado de la solicitud se comunica mediante mensajes SIP `NOTIFY`.
+6. Si la transferencia se completa, la llamada continúa en el destino humano sin la participación del agente virtual.
 
----
+<Callout type="warning">
+	La aceptación inicial de una solicitud `REFER` no confirma por sí sola que el agente humano haya atendido la llamada. El resultado de la acción se comunica posteriormente mediante SIP `NOTIFY`.
+</Callout>
+
+## Cabeceras SIP personalizadas
+
+Puedes incluir datos operativos en cabeceras personalizadas con el prefijo `X-`:
+
+```json
+{
+	"X-Customer-Id": "123456",
+	"X-Transfer-Reason": "facturacion"
+}
+```
+
+<Callout type="warning">
+	En una transferencia mediante SIP REFER, estas cabeceras se envían en la solicitud `REFER`, no en el `INVITE` que establece la llamada con el destino humano. El sistema de telefonía debe capturarlas
+	desde el `REFER` y, si el siguiente tramo las necesita, propagarlas explícitamente al nuevo `INVITE`.
+</Callout>
+
+Envía únicamente las cabeceras necesarias, evita incluir información sensible y comprueba que el sistema receptor conserva el nombre y el valor esperados.
+
+## Ejemplo completo
+
+El siguiente código inicia una transferencia en frío hacia la extensión `4500`. El usuario escucha el texto de `message` mientras comienza el traspaso y, si la operación falla o supera el tiempo de espera, el agente virtual recupera el control de la conversación.
+
+```javascript
+const transferError =
+  "Indica al cliente que no fue posible completar la transferencia y pregúntale si necesita ayuda con otra consulta.";
+
+controller.session.createResolver({
+  key: "livekit_transfer_human",
+  args: {
+    sip_trunk_id: "<id-proporcionado-por-inconcert>",
+    transfer_did: "4500",
+    caller_id: "*",
+    message: "Te estoy transfiriendo con un asesor. Un momento, por favor.",
+    is_cold: true
+  },
+  resolverName: "livekit_transfer_human",
+  timeoutSeconds: 30,
+  callback: function (result) {
+    if (result.status) {
+      return;
+    }
+
+    controller.session.append({
+      text: transferError,
+      author: "system"
+    });
+    controller.session.attend();
+  },
+  timeoutCallback: function () {
+    controller.session.append({
+      text: transferError,
+      author: "system"
+    });
+    controller.session.attend();
+  }
+});
+
+return "Transferencia iniciada; no envíes más mensajes al usuario.";
+```
+
+Sustituye `sip_trunk_id`, `transfer_did` y `message` por los valores de tu entorno. Si necesitas enviar cabeceras personalizadas, añádelas dentro de `args`:
+
+```javascript
+args: {
+  // ...
+  "X-Customer-Id": "123456",
+  "X-Transfer-Reason": "facturacion"
+}
+```
+
+## Requisitos y validación
+
+Antes de publicar la herramienta:
+
+- Confirma que el destino configurado en `transfer_did` puede recibir llamadas.
+- Verifica que tu sistema de telefonía admite y procesa SIP REFER.
+- Comprueba que las cabeceras `X-*` se leen desde la solicitud `REFER`.
+- Valida que las cabeceras necesarias se propagan al tramo final de la llamada.
+- Prueba los escenarios de transferencia completada, destino no disponible, rechazo y tiempo de espera agotado.
+- Revisa que el mensaje de transferencia se reproduce completo y resulta claro para el usuario.
 
 ## Buenas prácticas
 
-- **Escribe descripciones claras y específicas** para que el agente virtual sepa exactamente cuándo usar la herramienta.
-- **Define parámetros mínimos pero suficientes** para que el operador humano tenga toda la información.
-- **Elige el modo adecuado**:
-  - Usa **Básico** para la mayoría de los casos.
-  - Usa **JSON Schema** si necesitas estructuras complejas o validaciones avanzadas.
-- **Prueba la transferencia en Playground** para verificar que los parámetros lleguen correctamente al destino.
-
----
-
-## Próximos pasos
-
-- Configura los [**Contactos**](../core/contacts) que recibirán las conversaciones transferidas.
-- Prueba la herramienta en el [**Playground**](../core/playground) para confirmar que los parámetros se envían correctamente.
-- Monitorea el resultado en [**Reportes**](../reporting/overview) para medir calidad y tiempos de atención.
+- Define condiciones de uso específicas para que el agente virtual transfiera solo cuando corresponda.
+- Mantén `message` breve para no retrasar el traspaso.
+- Utiliza un destino diferente por herramienta cuando cada equipo humano tenga su propia extensión o cola.
+- Limita las cabeceras personalizadas a los datos imprescindibles para enrutar o contextualizar la llamada.
+- Realiza pruebas de extremo a extremo antes de utilizar la transferencia en producción.

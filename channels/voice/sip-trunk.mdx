@@ -9,24 +9,24 @@ El subcanal **SIP Trunk** conecta Inagent con tu **infraestructura de telefonía
 
 Este canal es ideal para:
 
-- Integraciones con centrales telefónicas existentes  
-- Altos volúmenes de llamadas entrantes o salientes  
-- Escenarios enterprise con carriers o contact centers  
+- Integraciones con centrales telefónicas existentes
+- Altos volúmenes de llamadas entrantes o salientes
+- Escenarios enterprise con carriers o contact centers
 
 ---
 
 ## Paso 1: Acceder a la configuración
 
-1. Ve a **Canales** en el menú principal  
-2. Haz clic en **Configurar canal**  
+1. Ve a **Canales** en el menú principal
+2. Haz clic en **Configurar canal**
 3. En la pestaña **Inagent**, selecciona **SIP Trunk**
 
 ---
 
 ## Paso 2: Configuración básica
 
-- **Equipo que atiende el canal**: selecciona el equipo de agentes virtuales  
-- **Inicia la conversación**: define si el asistente habla primero o espera al usuario  
+- **Equipo que atiende el canal**: selecciona el equipo de agentes virtuales
+- **Inicia la conversación**: define si el asistente habla primero o espera al usuario
 
 ---
 
@@ -34,17 +34,18 @@ Este canal es ideal para:
 
 La configuración de audio es equivalente a WebCall:
 
-- Modelo de voz  
-- Idioma  
-- Velocidad de locución  
-- Configuración de fluidez conversacional  
-- Parámetros avanzados de detección de voz  
+- Modelo de voz
+- Idioma
+- Velocidad de locución
+- Configuración de fluidez conversacional
+- Parámetros avanzados de detección de voz
 - Opciones de transcripción (ASR)
 
 <Callout type="info">
 Para detalles completos sobre fluidez conversacional, endpointing y transcripción avanzada, revisa:
 
 👉 [Configuración de voz](../configuracion-de-voz)
+
 </Callout>
 
 ---
@@ -68,10 +69,7 @@ Aquí se configuran los datos necesarios para conectar tu proveedor SIP con Inag
   Header requerido para enrutar correctamente la llamada dentro de Inagent.  
   Ejemplo: `X-Channel-Id`
 
-<Callout type="warning">
-El header SIP es obligatorio.  
-Si no se envía correctamente, la llamada no podrá ser enroutada al canal correspondiente.
-</Callout>
+<Callout type="warning">El header SIP es obligatorio. Si no se envía correctamente, la llamada no podrá ser enroutada al canal correspondiente.</Callout>
 
 ---
 
@@ -81,23 +79,33 @@ Debes configurar tu PBX o proveedor SIP para enviar las llamadas hacia Inagent u
 
 ### Flujo general
 
-1. Configura el **host SIP** como destino de las llamadas  
-2. Usa el **usuario y contraseña** provistos  
-3. Asegúrate de incluir el **header obligatorio (`X-Channel-Id`)**  
+1. Configura el **host SIP** como destino de las llamadas
+2. Usa el **usuario y contraseña** provistos
+3. Asegúrate de incluir el **header obligatorio (`X-Channel-Id`)**
 4. Verifica que el códec de audio sea compatible (ej. G.711)
+
+---
+
+## Transferencias hacia agentes humanos
+
+Inagent puede transferir una llamada activa hacia una extensión, un DID u otro destino SIP mediante **SIP REFER**.
+
+<Callout type="warning">
+	Las cabeceras personalizadas de una transferencia SIP REFER se reciben en la solicitud `REFER`, no en el `INVITE` que establece la llamada con el destino humano. Configura tu sistema de telefonía
+	para capturarlas desde el `REFER` y propagarlas al siguiente tramo cuando sea necesario.
+</Callout>
+
+Consulta [Transferencia a humano](../../tools/human-handoff) para configurar la herramienta, el mensaje de transferencia, el destino y las cabeceras SIP.
 
 ---
 
 ## Consideraciones técnicas
 
-- **Latencia**: el uso de SIP puede introducir mayor latencia que WebRTC  
-- **Códecs**: generalmente se utilizan G.711 o G.729  
-- **Calidad de red**: depende del carrier y routing configurado  
-- **Interrupciones**: pueden variar según el proveedor SIP  
+- **Códecs**: generalmente se utiliza G.711
+- **Calidad de red**: depende del carrier y routing configurado
+- **Interrupciones**: pueden variar según el proveedor SIP
 
-<Callout type="tip">
-Para mejorar la experiencia, prioriza redes estables y evita transcodificación innecesaria en tu proveedor SIP.
-</Callout>
+<Callout type="tip">Para mejorar la experiencia, prioriza redes estables y evita transcodificación innecesaria en tu proveedor SIP.</Callout>
 
 ---
 
@@ -105,18 +113,18 @@ Para mejorar la experiencia, prioriza redes estables y evita transcodificación 
 
 Una vez configurado:
 
-- Realiza llamadas de prueba desde tu PBX  
-- Verifica que el agente responde correctamente  
-- Ajusta parámetros de voz si detectas latencia o cortes  
+- Realiza llamadas de prueba desde tu PBX
+- Verifica que el agente responde correctamente
+- Ajusta parámetros de voz si detectas latencia o cortes
 
 ---
 
 ## Buenas prácticas
 
-- Mantén credenciales SIP seguras  
-- Verifica que el header esté correctamente configurado en todos los calls  
-- Monitorea la calidad de audio en producción  
-- Usa reportes para analizar duración, transferencias y desempeño  
+- Mantén credenciales SIP seguras
+- Verifica que el header esté correctamente configurado en todos los calls
+- Monitorea la calidad de audio en producción
+- Usa reportes para analizar duración, transferencias y desempeño
 
 ---
 
