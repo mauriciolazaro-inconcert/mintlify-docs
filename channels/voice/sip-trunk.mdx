@@ -56,20 +56,35 @@ Aquí se configuran los datos necesarios para conectar tu proveedor SIP con Inag
 
 ### Parámetros requeridos
 
-- **Servidor SIP (host)**  
-  Dirección del servidor al que debes enviar las llamadas.
+#### Servidor SIP (host)
+
+Configura como destino el host correspondiente a la región asignada a tu entorno:
+
+| Región | Host SIP |
+| --- | --- |
+| EU / Europa | `sip5i6j-eu1.inagent.inconcert.cloud` |
+| US / Américas | `sipt00g2-us1.inagent.inconcert.cloud` |
+
+<Callout type="info">
+  Consulta [URLs de acceso por región](../../getting-started/access-regions) para obtener más información sobre los entornos regionales de Inagent.
+</Callout>
+
+#### Datos del canal
+
+Al crear el canal SIP Trunk, Inagent muestra los datos específicos que necesitas para configurar tu proveedor. Cópialos directamente desde la configuración del canal:
 
 - **Usuario SIP (user)**  
-  Identificador de autenticación.
+  Usuario de autenticación asignado al canal.
 
 - **Contraseña (password)**  
-  Credencial asociada al usuario SIP.
+  Contraseña asociada al usuario SIP.
 
 - **Header SIP (obligatorio)**  
-  Header requerido para enrutar correctamente la llamada dentro de Inagent.  
-  Ejemplo: `X-Channel-Id`
+  Envía siempre el header con el nombre exacto `X-Channel-Id` y el valor mostrado en la configuración del canal.
 
-<Callout type="warning">El header SIP es obligatorio. Si no se envía correctamente, la llamada no podrá ser enroutada al canal correspondiente.</Callout>
+<Callout type="warning">
+  `X-Channel-Id` es obligatorio. Si no se envía con el valor exacto asignado al canal, la llamada no podrá enrutarse correctamente.
+</Callout>
 
 ---
 
@@ -79,10 +94,10 @@ Debes configurar tu PBX o proveedor SIP para enviar las llamadas hacia Inagent u
 
 ### Flujo general
 
-1. Configura el **host SIP** como destino de las llamadas
-2. Usa el **usuario y contraseña** provistos
-3. Asegúrate de incluir el **header obligatorio (`X-Channel-Id`)**
-4. Verifica que el códec de audio sea compatible (ej. G.711)
+1. Configura como destino el **host SIP** de la región asignada a tu entorno.
+2. Copia el **usuario y la contraseña** desde la configuración del canal en Inagent.
+3. Incluye siempre el header **`X-Channel-Id`** con el valor indicado en esa misma configuración.
+4. Verifica que el códec de audio sea compatible (por ejemplo, G.711).
 
 ---
 
