@@ -235,7 +235,7 @@ N/A
 
 **Propósito**\
 Devuelve un **estado instantáneo** de la sesión, incluyendo memoria, contexto y configuraciones activas.\
-Útil para respaldar, migrar o reproducir una conversación en otro entorno sin interrumpirla.
+Durante una transferencia a un agente humano, permite recuperar la información de la conversación para dar continuidad a la gestión.
 
 **Body**\
 N/A
@@ -243,6 +243,8 @@ N/A
 **Respuesta**
 
 - `200` con JSON que representa el estado actual de la sesión.
+
+Consulta [Obtener información de una conversación](./session-snapshot) para ver la URL completa, la autenticación y el acceso al contexto y al resumen de la conversación.
 
 ### 12. Resolver (External Tool Result)
 

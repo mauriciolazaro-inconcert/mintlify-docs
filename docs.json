@@ -105,7 +105,8 @@
 							"api-reference/endpoints/channel-talk",
 							"api-reference/endpoints/channel-listen",
 							"api-reference/endpoints/channel-destroy",
-							"api-reference/endpoints/administration"
+							"api-reference/endpoints/administration",
+							"api-reference/endpoints/session-snapshot"
 						]
 					},
 					{

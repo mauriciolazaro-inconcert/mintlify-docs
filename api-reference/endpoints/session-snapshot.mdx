@@ -1,0 +1,117 @@
+---
+title: "Obtener información de una conversación"
+description: "Recupera el contexto y el resumen de una conversación de Inagent para transferir la gestión a un agente humano."
+api: "GET https://api.backend.inconcertcc.com/engine/api/administration/session/{sessionId}/snapshot"
+auth: "key"
+---
+
+Obtiene el estado de una conversación de Inagent, incluido su contexto, a partir del identificador de sesión.
+
+Este endpoint se utiliza durante la **transferencia desde un agente virtual de Inagent hacia un agente humano**. Permite que el sistema de destino recupere lo ocurrido durante la gestión automática y presente esa información al agente humano antes de que continúe la atención.
+
+## Flujo de transferencia
+
+1. El agente virtual inicia la transferencia hacia el agente humano.
+2. Inagent envía el `sessionId` en la cabecera SIP `X-Session-ID` de la llamada.
+3. El sistema que recibe la transferencia extrae el `sessionId` de `X-Session-ID`.
+4. El backend del sistema de destino consulta el snapshot de la sesión.
+5. La interfaz del agente humano muestra el contexto o el resumen de la conversación.
+
+<Info>
+  La cabecera SIP que contiene el identificador de la sesión es siempre `X-Session-ID`. Utiliza su valor como parámetro de ruta en este endpoint.
+</Info>
+
+```text Cabecera SIP
+X-Session-ID: <sessionId>
+```
+
+## Endpoint
+
+```http
+GET /engine/api/administration/session/{sessionId}/snapshot
+```
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API Key proporcionada para la integración.
+</ParamField>
+
+## Parámetros de ruta
+
+<ParamField path="sessionId" type="string" required>
+  Identificador de la sesión de Inagent, obtenido de la cabecera SIP `X-Session-ID` recibida durante la transferencia.
+</ParamField>
+
+## Ejemplos
+
+<CodeGroup>
+
+```bash cURL
+curl --request GET \
+  --url "https://api.backend.inconcertcc.com/engine/api/administration/session/{sessionId}/snapshot" \
+  --header "apikey: tu-api-key-aqui"
+```
+
+```javascript JavaScript
+const sessionId = "session-id-obtenido-desde-sip";
+
+const response = await fetch(
+  `https://api.backend.inconcertcc.com/engine/api/administration/session/${encodeURIComponent(sessionId)}/snapshot`,
+  {
+    method: "GET",
+    headers: {
+      apikey: process.env.INCONCERT_API_KEY
+    }
+  }
+);
+
+if (!response.ok) {
+  throw new Error(`Error obteniendo el snapshot: ${response.status}`);
+}
+
+const payload = await response.json();
+const context = payload.data.snapshot.configuration.context;
+const conversationSummary = context.ResumenConversacion;
+```
+
+```python Python
+import os
+import requests
+
+session_id = "session-id-obtenido-desde-sip"
+url = (
+    "https://api.backend.inconcertcc.com/engine/api/administration/"
+    f"session/{session_id}/snapshot"
+)
+
+response = requests.get(
+    url,
+    headers={"apikey": os.environ["INCONCERT_API_KEY"]},
+    timeout=10
+)
+response.raise_for_status()
+
+payload = response.json()
+context = payload["data"]["snapshot"]["configuration"]["context"]
+conversation_summary = context["ResumenConversacion"]
+```
+
+</CodeGroup>
+
+## Acceso a los datos
+
+La respuesta devuelve el snapshot de la sesión. Utiliza las siguientes rutas para acceder a la información necesaria:
+
+| Información | Ruta en la respuesta |
+| --- | --- |
+| Contexto completo | `data.snapshot.configuration.context` |
+| Resumen de la conversación | `data.snapshot.configuration.context.ResumenConversacion` |
+
+<Tip>
+  Muestra el resumen al agente humano antes de que atienda la transferencia y conserva el contexto completo para consultar detalles adicionales de la gestión.
+</Tip>
+
+<Warning>
+  Realiza la petición desde un backend seguro. No expongas la API Key en aplicaciones cliente ni en la interfaz del agente.
+</Warning>
