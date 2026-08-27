@@ -1,0 +1,97 @@
+---
+title: "Salesforce"
+description: "Configura Salesforce desde el Market de Inagent mediante una External Client App y OAuth2."
+---
+
+export const SalesforceConfigPreview = () => {
+  const operations = ["Lectura", "Inserción", "Actualización", "Eliminación"];
+  const resources = ["Cuentas", "Contactos", "Leads", "Oportunidades", "Casos", "Tareas", "Eventos"];
+  const [enabled, setEnabled] = useState(["Lectura"]);
+  const [objects, setObjects] = useState(["Cuentas", "Contactos"]);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => { const root = document.documentElement; const update = () => setIsDark(root.classList.contains("dark")); update(); const observer = new MutationObserver(update); observer.observe(root, { attributes: true, attributeFilter: ["class"] }); return () => observer.disconnect(); }, []);
+  const color = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const toggle = (item, values, setter) => setter(values.includes(item) ? values.filter((value) => value !== item) : [...values, item]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${color.border}`, background: color.bg, color: color.text }}>
+      <div style={{ fontSize: 12, color: color.muted, marginBottom: 12 }}>Ejemplo visual · organización ficticia</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 }}>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>OAuth2</strong><div style={{ marginTop: 12, padding: 9, borderRadius: 8, border: `1px solid ${color.border}` }}>Salesforce · CRM de pruebas</div><div style={{ marginTop: 8, fontSize: 12, color: color.muted }}>Client ID, Client Secret y Token URL</div></div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Operaciones</strong>{operations.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 9 }}><input type="checkbox" checked={enabled.includes(item)} onChange={() => toggle(item, enabled, setEnabled)} />{item}{item === "Eliminación" && !enabled.includes(item) ? " · desactivada" : ""}</label>)}</div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Objetos</strong>{resources.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 9 }}><input type="checkbox" checked={objects.includes(item)} onChange={() => toggle(item, objects, setObjects)} />{item}</label>)}</div>
+      </div>
+    </div>
+  );
+}
+
+Conecta Salesforce para que un agente consulte o gestione objetos del CRM bajo la identidad y los permisos de un usuario de ejecución dedicado.
+
+## Capacidades y requisitos
+
+La aplicación admite lectura, inserción, actualización y eliminación sobre Cuentas, Contactos, Leads, Oportunidades, Casos, Tareas y Eventos, siempre que cada capa de autorización lo permita.
+
+Necesitas permisos administrativos para crear una **External Client App**, un usuario de ejecución con acceso de API y los permisos adecuados sobre objetos, campos y registros.
+
+Al finalizar la preparación, conserva:
+
+| Dato para Inagent | Origen en Salesforce |
+| --- | --- |
+| **Client ID** | Consumer Key de la External Client App. |
+| **Client Secret** | Consumer Secret de la External Client App. |
+| **Token URL** | URL de My Domain seguida de `/services/oauth2/token`. |
+
+## Preparar Salesforce
+
+<Steps>
+  <Step title="Crea la External Client App">En **Setup**, abre **External Client App Manager** y crea una aplicación local para la integración.</Step>
+  <Step title="Configura OAuth">Activa OAuth, añade el scope **Manage user data via APIs (`api`)** y habilita **Client Credentials Flow**.</Step>
+  <Step title="Asigna el usuario de ejecución">En las políticas de la aplicación, selecciona un usuario de integración dedicado. Sus permisos limitarán todas las operaciones.</Step>
+  <Step title="Obtén las credenciales">Copia Consumer Key y Consumer Secret desde los ajustes OAuth.</Step>
+  <Step title="Construye la Token URL">Usa tu My Domain completo, por ejemplo `https://empresa-ejemplo.my.salesforce.com/services/oauth2/token`.</Step>
+</Steps>
+
+Consulta la [configuración oficial del Client Credentials Flow](https://help.salesforce.com/s/articleView?id=sf.configure_client_credentials_flow_for_external_client_apps.htm&language=en_US&type=5).
+
+<Callout type="warning">
+  Quien conozca el Consumer Key y el Consumer Secret puede solicitar tokens como el usuario de ejecución. Custodia y rota el secreto, y evita asignar a ese usuario permisos administrativos generales.
+</Callout>
+
+## Crear la credencial en Inagent
+
+1. Abre **Credenciales → Crear credencial → OAuth2**.
+2. Completa **Client ID**, **Client Secret** y **Token URL**.
+3. Usa un nombre que identifique organización y entorno.
+4. Guarda la credencial. No necesitas crear ni pegar un access token manualmente.
+
+Consulta [Credenciales](../credentials) para ver el formulario de ejemplo.
+
+## Añadir Salesforce desde el Market
+
+<Steps>
+  <Step title="Abre la aplicación">Selecciona **Crear herramienta → Market → Salesforce**.</Step>
+  <Step title="Asocia OAuth2">Selecciona la credencial creada para esta organización.</Step>
+  <Step title="Limita las operaciones">Empieza con lectura. Habilita inserción o actualización solo cuando el flujo lo necesite y mantén eliminación desactivada por defecto.</Step>
+  <Step title="Limita los objetos">Selecciona únicamente los objetos que debe utilizar el agente y guarda.</Step>
+</Steps>
+
+<SalesforceConfigPreview />
+
+## Cómo se acumulan los permisos
+
+Una operación solo puede completarse si coincide el permiso de Inagent, el objeto habilitado, el acceso de API del usuario de ejecución, sus permisos sobre el objeto y los campos, y su acceso al registro concreto. Inagent nunca amplía los permisos concedidos en Salesforce.
+
+## Comprobación final
+
+1. Consulta un registro de prueba de un objeto habilitado.
+2. Intenta consultar un objeto no seleccionado y confirma que el acceso se rechaza.
+3. Verifica en Salesforce que el usuario de ejecución solo ve los campos y registros previstos.
+4. Si habilitas escritura, prueba primero en un entorno aislado con un registro identificable.
+
+## Errores frecuentes
+
+<AccordionGroup>
+  <Accordion title="No se puede obtener el token">Revisa Client ID, Client Secret, Token URL y que Client Credentials Flow esté activo.</Accordion>
+  <Accordion title="Falta un usuario de ejecución">Selecciona el usuario **Run As** en las políticas de la External Client App.</Accordion>
+  <Accordion title="El objeto o campo devuelve acceso denegado">Comprueba el permiso en Inagent y los permisos de objeto, campo y registro del usuario de ejecución.</Accordion>
+  <Accordion title="La External Client App acaba de cambiar">Los cambios pueden tardar unos minutos en propagarse. Espera y vuelve a realizar una consulta de lectura.</Accordion>
+</AccordionGroup>

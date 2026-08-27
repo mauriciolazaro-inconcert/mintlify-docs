@@ -54,6 +54,17 @@
 						"pages": ["tools/overview", "tools/human-handoff", "tools/rest-api", "tools/code", "tools/credentials"]
 					},
 					{
+						"group": "Market de aplicaciones",
+						"pages": [
+							"tools/market/overview",
+							"tools/market/airtable",
+							"tools/market/calendly",
+							"tools/market/salesforce",
+							"tools/market/shopify",
+							"tools/market/supabase"
+						]
+					},
+					{
 						"group": "Bases de conocimiento",
 						"pages": ["knowledge/overview", "knowledge/native-text", "knowledge/documents-pdf", "knowledge/external-sites", "knowledge/videos"]
 					},

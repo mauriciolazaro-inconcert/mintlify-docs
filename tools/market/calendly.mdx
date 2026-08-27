@@ -1,0 +1,91 @@
+---
+title: "Calendly"
+description: "Configura Calendly desde el Market de Inagent para consultar disponibilidad y gestionar reservas de una cuenta."
+---
+
+export const CalendlyConfigPreview = () => {
+  const options = ["Consultar tipos de evento", "Consultar disponibilidad", "Consultar citas", "Crear reservas"];
+  const [enabled, setEnabled] = useState(options.slice(0, 3));
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const color = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const toggle = (item) => setEnabled(enabled.includes(item) ? enabled.filter((value) => value !== item) : [...enabled, item]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${color.border}`, background: color.bg, color: color.text }}>
+      <div style={{ fontSize: 12, color: color.muted, marginBottom: 12 }}>Ejemplo visual · no opera sobre Calendly</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Bearer Token</strong><div style={{ marginTop: 12, padding: 9, borderRadius: 8, border: `1px solid ${color.border}` }}>Calendly · Agenda comercial</div><div style={{ marginTop: 8, fontSize: 12, color: color.muted }}>Cuenta conectada: agenda de ejemplo</div></div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Capacidades</strong>{options.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}><input type="checkbox" checked={enabled.includes(item)} onChange={() => toggle(item)} />{item}</label>)}<div style={{ marginTop: 10, fontSize: 12, color: color.muted }}>Cancelar citas no está disponible.</div></div>
+      </div>
+    </div>
+  );
+}
+
+Conecta una cuenta de Calendly para consultar tipos de evento, disponibilidad y citas. La reserva directa desde la conversación está disponible cuando el plan de Calendly permite usar la Scheduling API.
+
+<Callout type="warning">
+  Esta integración trabaja con una sola cuenta de Calendly. Permite consultar citas, pero no cancelarlas desde Inagent. La reserva directa requiere un plan de pago compatible.
+</Callout>
+
+## Capacidades y requisitos
+
+- Consultar los **Event Types** de la cuenta conectada.
+- Consultar disponibilidad para un tipo de evento.
+- Consultar citas existentes.
+- Crear una reserva directa si la cuenta dispone de la función necesaria.
+
+Necesitas acceso a la cuenta que se conectará, tipos de evento activos y un Personal Access Token. Para conectar cuentas pertenecientes a terceros se requiere un flujo OAuth diferente, que no cubre esta guía.
+
+## Preparar Calendly
+
+<Steps>
+  <Step title="Crea los tipos de evento">En **Event Types**, configura la duración, disponibilidad y reglas de cada reunión que ofrecerá el agente.</Step>
+  <Step title="Genera un token">Abre **Integrations → API & Webhooks** y crea un Personal Access Token con un nombre que identifique a Inagent.</Step>
+  <Step title="Cópialo de inmediato">Calendly solo lo muestra al crearlo. Guárdalo directamente en una credencial de Inagent y no lo compartas por chat o correo.</Step>
+</Steps>
+
+El identificador de API de un Event Type no es necesariamente su enlace público. La aplicación obtiene los tipos de evento de la cuenta conectada para trabajar con el recurso correcto. Consulta [autenticación con Personal Access Tokens](https://developer.calendly.com/how-to-authenticate-with-personal-access-tokens) y la [guía actual de Personal Access Tokens](https://developer.calendly.com/personal-access-tokens).
+
+## Crear la credencial en Inagent
+
+1. Abre **Credenciales → Crear credencial**.
+2. Selecciona **Bearer Token**.
+3. Usa un nombre reconocible, por ejemplo `Calendly · Agenda comercial`.
+4. Pega el Personal Access Token en el campo **Token** y guarda.
+
+Consulta el [flujo visual de credenciales](../credentials) si necesitas identificar los campos.
+
+## Añadir Calendly desde el Market
+
+<Steps>
+  <Step title="Abre la aplicación">Selecciona **Crear herramienta → Market → Calendly**.</Step>
+  <Step title="Selecciona la credencial">Asocia el Bearer Token de la cuenta que debe utilizar el agente.</Step>
+  <Step title="Revisa las capacidades">Habilita consulta de tipos, disponibilidad y citas. Activa reservas solo después de comprobar el plan y el flujo completo.</Step>
+  <Step title="Guarda">Confirma que la credencial corresponde a la cuenta y entorno correctos.</Step>
+</Steps>
+
+<CalendlyConfigPreview />
+
+## Comprobación final
+
+1. Lista los tipos de evento y confirma que pertenecen a la cuenta esperada.
+2. Consulta disponibilidad en un intervalo breve y revisa la zona horaria mostrada al usuario.
+3. Consulta una cita de prueba.
+4. Si habilitaste reservas, crea una cita controlada y comprueba la confirmación en Calendly.
+
+## Errores frecuentes
+
+<AccordionGroup>
+  <Accordion title="No aparecen tipos de evento">Comprueba que estén activos y que el token pertenezca a la cuenta correcta.</Accordion>
+  <Accordion title="El token no funciona">Los tokens regenerados dejan de ser válidos. Genera uno nuevo y actualiza la credencial Bearer Token.</Accordion>
+  <Accordion title="La reserva directa es rechazada">Confirma que el plan de Calendly permite la Scheduling API y que el tipo de evento admite la reserva.</Accordion>
+  <Accordion title="La hora no coincide">Verifica la zona horaria de la persona y la disponibilidad configurada en Calendly antes de reservar.</Accordion>
+  <Accordion title="No puedo cancelar una cita">La cancelación no está disponible desde esta integración. Realízala en Calendly o mediante el proceso operativo definido por tu organización.</Accordion>
+</AccordionGroup>

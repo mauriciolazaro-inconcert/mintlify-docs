@@ -1,0 +1,99 @@
+---
+title: "Airtable"
+description: "Configura Airtable desde el Market de Inagent con acceso limitado a una Base y una tabla."
+---
+
+export const AirtableConfigPreview = () => {
+  const options = ["Lectura", "Inserción", "Actualización", "Eliminación"];
+  const [enabled, setEnabled] = useState(["Lectura"]);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const color = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const toggle = (item) => setEnabled(enabled.includes(item) ? enabled.filter((value) => value !== item) : [...enabled, item]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${color.border}`, background: color.bg, color: color.text }}>
+      <div style={{ fontSize: 12, color: color.muted, marginBottom: 12 }}>Ejemplo visual · valores ficticios</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}>
+          <strong>Credenciales</strong>
+          <label style={{ display: "block", marginTop: 12, fontSize: 12, color: color.muted }}>Variables de configuración</label>
+          <div style={{ marginTop: 5, padding: 9, borderRadius: 8, border: `1px solid ${color.border}` }}>Airtable · Base de soporte</div>
+          <label style={{ display: "block", marginTop: 12, fontSize: 12, color: color.muted }}>API Key</label>
+          <div style={{ marginTop: 5, padding: 9, borderRadius: 8, border: `1px solid ${color.border}` }}>Airtable · PAT de producción</div>
+        </div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}>
+          <strong>Operaciones permitidas</strong>
+          {options.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10, opacity: item === "Eliminación" && !enabled.includes(item) ? .65 : 1 }}><input type="checkbox" checked={enabled.includes(item)} onChange={() => toggle(item)} />{item}{item === "Eliminación" && !enabled.includes(item) ? " · desactivada" : ""}</label>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Conecta una Base y una tabla de Airtable para consultar registros y, si el caso de uso lo requiere, crearlos o modificarlos.
+
+## Capacidades y requisitos
+
+La aplicación puede leer, crear, actualizar y eliminar registros según los permisos que habilites en Inagent. Necesitas una cuenta de Airtable con acceso a la Base, una tabla preparada y permiso suficiente para las acciones seleccionadas.
+
+Antes de empezar, obtén:
+
+| Dato | Dónde encontrarlo |
+| --- | --- |
+| **Base ID** | Identificador de la Base; comienza por `app`. |
+| **Table ID** | Identificador estable de la tabla; comienza por `tbl`. |
+| **Personal Access Token** | Developer Hub de Airtable. Se muestra al generarlo. |
+
+## Preparar Airtable
+
+<Steps>
+  <Step title="Abre la Base y la tabla">Crea o revisa los campos que utilizará el agente. Conserva sus nombres exactos.</Step>
+  <Step title="Copia los identificadores">Obtén el **Base ID** y el **Table ID** desde Airtable. Usa el ID de tabla, no su nombre visible.</Step>
+  <Step title="Crea el token">En el Developer Hub, crea un Personal Access Token dedicado y añade la Base como único recurso de acceso.</Step>
+  <Step title="Selecciona los scopes">Añade `data.records:read` y `schema.bases:read`. Incluye `data.records:write` solo si habilitarás creación, actualización o eliminación.</Step>
+</Steps>
+
+El token nunca puede hacer más de lo permitido al usuario que lo creó y solo alcanza los recursos seleccionados. Consulta [Crear Personal Access Tokens en Airtable](https://support.airtable.com/articles/9934989703-creating-personal-access-tokens) y la [introducción a la Web API](https://support.airtable.com/articles/6292134965-getting-started-with-airtable-s-web-api).
+
+## Crear las credenciales en Inagent
+
+Necesitas dos credenciales:
+
+1. **Variables de configuración** con `BASE_ID` y `TABLE_ID`.
+2. **API Key** con el Personal Access Token. Usa un nombre reconocible y no pegues el token en descripciones ni campos de variables.
+
+Si necesitas revisar el alta de cada tipo, consulta [Credenciales](../credentials).
+
+## Añadir Airtable desde el Market
+
+<Steps>
+  <Step title="Abre el Market">En el agente, selecciona **Crear herramienta → Market → Airtable**.</Step>
+  <Step title="Asocia las credenciales">Selecciona la credencial de Variables de configuración y la credencial API Key creadas anteriormente.</Step>
+  <Step title="Define los permisos">Empieza con **Lectura**. Activa inserción o actualización solo si el agente debe escribir; deja eliminación desactivada inicialmente.</Step>
+  <Step title="Guarda">Revisa la Base, la tabla y el alcance antes de guardar la herramienta.</Step>
+</Steps>
+
+<AirtableConfigPreview />
+
+## Comprobación final
+
+1. Solicita una lectura limitada de una tabla con datos de prueba.
+2. Confirma que los campos corresponden a la tabla elegida.
+3. Si habilitaste escritura, crea o actualiza un registro de prueba y revísalo en Airtable.
+4. Verifica que una operación deshabilitada sea rechazada.
+
+## Errores frecuentes
+
+<AccordionGroup>
+  <Accordion title="La Base o la tabla no se encuentran">Comprueba que los IDs comiencen por `app` y `tbl`, y que la Base figure entre los recursos del token.</Accordion>
+  <Accordion title="Falta acceso al esquema">Añade `schema.bases:read`; es necesario para que la aplicación reconozca los campos de la tabla.</Accordion>
+  <Accordion title="Una escritura devuelve acceso denegado">Revisa `data.records:write`, los permisos del usuario de Airtable y que la operación esté habilitada en Inagent.</Accordion>
+  <Accordion title="El token dejó de funcionar">Comprueba que no se haya regenerado, eliminado o modificado. Si se regeneró, actualiza la credencial en Inagent.</Accordion>
+</AccordionGroup>

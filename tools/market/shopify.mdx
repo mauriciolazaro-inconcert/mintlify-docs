@@ -1,0 +1,94 @@
+---
+title: "Shopify"
+description: "Configura Shopify desde el Market de Inagent para una tienda de la misma organización."
+---
+
+export const ShopifyConfigPreview = () => {
+  const permissions = ["Lectura", "Inserción", "Actualización", "Eliminación"];
+  const resources = ["Productos", "Inventario", "Clientes", "Carrito", "Draft Orders", "Pedidos", "Reembolsos", "Devoluciones", "Fulfillment", "Empresas"];
+  const [enabled, setEnabled] = useState(["Lectura"]);
+  const [selected, setSelected] = useState(["Productos", "Inventario"]);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => { const root = document.documentElement; const update = () => setIsDark(root.classList.contains("dark")); update(); const observer = new MutationObserver(update); observer.observe(root, { attributes: true, attributeFilter: ["class"] }); return () => observer.disconnect(); }, []);
+  const color = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const toggle = (item, values, setter) => setter(values.includes(item) ? values.filter((value) => value !== item) : [...values, item]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${color.border}`, background: color.bg, color: color.text }}>
+      <div style={{ fontSize: 12, color: color.muted, marginBottom: 12 }}>Ejemplo visual · tienda ficticia</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 }}>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Credenciales</strong><div style={{ marginTop: 10, padding: 8, border: `1px solid ${color.border}`, borderRadius: 8 }}>OAuth2 · Catálogo demo</div><div style={{ marginTop: 8, padding: 8, border: `1px solid ${color.border}`, borderRadius: 8 }}>Variables · tienda-demo.myshopify.com</div></div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Operaciones</strong>{permissions.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 9 }}><input type="checkbox" checked={enabled.includes(item)} onChange={() => toggle(item, enabled, setEnabled)} />{item}{item === "Eliminación" && !enabled.includes(item) ? " · desactivada" : ""}</label>)}</div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Recursos</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 10px", marginTop: 10 }}>{resources.map((item) => <label key={item} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13 }}><input type="checkbox" checked={selected.includes(item)} onChange={() => toggle(item, selected, setSelected)} />{item}</label>)}</div></div>
+      </div>
+    </div>
+  );
+}
+
+Conecta una tienda de Shopify para consultar o gestionar recursos comerciales con los permisos definidos en Shopify y en Inagent.
+
+<Callout type="warning">
+  El flujo de Client Credentials utilizado por esta integración solo funciona cuando la aplicación y la tienda pertenecen a la misma organización de Shopify. Para tiendas de otras organizaciones se necesita otro método de autenticación.
+</Callout>
+
+## Capacidades y requisitos
+
+La aplicación puede trabajar con productos, inventario, clientes, carrito, Draft Orders, pedidos, reembolsos, devoluciones, fulfillment y empresas B2B. La disponibilidad efectiva depende de los scopes de Shopify, los permisos de Inagent, el recurso seleccionado y las funciones habilitadas para la tienda.
+
+Necesitas acceso al **Dev Dashboard**, permisos para desarrollar aplicaciones y una tienda de la misma organización en la que instalarla.
+
+Al finalizar, conserva:
+
+- **Client ID** y **Client Secret** de la aplicación.
+- Dominio técnico permanente con formato `tienda-ejemplo.myshopify.com`.
+
+## Preparar Shopify
+
+<Steps>
+  <Step title="Crea la aplicación">En el Dev Dashboard, selecciona **Apps → Create app → Start from Dev Dashboard**.</Step>
+  <Step title="Crea una versión">Configura una versión y selecciona solo los scopes necesarios para los recursos que utilizará el agente.</Step>
+  <Step title="Publica la versión">Libera la versión para aplicar su configuración. Los cambios de scopes posteriores requieren una nueva versión y aprobación.</Step>
+  <Step title="Instala en la tienda">Desde **Home → Install app**, elige una tienda de la misma organización y confirma los permisos.</Step>
+  <Step title="Copia las credenciales">En **Settings**, obtén Client ID y Client Secret.</Step>
+  <Step title="Obtén el dominio técnico">Copia el host `myshopify.com` sin `https://`, rutas ni barra final.</Step>
+</Steps>
+
+Usa la [guía del Client Credentials Grant](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials-grant), la [creación de aplicaciones en el Dev Dashboard](https://shopify.dev/docs/apps/build/dev-dashboard/create-apps-using-dev-dashboard) y la [referencia de scopes](https://shopify.dev/docs/apps/build/authentication-authorization/manage-access-scopes).
+
+### Elegir scopes
+
+Los scopes dependen del flujo que habilites. Entre los más habituales se encuentran `read_products`, `read_inventory`, `write_customers`, `write_draft_orders`, `write_orders`, `write_returns` y `write_merchant_managed_fulfillment_orders`. No copies una lista completa por defecto: contrasta cada operación necesaria con la referencia vigente y solicita el alcance mínimo.
+
+## Crear las credenciales en Inagent
+
+1. Crea una credencial **OAuth2** con Client ID y Client Secret.
+2. Crea otra de **Variables de configuración** con la clave `URL_TIENDA` y el valor `tienda-ejemplo.myshopify.com`.
+3. Usa nombres que identifiquen la misma tienda y el mismo entorno.
+
+No introduzcas el dominio comercial, el protocolo ni una URL del administrador. Consulta [Credenciales](../credentials) para ver ambos formularios.
+
+## Añadir Shopify desde el Market
+
+<Steps>
+  <Step title="Abre la aplicación">Selecciona **Crear herramienta → Market → Shopify**.</Step>
+  <Step title="Asocia ambas credenciales">Selecciona OAuth2 y Variables de configuración correspondientes a la misma aplicación y tienda.</Step>
+  <Step title="Limita las operaciones">Empieza con lectura. Habilita escritura solo para flujos confirmados y mantén eliminación desactivada por defecto.</Step>
+  <Step title="Limita los recursos">Activa únicamente los recursos cubiertos por los scopes instalados y guarda.</Step>
+</Steps>
+
+<ShopifyConfigPreview />
+
+## Comprobación final
+
+1. Consulta un producto de prueba y, si corresponde, su inventario.
+2. Confirma que un recurso no seleccionado no está disponible.
+3. Comprueba que los scopes aprobados en la instalación coinciden con los recursos de Inagent.
+4. Prueba cualquier escritura en una tienda de desarrollo o con datos controlados antes de usarla en producción.
+
+## Errores frecuentes
+
+<AccordionGroup>
+  <Accordion title="No se puede obtener acceso a la tienda">Confirma que aplicación y tienda pertenecen a la misma organización y que la aplicación está instalada.</Accordion>
+  <Accordion title="El dominio no es válido">Usa únicamente el host `tienda.myshopify.com`, sin protocolo, rutas ni barra final.</Accordion>
+  <Accordion title="Falta un scope">Añádelo a una nueva versión, publícala y aprueba el cambio en la tienda; modificar la versión no actualiza por sí solo una instalación existente.</Accordion>
+  <Accordion title="El recurso sigue bloqueado">Además del scope de Shopify, habilita la operación y el recurso correspondientes en Inagent.</Accordion>
+</AccordionGroup>

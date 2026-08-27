@@ -1,0 +1,88 @@
+---
+title: "Market de aplicaciones"
+description: "Añade a tus agentes herramientas publicadas para conectar servicios externos desde Inagent."
+---
+
+export const MarketPreview = () => {
+  const apps = [
+    { name: "Airtable", icon: "A", detail: "Bases y registros", credential: "API Key + Variables" },
+    { name: "Calendly", icon: "C", detail: "Agenda y citas", credential: "Bearer Token" },
+    { name: "Salesforce", icon: "S", detail: "CRM y actividades", credential: "OAuth2" },
+    { name: "Shopify", icon: "S", detail: "Comercio y pedidos", credential: "OAuth2 + Variables" },
+    { name: "Supabase", icon: "S", detail: "Tablas y registros", credential: "API Key + Variables" },
+  ];
+  const [selected, setSelected] = useState(0);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const colors = isDark
+    ? { shell: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af", active: "#37206f" }
+    : { shell: "#f8fafc", card: "#ffffff", border: "#e2e8f0", text: "#172033", muted: "#64748b", active: "#f0eaff" };
+  const app = apps[selected];
+
+  return (
+    <div className="not-prose" style={{ border: `1px solid ${colors.border}`, borderRadius: 16, background: colors.shell, overflow: "hidden", color: colors.text }}>
+      <div style={{ padding: "12px 16px", borderBottom: `1px solid ${colors.border}`, fontSize: 12, color: colors.muted }}>Ejemplo visual · no es un formulario operativo</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, padding: 16 }}>
+        {apps.map((item, index) => (
+          <button key={item.name} type="button" onClick={() => setSelected(index)} style={{ display: "flex", gap: 10, alignItems: "center", padding: 12, borderRadius: 12, border: `1px solid ${index === selected ? "#7c3aed" : colors.border}`, background: index === selected ? colors.active : colors.card, color: colors.text, cursor: "pointer", textAlign: "left" }}>
+            <span style={{ display: "grid", placeItems: "center", width: 30, height: 30, borderRadius: 8, background: "#661aff", color: "white", fontWeight: 700 }}>{item.icon}</span>
+            <span><strong style={{ display: "block" }}>{item.name}</strong><span style={{ fontSize: 12, color: colors.muted }}>{item.detail}</span></span>
+          </button>
+        ))}
+      </div>
+      <div style={{ margin: "0 16px 16px", padding: 16, border: `1px solid ${colors.border}`, borderRadius: 12, background: colors.card }}>
+        <strong>{app.name}</strong>
+        <div style={{ marginTop: 8, fontSize: 13, color: colors.muted }}>Credenciales: {app.credential}</div>
+        <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["Credenciales", "Permisos", "Recursos", "Guardar"].map((step, index) => <span key={step} style={{ padding: "6px 9px", borderRadius: 999, background: index === 0 ? "#661aff" : colors.shell, color: index === 0 ? "white" : colors.text, fontSize: 12 }}>{index + 1}. {step}</span>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+El Market reúne herramientas publicadas para conectar Inagent con aplicaciones externas. Elige una aplicación, asocia credenciales seguras y limita las operaciones y recursos disponibles para cada agente.
+
+<Callout type="info">
+  El Market es un origen de herramientas ya preparadas, no un tipo de herramienta adicional. Las herramientas instaladas pasan a formar parte de las capacidades del agente.
+</Callout>
+
+<MarketPreview />
+
+## Aplicaciones disponibles
+
+<Columns cols={2}>
+  <Card title="Airtable" icon="table" href="./airtable">Consulta y gestiona registros de una Base.</Card>
+  <Card title="Calendly" icon="calendar" href="./calendly">Consulta tipos de evento, disponibilidad y citas.</Card>
+  <Card title="Salesforce" icon="cloud" href="./salesforce">Trabaja con objetos del CRM según el usuario de ejecución.</Card>
+  <Card title="Shopify" icon="cart-shopping" href="./shopify">Conecta catálogo, clientes y operaciones de comercio.</Card>
+  <Card title="Supabase" icon="database" href="./supabase">Opera sobre una tabla expuesta mediante la Data API.</Card>
+</Columns>
+
+## Flujo común
+
+<Steps>
+  <Step title="Prepara la aplicación externa">Crea o configura la cuenta, aplicación, Base, tienda o proyecto siguiendo la guía correspondiente.</Step>
+  <Step title="Crea las credenciales">En Inagent, abre **Credenciales**, elige el tipo indicado y guarda únicamente los valores solicitados.</Step>
+  <Step title="Añade la herramienta">En el agente, selecciona **Crear herramienta → Market** y elige la aplicación.</Step>
+  <Step title="Limita el acceso">Asocia las credenciales y habilita solo las operaciones y recursos necesarios.</Step>
+  <Step title="Guarda y comprueba">Haz una consulta de solo lectura con datos no sensibles antes de habilitar escrituras.</Step>
+</Steps>
+
+## Seguridad recomendada
+
+- Crea credenciales dedicadas para cada entorno y caso de uso.
+- Aplica mínimo privilegio tanto en la aplicación externa como en Inagent.
+- Mantén desactivadas la eliminación y las operaciones destructivas hasta que exista un caso probado.
+- Rota inmediatamente cualquier secreto que se haya compartido fuera del módulo de credenciales.
+
+<Card title="Crear credenciales" icon="key" href="../credentials">Consulta los tipos de credencial y el flujo de alta en Inagent.</Card>

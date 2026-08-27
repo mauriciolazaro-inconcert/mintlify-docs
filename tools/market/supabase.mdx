@@ -1,0 +1,88 @@
+---
+title: "Supabase"
+description: "Configura Supabase desde el Market de Inagent para operar sobre una tabla expuesta mediante la Data API."
+---
+
+export const SupabaseConfigPreview = () => {
+  const options = ["Lectura", "Inserción", "Actualización", "Eliminación"];
+  const [enabled, setEnabled] = useState(["Lectura"]);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => { const root = document.documentElement; const update = () => setIsDark(root.classList.contains("dark")); update(); const observer = new MutationObserver(update); observer.observe(root, { attributes: true, attributeFilter: ["class"] }); return () => observer.disconnect(); }, []);
+  const color = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const toggle = (item) => setEnabled(enabled.includes(item) ? enabled.filter((value) => value !== item) : [...enabled, item]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${color.border}`, background: color.bg, color: color.text }}>
+      <div style={{ fontSize: 12, color: color.muted, marginBottom: 12 }}>Ejemplo visual · proyecto y credenciales ficticios</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Conexión</strong><div style={{ marginTop: 10, padding: 8, border: `1px solid ${color.border}`, borderRadius: 8 }}>Variables · Proyecto de soporte</div><div style={{ marginTop: 8, fontSize: 12, color: color.muted }}>Schema: public · Tabla: solicitudes_demo</div><div style={{ marginTop: 8, padding: 8, border: `1px solid ${color.border}`, borderRadius: 8 }}>API Key · Clave backend</div></div>
+        <div style={{ padding: 14, borderRadius: 12, background: color.card, border: `1px solid ${color.border}` }}><strong>Operaciones</strong>{options.map((item) => <label key={item} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}><input type="checkbox" checked={enabled.includes(item)} onChange={() => toggle(item)} />{item}{item === "Eliminación" && !enabled.includes(item) ? " · desactivada" : ""}</label>)}</div>
+      </div>
+    </div>
+  );
+}
+
+Conecta una tabla de Supabase expuesta mediante la Data API para consultar registros y, si lo necesitas, crear o modificar datos.
+
+<Callout type="danger">
+  Una clave `sb_secret_` utiliza privilegios elevados y omite todas las políticas RLS. Trátala como un secreto de backend: limita la superficie mediante la exposición de la Data API, los permisos de base de datos, la configuración de Inagent y una custodia segura.
+</Callout>
+
+## Capacidades y requisitos
+
+La aplicación puede leer, insertar, actualizar y eliminar filas de una tabla seleccionada. Necesitas un proyecto de Supabase, la tabla preparada, acceso a los ajustes de API y permisos para revisar schemas y privilegios de PostgreSQL.
+
+Obtén estos datos:
+
+| Dato | Ejemplo de formato |
+| --- | --- |
+| **URL** | `https://proyecto-ejemplo.supabase.co` |
+| **TABLE** | Nombre exacto de la tabla. |
+| **SUPABASE_SCHEMA** | Schema expuesto; normalmente `public`. |
+| **Secret key** | Clave con prefijo `sb_secret_`; no publiques su valor. |
+
+## Preparar Supabase
+
+<Steps>
+  <Step title="Prepara la tabla">Crea o revisa columnas, tipos, restricciones y valores predeterminados.</Step>
+  <Step title="Expón el schema">En la configuración de la Data API, confirma que el schema forma parte de la superficie expuesta.</Step>
+  <Step title="Concede acceso explícito">Revisa los privilegios PostgreSQL de la tabla para el rol utilizado por la clave. Las tablas nuevas no deben darse por expuestas automáticamente.</Step>
+  <Step title="Crea una secret key">En **Settings → API Keys**, crea o copia una clave `sb_secret_` dedicada al backend.</Step>
+</Steps>
+
+Supabase está migrando hacia una exposición explícita de tablas nuevas: comprueba siempre los grants del proyecto en lugar de presuponer que una tabla en `public` ya es accesible. Consulta [seguridad de la Data API](https://supabase.com/docs/guides/api/securing-your-api), la [guía de la Data API](https://supabase.com/docs/guides/api) y la [documentación de API keys](https://supabase.com/docs/guides/getting-started/api-keys).
+
+## Crear las credenciales en Inagent
+
+Necesitas dos credenciales:
+
+1. **Variables de configuración** con `URL`, `TABLE` y `SUPABASE_SCHEMA`.
+2. **API Key** con la clave `sb_secret_` en el campo secreto.
+
+Usa un nombre que identifique proyecto, tabla y entorno sin revelar la clave. Consulta [Credenciales](../credentials) para revisar el flujo de alta.
+
+## Añadir Supabase desde el Market
+
+<Steps>
+  <Step title="Abre la aplicación">Selecciona **Crear herramienta → Market → Supabase**.</Step>
+  <Step title="Asocia las credenciales">Selecciona Variables de configuración y API Key del mismo proyecto.</Step>
+  <Step title="Limita las operaciones">Empieza con lectura. Habilita inserción o actualización solo si son imprescindibles; deja eliminación desactivada inicialmente.</Step>
+  <Step title="Guarda">Revisa URL, schema, tabla y permisos antes de completar la configuración.</Step>
+</Steps>
+
+<SupabaseConfigPreview />
+
+## Comprobación final
+
+1. Consulta una fila de prueba de la tabla configurada.
+2. Comprueba que otra tabla del proyecto no queda disponible por error.
+3. Verifica que una operación desactivada sea rechazada en Inagent.
+4. Si habilitas escritura, prueba primero con datos desechables y un filtro que identifique de forma única las filas afectadas.
+
+## Errores frecuentes
+
+<AccordionGroup>
+  <Accordion title="La tabla no aparece">Confirma que el schema está expuesto a la Data API y que la tabla tiene los grants necesarios. Crear una tabla no garantiza que quede expuesta.</Accordion>
+  <Accordion title="El schema o la tabla no coinciden">Respeta mayúsculas, minúsculas y nombres exactos; revisa también que la URL corresponda al mismo proyecto.</Accordion>
+  <Accordion title="La clave es rechazada">Usa una clave `sb_secret_` vigente y guárdala como API Key. Si se filtró, rótala y actualiza la credencial.</Accordion>
+  <Accordion title="RLS no limita los resultados">Es el comportamiento esperado de una secret key: omite RLS. Reduce el acceso con grants, una superficie de API acotada y los permisos de Inagent.</Accordion>
+</AccordionGroup>
