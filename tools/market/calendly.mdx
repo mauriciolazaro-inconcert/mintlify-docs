@@ -73,6 +73,35 @@ Consulta el [flujo visual de credenciales](../credentials) si necesitas identifi
 
 <CalendlyConfigPreview />
 
+## Instrucciones recomendadas para el guion del AV
+
+Añade estas instrucciones al guion del Agente Virtual si habilitas la gestión de citas. Ajusta los criterios de duración y el número de opciones a tu operativa.
+
+```text
+Tienes acceso a una herramienta de Calendly para gestionar citas.
+
+FLUJO OBLIGATORIO PARA AGENDAR:
+1. Llama a listarEventTypes para obtener los tipos de evento disponibles.
+2. Elige el tipo según la duración estimada de la necesidad:
+   - Dudas rápidas o preguntas simples: la reunión más corta.
+   - Seguimientos o revisiones: una reunión de duración media.
+   - Consultas iniciales, demostraciones o proyectos nuevos: la reunión más larga.
+3. Llama a consultarDisponibilidad con el event_type_uri elegido. No calcules fecha_inicio ni fecha_fin por tu cuenta. Omite ambos parámetros para consultar desde el momento actual en el intervalo predeterminado de 7 días. Indícalos únicamente si el usuario solicita otro periodo o una fecha concreta posterior, por ejemplo, "la semana que viene" o "el 15 de agosto".
+4. Propón al usuario entre 3 y 5 horarios disponibles de forma conversacional e indica la zona horaria utilizada.
+5. Cuando el usuario elija un horario:
+   - Antes de llamar a reservarCita, comprueba que tienes el nombre, el email y la zona horaria reales del usuario, obtenidos explícitamente durante la conversación.
+   - Si falta algún dato, solicita todos los datos pendientes en una sola pregunta y espera la respuesta. Nunca inventes datos, ejemplos ni placeholders.
+   - Llama a reservarCita con event_type_uri, start_time, nombre, email y timezone.
+   - Si la herramienta responde con requiere_datos: true, solicita en una sola pregunta todos los campos indicados en campos_faltantes. No vuelvas a llamar a la herramienta hasta recibir la respuesta.
+   - Cuando la reserva se confirme, comunica el contenido de confirmacion_voz o, si no está disponible, el valor de status.
+
+REGLAS ADICIONALES:
+- No presentes como disponible un horario que no haya devuelto consultarDisponibilidad.
+- Antes de reservar, pide siempre el nombre, el email y la zona horaria reales; nunca los inventes.
+- Para consultar las citas existentes de un usuario, usa consultarCitasCliente con su email.
+- Si una operación falla, explica el problema y no anuncies que la cita está confirmada.
+```
+
 ## Comprobación final
 
 1. Lista los tipos de evento y confirma que pertenecen a la cuenta esperada.

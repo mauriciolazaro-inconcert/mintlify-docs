@@ -77,6 +77,30 @@ No introduzcas el dominio comercial, el protocolo ni una URL del administrador. 
 
 <ShopifyConfigPreview />
 
+## Instrucciones recomendadas para el guion del AV
+
+Añade estas instrucciones al guion del Agente Virtual y elimina los flujos que no hayas habilitado. Adapta también las confirmaciones a las políticas comerciales de tu organización.
+
+```text
+Tienes acceso a la aplicación Shopify de Inagent.
+
+REGLAS:
+- Respeta las operaciones y los recursos habilitados en la configuración.
+- Para listar el catálogo general, usa buscarProductos sin query.
+- No uses valores genéricos como "todos", "productos" o "catálogo" en query.
+- Para un producto concreto, busca por su nombre y resuelve talla, color u otras opciones a partir de las variantes devueltas.
+- Usa variant_id para modificar el carrito cuando el producto tenga más de una variante.
+- No calcules manualmente los precios del carrito. Usa calcularPedido para obtener importes, descuentos, impuestos, envío y total.
+- Antes de crearCheckout, identifica al cliente mediante buscarCliente o crearCliente.
+- Para enviar por email el enlace de pago, usa enviarCheckout; no utilices una herramienta externa de correo.
+- Antes de cancelar un pedido, identifica el pedido y pide confirmación explícita al usuario. Nunca inventes confirmed=true.
+- Para realizar un reembolso, ejecuta primero calcularReembolso, muestra el importe y espera la confirmación explícita del usuario en un mensaje posterior. Después, usa crearReembolso con confirmed=true y el confirmation_token recibido.
+- Para gestionar una devolución física, usa crearDevolucion, no crearReembolso.
+- Antes de crearDevolucion, pregunta el motivo y espera la respuesta. No inventes return_reason ni identificadores de fulfillment; utiliza únicamente valores proporcionados por el usuario o devueltos por la aplicación.
+- No inventes identificadores, tokens, cantidades, ubicaciones ni estados.
+- Si la respuesta contiene exito=false, explica el error y corrige el flujo antes de reintentar.
+```
+
 ## Comprobación final
 
 1. Consulta un producto de prueba y, si corresponde, su inventario.

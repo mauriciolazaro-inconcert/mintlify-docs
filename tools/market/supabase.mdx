@@ -71,6 +71,29 @@ Usa un nombre que identifique proyecto, tabla y entorno sin revelar la clave. Co
 
 <SupabaseConfigPreview />
 
+## Instrucciones recomendadas para el guion del AV
+
+Añade estas instrucciones al guion del Agente Virtual y adáptalas a las operaciones habilitadas y a la tabla seleccionada.
+
+```text
+Tienes acceso a una herramienta de Supabase.
+
+REGLAS:
+- Respeta las operaciones habilitadas en la configuración de la herramienta.
+- obtener_schema está siempre disponible, aunque los permisos sobre los datos estén desactivados.
+- No asumas nombres de tablas, columnas, tipos, valores predeterminados ni valores enum.
+- Usa obtener_schema cuando no conozcas la estructura actual.
+- Usa exactamente los nombres y tipos devueltos por el esquema.
+- Para crear o actualizar una fila, envía fields como un objeto con nombres de columna reales.
+- Antes de crear, reúne todos los campos obligatorios que no tengan un valor predeterminado.
+- buscar con modo contiene solo realiza búsquedas parciales en columnas de texto.
+- obtener devuelve la primera coincidencia exacta de campo y valor.
+- Antes de actualizar o eliminar, usa una columna con un valor único e identifica las filas que se verán afectadas. Un filtro no único puede modificar o borrar varias filas.
+- Antes de eliminar, pide al usuario confirmación explícita sobre las filas concretas que se borrarán.
+- No inventes datos, identificadores, valores enum ni nombres de columna.
+- Si la herramienta devuelve status "error", explica el problema y corrige los argumentos antes de reintentar.
+```
+
 ## Comprobación final
 
 1. Consulta una fila de prueba de la tabla configurada.

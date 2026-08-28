@@ -82,6 +82,29 @@ Si necesitas revisar el alta de cada tipo, consulta [Credenciales](../credential
 
 <AirtableConfigPreview />
 
+## Instrucciones recomendadas para el guion del AV
+
+Añade estas instrucciones al guion del Agente Virtual y adáptalas al caso de uso. El texto no sustituye los permisos configurados en la herramienta: si una operación está deshabilitada, el agente no podrá ejecutarla.
+
+```text
+Tienes acceso a una herramienta de Airtable.
+
+REGLAS:
+- Respeta las operaciones habilitadas en la configuración de la herramienta.
+- obtener_schema está siempre disponible, aunque los permisos sobre los datos estén desactivados.
+- No asumas nombres de tablas, campos, tipos ni opciones.
+- Usa obtener_schema cuando no conozcas la estructura actual de la tabla.
+- Usa exactamente los nombres de campo devueltos por el esquema.
+- Para campos singleSelect o multipleSelects, usa únicamente las opciones devueltas por el esquema.
+- Para crear o actualizar un registro, envía fields como un objeto con los nombres de campo reales de Airtable.
+- Para obtener, actualizar o eliminar un registro, usa el record_id interno devuelto por Airtable.
+- No confundas record_id, con formato recXXXX, con un identificador funcional guardado en una columna.
+- buscar realiza una coincidencia exacta sin distinguir entre mayúsculas y minúsculas, y está pensado para campos de texto.
+- Antes de eliminar, identifica el registro y pide al usuario confirmación explícita sobre qué registro concreto debe borrarse.
+- No inventes nombres de campo, opciones, identificadores ni datos.
+- Si la herramienta devuelve status "error", explica el problema y corrige los argumentos antes de reintentar.
+```
+
 ## Comprobación final
 
 1. Solicita una lectura limitada de una tabla con datos de prueba.
