@@ -1,0 +1,95 @@
+---
+title: "API del marcador"
+description: "Autentica y consulta la API del marcador nativo de Inagent."
+---
+
+La API del **marcador de Inagent** permite consultar lotes, incorporar contactos, reagendar contactos y revisar el historial operativo y de llamadas.
+
+## URL base
+
+```text
+https://api.backend.inconcertcc.com/engine/v1/api/auto-contact
+```
+
+## Autenticación
+
+Todos los endpoints de esta sección requieren una API key en el header `apikey`.
+
+```http
+apikey: TU_API_KEY
+```
+
+Puedes obtener la API key desde la interfaz de Inagent, dentro del marcador.
+
+<Warning>
+  Trata la API key como una credencial. No la incluyas en repositorios, código cliente, logs ni ejemplos compartidos.
+</Warning>
+
+## Ejemplo autenticado
+
+<CodeGroup>
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10' \
+  --header 'apikey: TU_API_KEY'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  "https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10",
+  {
+    headers: {
+      apikey: process.env.INAGENT_DIALER_API_KEY
+    }
+  }
+);
+
+const data = await response.json();
+```
+
+```python Python
+import os
+import requests
+
+response = requests.get(
+    "https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches",
+    headers={"apikey": os.environ["INAGENT_DIALER_API_KEY"]},
+    params={"page": 0, "size": 10},
+    timeout=10,
+)
+response.raise_for_status()
+data = response.json()
+```
+
+</CodeGroup>
+
+## Endpoints disponibles
+
+<CardGroup cols={2}>
+  <Card title="Consultar lotes" icon="list" href="./list-batches">
+    Lista y filtra los lotes del marcador.
+  </Card>
+  <Card title="Obtener un lote" icon="box" href="./get-batch">
+    Recupera la configuración y el estado de un lote.
+  </Card>
+  <Card title="Insertar contactos" icon="user-plus" href="./add-contacts">
+    Añade uno o varios contactos a un lote existente.
+  </Card>
+  <Card title="Reagendar un contacto" icon="calendar-clock" href="./schedule-contact">
+    Programa un nuevo intento para un contacto del lote.
+  </Card>
+  <Card title="Log de cambios" icon="clock-rotate-left" href="./batch-logs">
+    Consulta las operaciones registradas sobre un lote.
+  </Card>
+  <Card title="Historial del lote" icon="phone" href="./batch-call-history">
+    Revisa los intentos de llamada registrados en un lote.
+  </Card>
+  <Card title="Historial del contacto" icon="address-card" href="./contact-call-history">
+    Consulta los intentos de un contacto concreto.
+  </Card>
+</CardGroup>
+
+<Info>
+  Los ejemplos de esta sección reutilizan los mismos identificadores de lote, canal y contacto para facilitar la comparación entre peticiones.
+</Info>

@@ -1,0 +1,96 @@
+---
+title: "Consultar el log de un lote"
+description: "Obtén el registro de cambios y operaciones de un lote del marcador."
+api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/logs"
+auth: "key"
+---
+
+Devuelve el registro de operaciones realizadas sobre un lote.
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+## Parámetros
+
+<ParamField path="batchId" type="string" required>
+  Identificador único del lote.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Cantidad máxima de registros solicitados.
+</ParamField>
+
+<ParamField query="offset" type="integer">
+  Desplazamiento desde el primer registro.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/logs?limit=50&offset=0' \
+  --header 'apikey: TU_API_KEY'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "data": [
+    {
+      "id": "ce4d9628-8127-475f-ab49-8ad308cd78c6",
+      "batchId": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "operation": "archived",
+      "performedBy": "b5860478-5927-4362-8b59-c8f42149d045",
+      "details": null,
+      "createdAt": "2026-09-07T11:28:37.000Z",
+      "updatedAt": "2026-09-07T11:28:37.000Z",
+      "user": {
+        "id": "b5860478-5927-4362-8b59-c8f42149d045",
+        "name": "Usuario de ejemplo"
+      }
+    },
+    {
+      "id": "0515fb23-fd67-46a9-a17c-d207dfcec57c",
+      "batchId": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "operation": "stopped",
+      "performedBy": "b5860478-5927-4362-8b59-c8f42149d045",
+      "details": { "reason": "manual" },
+      "createdAt": "2026-09-07T11:28:29.000Z",
+      "updatedAt": "2026-09-07T11:28:29.000Z",
+      "user": {
+        "id": "b5860478-5927-4362-8b59-c8f42149d045",
+        "name": "Usuario de ejemplo"
+      }
+    },
+    {
+      "id": "5c17854c-19df-49c2-a388-09f73a5a8bc1",
+      "batchId": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "operation": "contacts_added",
+      "performedBy": "system",
+      "details": { "count": 4 },
+      "createdAt": "2026-09-07T11:27:45.000Z",
+      "updatedAt": "2026-09-07T11:27:45.000Z"
+    },
+    {
+      "id": "578b7aab-f935-4927-a8a5-db533a400076",
+      "batchId": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "operation": "started",
+      "performedBy": "b5860478-5927-4362-8b59-c8f42149d045",
+      "details": { "reason": "manual" },
+      "createdAt": "2026-09-07T10:54:16.000Z",
+      "updatedAt": "2026-09-07T10:54:16.000Z",
+      "user": {
+        "id": "b5860478-5927-4362-8b59-c8f42149d045",
+        "name": "Usuario de ejemplo"
+      }
+    }
+  ],
+  "total": 6
+}
+```
+
+</ResponseExample>

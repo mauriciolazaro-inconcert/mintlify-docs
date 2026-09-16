@@ -1,0 +1,88 @@
+---
+title: "Historial de llamadas de un contacto"
+description: "Consulta los intentos de llamada de un contacto dentro de un lote."
+api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/contacts/{contactId}/event-history"
+auth: "key"
+---
+
+Devuelve los intentos de llamada de un contacto concreto dentro de un lote.
+
+<Info>
+  Cada posición de los arrays de `data` corresponde, en el mismo orden, al nombre incluido en `columns`.
+</Info>
+
+## Parámetros
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+<ParamField path="contactId" type="string" required>
+  Identificador interno del contacto devuelto por el historial del lote.
+</ParamField>
+
+<ParamField query="batchId" type="string" required>
+  Identificador del lote al que pertenece el contacto.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Cantidad máxima de registros solicitados.
+</ParamField>
+
+<ParamField query="offset" type="integer">
+  Desplazamiento desde el primer registro.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/contacts/01a07b9f-cd7f-772c-adc5-e05f5b20d196/event-history?limit=50&offset=0&batchId=e8b63614-f5db-4fd4-84ab-258b7070262e' \
+  --header 'apikey: TU_API_KEY'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "data": [
+    [
+      "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "01a07b9f-cd7f-772c-adc5-e05f5b20d196",
+      "CLI-002",
+      "Juan Pérez",
+      "+5491155551234",
+      "503",
+      "Service Unavailable",
+      "2026-09-07T11:28:22.603Z",
+      "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "874b769d-0425-4d49-9e6d-a66643a910fc",
+      1
+    ]
+  ],
+  "columns": [
+    "batchId",
+    "contactId",
+    "identifier",
+    "name",
+    "address",
+    "result_code",
+    "result_description",
+    "createdAt",
+    "channelId",
+    "dialId",
+    "attemptCount"
+  ],
+  "pagination": {
+    "total": 1,
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+</ResponseExample>
+
+<Note>
+  En estos ejemplos, el `contactId` consultado corresponde al identificador externo `CLI-002` y al lote `e8b63614-f5db-4fd4-84ab-258b7070262e`.
+</Note>

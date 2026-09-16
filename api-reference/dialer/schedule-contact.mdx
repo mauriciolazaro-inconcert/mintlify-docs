@@ -1,0 +1,71 @@
+---
+title: "Reagendar un contacto"
+description: "Programa un nuevo intento para un contacto de un lote."
+api: "POST https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/contacts/{contactIdentifier}/schedule/"
+auth: "key"
+---
+
+Programa la fecha y hora del siguiente intento para un contacto incluido en un lote.
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+## Parámetros de ruta
+
+<ParamField path="batchId" type="string" required>
+  Identificador único del lote.
+</ParamField>
+
+<ParamField path="contactIdentifier" type="string" required>
+  Identificador del contacto dentro del lote, por ejemplo `CLI-002`.
+</ParamField>
+
+## Body
+
+<ParamField body="scheduledAt" type="string" required>
+  Fecha y hora programadas en formato ISO 8601.
+</ParamField>
+
+<ParamField body="resetAttempts" type="boolean">
+  Indica si se reinicia el contador de intentos al reagendar.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Motivo del reagendamiento.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request POST \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts/CLI-002/schedule/' \
+  --header 'Content-Type: application/json' \
+  --header 'apikey: TU_API_KEY' \
+  --data '{
+    "scheduledAt": "2026-09-16T11:10:00.000Z",
+    "resetAttempts": true,
+    "reason": "El cliente pidió que lo llamen más tarde"
+  }'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "contactId": "01a07b9f-cd7f-772c-adc5-e05f5b20d196",
+  "batchId": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+  "scheduledAt": "2026-09-16T11:10:00.000Z",
+  "scheduled": true,
+  "resetAttempts": true,
+  "reason": "El cliente pidió que lo llamen más tarde"
+}
+```
+
+</ResponseExample>
+
+<Note>
+  El identificador `CLI-002` de la URL corresponde al contacto cuyo `contactId` es `01a07b9f-cd7f-772c-adc5-e05f5b20d196` en los ejemplos de historial.
+</Note>

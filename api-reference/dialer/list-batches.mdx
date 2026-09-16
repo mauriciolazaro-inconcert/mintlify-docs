@@ -1,0 +1,100 @@
+---
+title: "Consultar lotes"
+description: "Lista y filtra los lotes del marcador de Inagent."
+api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches"
+auth: "key"
+---
+
+Devuelve los lotes del marcador que coinciden con los filtros enviados.
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+## Parámetros de consulta
+
+<ParamField query="page" type="integer">
+  Página que se desea consultar. El ejemplo comienza en `0`.
+</ParamField>
+
+<ParamField query="size" type="integer">
+  Cantidad de lotes por página.
+</ParamField>
+
+<ParamField query="sortField" type="string">
+  Campo utilizado para ordenar los resultados. En el ejemplo se usa `createdAt`.
+</ParamField>
+
+<ParamField query="sortOrder" type="string">
+  Orden de los resultados. En el ejemplo se usa `desc`.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Estado por el que se filtran los lotes. En el ejemplo se usa `archived`.
+</ParamField>
+
+<ParamField query="startDate" type="string">
+  Inicio del periodo en formato ISO 8601.
+</ParamField>
+
+<ParamField query="endDate" type="string">
+  Fin del periodo en formato ISO 8601.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10&sortField=createdAt&sortOrder=desc&status=archived&startDate=2026-08-31T22%3A00%3A00.000Z&endDate=2026-09-16T21%3A59%3A59.999Z' \
+  --header 'apikey: TU_API_KEY'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "data": [
+    {
+      "id": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+      "name": "lote_ventas",
+      "channelName": "Marcador_ventas",
+      "channelType": "Livekit_SipCall",
+      "channelId": "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "status": "archived",
+      "displayStatus": "archived",
+      "statusReason": "manual",
+      "statusChangedAt": "2026-09-07T11:28:37.000Z",
+      "statusChangedBy": "Usuario de ejemplo",
+      "totalContacts": 6,
+      "contactedCount": 0,
+      "processedCount": 2,
+      "finishedCount": 2,
+      "uploadStatus": "completed",
+      "uploadProgress": 1,
+      "channelPriority": 1,
+      "queueSyncStatus": "completed",
+      "isFavorite": false,
+      "enabled": true,
+      "deleted": false,
+      "createdAt": "2026-09-07T10:53:45.000Z",
+      "updatedAt": "2026-09-07T11:28:37.000Z",
+      "createdBy": "Usuario de ejemplo",
+      "updatedBy": "Usuario de ejemplo",
+      "crewId": "3de07003-adc0-4b7a-b1d4-333220d51fb4.equipo-ventas.latest"
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 0,
+    "limit": 10
+  }
+}
+```
+
+</ResponseExample>
+
+<Note>
+  La respuesta de cada lote también puede incluir su mapeo, reglas, estrategia de duplicados y datos del canal. Para ver un ejemplo más detallado, consulta <a href="./get-batch">Obtener un lote</a>.
+</Note>

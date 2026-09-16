@@ -1,0 +1,114 @@
+---
+title: "Historial de llamadas de un lote"
+description: "Consulta los intentos de llamada registrados en un lote."
+api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/event-history"
+auth: "key"
+---
+
+Devuelve los intentos de llamada registrados para los contactos de un lote.
+
+<Info>
+  En ambas respuestas, cada posición de los arrays de `data` corresponde, en el mismo orden, al nombre incluido en `columns`.
+</Info>
+
+## Parámetros
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+<ParamField path="batchId" type="string" required>
+  Identificador único del lote.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Cantidad máxima de registros solicitados.
+</ParamField>
+
+<ParamField query="offset" type="integer">
+  Desplazamiento desde el primer registro.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/event-history?limit=20&offset=0' \
+  --header 'apikey: TU_API_KEY'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "data": [
+    [
+      "01a07b9f-cd80-7b76-a602-256f75e1bce9",
+      1,
+      "CLI-004",
+      "Pedro López",
+      "+5491177771234",
+      "503",
+      "Service Unavailable",
+      "2026-09-07T11:28:22.848Z",
+      "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "81e9b7ca-ca02-4532-8667-d6a68ffff3a6"
+    ],
+    [
+      "01a07b9f-cd80-7d2e-b035-08e5d70aa5d8",
+      1,
+      "CLI-005",
+      "Ana Martínez",
+      "+5491188881234",
+      "503",
+      "Service Unavailable",
+      "2026-09-07T11:28:22.781Z",
+      "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "217fb3c4-ab9a-497f-a581-fe3f2f2269ff"
+    ],
+    [
+      "01a07b9f-cd7f-772c-adc5-e05f5b20d196",
+      1,
+      "CLI-002",
+      "Juan Pérez",
+      "+5491155551234",
+      "503",
+      "Service Unavailable",
+      "2026-09-07T11:28:22.603Z",
+      "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "874b769d-0425-4d49-9e6d-a66643a910fc"
+    ],
+    [
+      "01a07b9f-cd80-79fd-8f3a-e0ce135d68df",
+      1,
+      "CLI-003",
+      "María García",
+      "+5491166661234",
+      "503",
+      "Service Unavailable",
+      "2026-09-07T11:28:22.285Z",
+      "55210458-1957-4023-b7cc-82bbb5124aaa",
+      "0c5c0429-c186-409a-b4c4-145c476368f9"
+    ]
+  ],
+  "columns": [
+    "contactId",
+    "attemptCount",
+    "identifier",
+    "name",
+    "address",
+    "result_code",
+    "result_description",
+    "createdAt",
+    "channelId",
+    "dialId"
+  ],
+  "pagination": {
+    "total": 7,
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+
+</ResponseExample>

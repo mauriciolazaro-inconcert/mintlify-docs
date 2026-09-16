@@ -1,0 +1,113 @@
+---
+title: "Obtener un lote"
+description: "Consulta el estado y la configuración de un lote del marcador."
+api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}"
+auth: "key"
+---
+
+Devuelve la información de un lote concreto, incluidos su estado, métricas, configuración y canal asociado.
+
+## Autenticación
+
+<ParamField header="apikey" type="string" required>
+  API key obtenida desde la interfaz de Inagent, dentro del marcador.
+</ParamField>
+
+## Parámetros de ruta
+
+<ParamField path="batchId" type="string" required>
+  Identificador único del lote.
+</ParamField>
+
+## Ejemplo
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e' \
+  --header 'apikey: TU_API_KEY'
+```
+
+<ResponseExample>
+
+```json Response
+{
+  "id": "e8b63614-f5db-4fd4-84ab-258b7070262e",
+  "name": "lote_ventas",
+  "channelName": "Marcador_ventas",
+  "channelType": "Livekit_SipCall",
+  "channelId": "55210458-1957-4023-b7cc-82bbb5124aaa",
+  "status": "archived",
+  "displayStatus": "archived",
+  "statusReason": "manual",
+  "statusChangedAt": "2026-09-07T11:28:37.000Z",
+  "statusChangedBy": "b5860478-5927-4362-8b59-c8f42149d045",
+  "totalContacts": 6,
+  "fileRowCount": 1,
+  "contactedCount": 0,
+  "processedCount": 2,
+  "finishedCount": 2,
+  "uploadStatus": "completed",
+  "uploadProgress": 1,
+  "mapping": {
+    "name": "nombre",
+    "priority": "",
+    "addresses": [
+      {
+        "column": "telefono",
+        "priority": 1
+      }
+    ],
+    "identifier": "id",
+    "customFields": [],
+    "identifierLooksConstant": false
+  },
+  "filters": null,
+  "schedule": null,
+  "rules": {
+    "amd": {
+      "amdAction": "HANGUP",
+      "amdEnabled": true
+    },
+    "strategy": {
+      "timezone": "Europe/Madrid",
+      "daysOfWeek": [1, 2, 3, 4, 5],
+      "scheduleEnd": "19:00",
+      "scheduleStart": "08:00",
+      "timeBetweenAttempts": 3,
+      "maxAttemptsPerAddress": 2,
+      "maxAttemptsPerContact": 4,
+      "processAllContactsFirst": false
+    },
+    "channelType": "livekit_sipcall",
+    "resultRules": {
+      "busy": { "maxRetries": 2, "retryDelay": 15 },
+      "failed": { "maxRetries": 2, "retryDelay": 15 },
+      "noAnswer": { "maxRetries": 2, "retryDelay": 15 },
+      "voicemail": { "maxRetries": 2, "retryDelay": 15 }
+    },
+    "addressPriority": {
+      "tryAllBeforeRetry": true
+    }
+  },
+  "duplicateStrategy": {
+    "action": "update_always",
+    "enabled": true,
+    "detectionCriteria": "phone"
+  },
+  "channelPriority": 1,
+  "statusDetail": null,
+  "queueSyncStatus": "completed",
+  "isFavorite": false,
+  "enabled": true,
+  "deleted": false,
+  "createdAt": "2026-09-07T10:53:45.000Z",
+  "updatedAt": "2026-09-07T11:28:37.000Z",
+  "channel": {
+    "id": "55210458-1957-4023-b7cc-82bbb5124aaa",
+    "crewId": "3de07003-adc0-4b7a-b1d4-333220d51fb4.equipo-ventas.latest"
+  },
+  "crewId": "3de07003-adc0-4b7a-b1d4-333220d51fb4.equipo-ventas.latest"
+}
+```
+
+</ResponseExample>

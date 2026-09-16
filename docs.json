@@ -125,6 +125,19 @@
 						"pages": ["api-reference/events/dictionary"]
 					},
 					{
+						"group": "Marcador de Inagent",
+						"pages": [
+							"api-reference/dialer/overview",
+							"api-reference/dialer/list-batches",
+							"api-reference/dialer/get-batch",
+							"api-reference/dialer/add-contacts",
+							"api-reference/dialer/schedule-contact",
+							"api-reference/dialer/batch-logs",
+							"api-reference/dialer/batch-call-history",
+							"api-reference/dialer/contact-call-history"
+						]
+					},
+					{
 						"group": "Reportes",
 						"pages": ["api-reference/reports/authentication", "api-reference/reports/reportes-estandar", "api-reference/reports/reportes-personalizados"]
 					}
