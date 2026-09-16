@@ -26,7 +26,7 @@ Añade contactos a un lote existente y deja la operación en cola para su proces
 </ParamField>
 
 <ParamField body="contacts[].identifier" type="string" required>
-  Identificador del contacto dentro del lote.
+  Identificador único externo definido por el cliente para el contacto. No es el `contactId` interno que genera el sistema al importar el contacto.
 </ParamField>
 
 <ParamField body="contacts[].name" type="string">

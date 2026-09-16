@@ -1,7 +1,7 @@
 ---
 title: "Reagendar un contacto"
 description: "Programa un nuevo intento para un contacto de un lote."
-api: "POST https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/contacts/{contactIdentifier}/schedule/"
+api: "POST https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/contacts/{contactId}/schedule/"
 auth: "key"
 ---
 
@@ -19,8 +19,8 @@ Programa la fecha y hora del siguiente intento para un contacto incluido en un l
   Identificador único del lote.
 </ParamField>
 
-<ParamField path="contactIdentifier" type="string" required>
-  Identificador del contacto dentro del lote, por ejemplo `CLI-002`.
+<ParamField path="contactId" type="string" required>
+  Identificador interno que el sistema genera al importar el contacto, por ejemplo `01a07b9f-cd7f-772c-adc5-e05f5b20d196`.
 </ParamField>
 
 ## Body
@@ -41,7 +41,7 @@ Programa la fecha y hora del siguiente intento para un contacto incluido en un l
 
 ```bash cURL
 curl --request POST \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts/CLI-002/schedule/' \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts/01a07b9f-cd7f-772c-adc5-e05f5b20d196/schedule/' \
   --header 'Content-Type: application/json' \
   --header 'apikey: TU_API_KEY' \
   --data '{
@@ -66,6 +66,6 @@ curl --request POST \
 
 </ResponseExample>
 
-<Note>
-  El identificador `CLI-002` de la URL corresponde al contacto cuyo `contactId` es `01a07b9f-cd7f-772c-adc5-e05f5b20d196` en los ejemplos de historial.
-</Note>
+<Warning>
+  Usa el `contactId` generado por el sistema, no el campo `identifier` definido por el cliente durante la importación. Puedes obtener el `contactId` en el historial de llamadas del lote.
+</Warning>
