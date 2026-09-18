@@ -1,0 +1,3172 @@
+openapi: 3.1.0
+
+info:
+  title: AutoContact API
+  version: final
+  summary: Gestión de lotes de marcación automática y carga de contactos.
+  description: |
+    API de AutoContact: gestión de lotes de marcación automática y de los contactos que los integran.
+
+    Todos los recursos se publican bajo `/auto-contact/`.
+
+    ## Autenticación
+
+    Las peticiones se autentican con el header `apikey`, usando la credencial asociada al lote. El
+    servicio deriva la cuenta de esa credencial y verifica que el recurso solicitado le pertenezca.
+
+    Un lote que no pertenece a la cuenta responde `404`, igual que un lote inexistente.
+
+    ## Operaciones asíncronas
+
+    Algunas operaciones responden `202` en lugar de `200`: la petición se acepta y el trabajo continúa
+    en segundo plano. Es el caso de la carga de contactos, la creación de un lote, el arranque y la
+    eliminación.
+
+    Esas respuestas incluyen un `operationId` que se consulta en
+    `GET /auto-contact/batches/operations/{operationId}` para conocer el resultado.
+
+    Tiempo de retención de las operaciones:
+
+    | Tipo de operación | Disponible durante |
+    |---|---|
+    | Carga de contactos | 6 horas |
+    | Ciclo de vida del lote (creación, arranque, archivado, eliminación) | 1 hora, y 10 minutos desde que finaliza |
+
+    ## Reintentos seguros con `Idempotency-Key`
+
+    Las operaciones de escritura aceptan el header opcional `Idempotency-Key`. Resuelve el caso en que
+    se produce un error de red después de que la petición llegó al servicio: sin este header no es
+    posible determinar si el trabajo se procesó, y reintentar podría duplicar llamadas telefónicas.
+
+    Con el header, un reintento que use la misma clave y el mismo cuerpo devuelve la respuesta original
+    sin procesar nada de nuevo. Las claves se conservan 24 horas.
+
+    Recomendación de uso: generar un identificador único (por ejemplo un UUID) antes del primer intento
+    y reutilizarlo solo en los reintentos de esa misma operación.
+
+    Requisitos de la clave: entre 1 y 255 caracteres, solo ASCII imprimible. Una clave que no cumpla
+    estos requisitos se rechaza con `400 INVALID_IDEMPOTENCY_KEY` en lugar de ignorarse, para evitar
+    procesar la petición sin la protección que el cliente espera tener.
+
+    ### Headers de respuesta
+
+    | Header | Cuándo aparece | Significado |
+    |---|---|---|
+    | `Idempotency-Replayed: true` | En un reintento | La respuesta corresponde a la petición original; no se procesó de nuevo |
+    | `Retry-After` | Junto a `409 IDEMPOTENCY_KEY_IN_FLIGHT` | Segundos a esperar antes de reintentar |
+    | `Idempotency-Status: bypassed` | Excepcionalmente | La petición se procesó **sin** protección de idempotencia |
+
+    El header `Idempotency-Status: bypassed` indica que el servicio de idempotencia no estaba
+    disponible y la petición se procesó igualmente, para no interrumpir la operación. La respuesta es
+    válida, pero esa petición concreta no quedó protegida: si no se recibe respuesta, se recomienda
+    verificar el estado antes de reintentar.
+
+    Las respuestas con error `5xx` no se almacenan, de modo que un reintento con la misma clave vuelve a
+    procesar la petición.
+
+servers:
+  - url: https://api.backend.inconcertcc.com/engine/v1/api
+    description: API de Inagent
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Lotes
+    description: |
+      Creación, consulta y control de lotes de marcación.
+  - name: Contactos
+    description: |
+      Carga de contactos en un lote, reagendamiento y anulación.
+  - name: Direcciones bloqueadas
+    description: |
+      Direcciones excluidas de la marcación en toda la cuenta.
+  - name: Operaciones
+    description: |
+      Seguimiento de las operaciones asíncronas que devuelven `202`.
+
+paths:
+  /auto-contact/batches/{batchId}/contacts:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    post:
+      tags: [Contactos]
+      operationId: insertContacts
+      summary: Carga uno o varios contactos en un lote
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      description: |
+        Agrega contactos a un lote existente. Responde `202`: la inserción se realiza en segundo plano.
+
+        Se recomienda enviar el header `Idempotency-Key`. Esta operación encola llamadas telefónicas, por
+        lo que un reintento sin protección puede contactar dos veces a las mismas personas.
+
+        ## Formato del cuerpo
+
+        Admite dos formas equivalentes: un contacto individual en la raíz del cuerpo, o varios contactos
+        en el campo `contacts`.
+
+        ## Límites
+
+        * Máximo 1000 contactos por petición.
+        * El total de contactos activos de la cuenta tiene un límite propio. Al superarlo, la respuesta
+          es `400` con `code: CONTACT_LIMIT_EXCEEDED` e indica cuántos contactos pueden añadirse.
+
+        ## El campo `identifier`
+
+        Es el identificador del contacto en el sistema de origen y permite conciliar los resultados. Si
+        se omite, el servicio genera uno automáticamente, pero en ese caso no habrá forma de relacionar
+        el contacto con el registro original.
+
+        ## Resultado de la carga
+
+        La respuesta `202` confirma que los contactos se aceptaron para procesamiento, no que se hayan
+        insertado. Una carga puede completarse parcialmente: un contacto puede descartarse por duplicado
+        según la política de deduplicación configurada en el lote.
+
+        Para conocer el resultado, consulte
+        `GET /auto-contact/batches/operations/{operationId}` con el identificador que devuelve esta
+        respuesta. La URL completa también viene en el header `Location`.
+
+        Las validaciones de formato (campos obligatorios, formato de teléfono y correo, prioridades) se
+        aplican antes de encolar. Un solo contacto inválido rechaza la petición completa con `400`, de
+        modo que se pueda corregir el envío antes de procesarlo.
+
+        La respuesta `400` de validación incluye todos los errores detectados, cada uno con su campo, un
+        código estable y datos adicionales del problema.
+
+        ## Agendar la primera llamada
+
+        El campo `scheduledAt` es opcional y determina cuándo se intentará contactar por primera vez. Si
+        se omite, el contacto entra en el siguiente ciclo de marcación.
+
+        La fecha debe ser futura y estar dentro de los próximos 30 días.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ContactInput'
+                - type: object
+                  required: [contacts]
+                  properties:
+                    contacts:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        $ref: '#/components/schemas/ContactInput'
+            examples:
+              unContacto:
+                summary: Un contacto individual, en la raíz del cuerpo
+                value:
+                  identifier: CLI-001
+                  name: Juan Pérez
+                  addresses:
+                    - address: '5491155551234'
+                      type: phone
+                      priority: 1
+                    - address: juan@example.com
+                      type: email
+                      priority: 2
+                  customFields:
+                    campaign: verano2025
+                    source: crm
+              variosContactos:
+                summary: Varios contactos, en el campo `contacts`
+                value:
+                  contacts:
+                    - identifier: CLI-001
+                      name: Juan Pérez
+                      addresses:
+                        - address: '5491155551234'
+                          type: phone
+                          priority: 1
+                    - identifier: CLI-002
+                      name: María López
+                      addresses:
+                        - address: '5491155555678'
+                          type: phone
+                          priority: 1
+              conAgendamiento:
+                summary: Con la primera llamada programada
+                value:
+                  identifier: CLI-003
+                  name: Carlos Gómez
+                  addresses:
+                    - address: '5491155559999'
+                      type: phone
+                      priority: 1
+                  scheduledAt: '2026-08-20T14:30:00.000Z'
+      responses:
+        '202':
+          description: |
+            Contactos aceptados. La inserción se realiza en segundo plano.
+          headers:
+            Location:
+              description: |
+                URL de la operación asociada a esta carga, donde se consulta su resultado.
+              schema:
+                type: string
+              example: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+            Idempotency-Replayed:
+              $ref: '#/components/headers/IdempotencyReplayed'
+            Idempotency-Status:
+              $ref: '#/components/headers/IdempotencyStatus'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [operationId, operationUrl, status, contactsReceived, chunksPublished]
+                properties:
+                  operationId:
+                    type: string
+                    format: uuid
+                    description: |
+                      Identifica esta carga. Se resuelve en
+                      `GET /auto-contact/batches/operations/{operationId}`.
+                    example: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                  operationUrl:
+                    type: string
+                    description: |
+                      URL del recurso de operación, la misma que viene en el header `Location`.
+                    example: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                  status:
+                    type: string
+                    enum: [queued]
+                  contactsReceived:
+                    type: integer
+                    description: Cuántos contactos se recibieron y validaron.
+                    example: 150
+                  chunksPublished:
+                    type: integer
+                    description: |
+                      Número de bloques en los que se dividió la carga. La operación se considera
+                      finalizada cuando todos se han procesado.
+                    example: 3
+                  message:
+                    type: string
+              example:
+                operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                operationUrl: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                status: queued
+                contactsReceived: 150
+                chunksPublished: 3
+                message: Contacts queued for processing
+        '400':
+          description: |
+            Cuerpo vacío, más de 1000 contactos, un contacto que no pasó la validación de formato,
+            límite de contactos de la cuenta excedido, o `Idempotency-Key` con formato incorrecto.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/ContactLimitError'
+                  - $ref: '#/components/schemas/IdempotencyKeyError'
+              examples:
+                sinContactos:
+                  summary: Ningún contacto en el cuerpo
+                  value:
+                    message: Se requiere al menos un contacto
+                    details: []
+                demasiados:
+                  summary: Más de 1000 contactos
+                  value:
+                    message: El máximo de contactos por request es 1000
+                    details:
+                      - Se recibieron 1500 contactos
+                validacion:
+                  summary: Uno o más contactos inválidos
+                  value:
+                    code: VALIDATION_FAILED
+                    message: Validación fallida en uno o más contactos
+                    details:
+                      - index: 3
+                        field: contacts[3].addresses[0].address
+                        code: INVALID_PHONE_FORMAT
+                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                        meta:
+                          received: '123'
+                          expected: '+?digits, 7-15 characters'
+                        error: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                      - index: 7
+                        field: contacts[7].name
+                        code: REQUIRED
+                        reason: "'name' es obligatorio y no puede estar vacío"
+                        error: "'name' es obligatorio y no puede estar vacío"
+                limite:
+                  summary: Límite de contactos de la cuenta excedido
+                  value:
+                    code: CONTACT_LIMIT_EXCEEDED
+                    message: Contact limit exceeded. You are trying to add 500 contacts, but you can only add 120 more.
+                    maxContacts: 10000
+                    currentActive: 9880
+                    attempting: 500
+                    exceededBy: 380
+                claveInvalida:
+                  summary: '`Idempotency-Key` mal formada'
+                  value:
+                    code: INVALID_IDEMPOTENCY_KEY
+                    message: 'Invalid Idempotency-Key header: it must be at most 255 characters'
+                    details:
+                      - field: Idempotency-Key
+                        code: TOO_LONG
+                        reason: must be at most 255 characters
+                        meta:
+                          maxLength: 255
+                          receivedLength: 300
+                    meta:
+                      rejection: TOO_LONG
+                      maxLength: 255
+                      receivedLength: 300
+        '404':
+          description: |
+            El lote no existe o no pertenece a la cuenta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: Batch not found
+        '409':
+          description: |
+            El lote está archivado, o existe un conflicto de idempotencia.
+          headers:
+            Retry-After:
+              description: |
+                Segundos a esperar antes de reintentar. Solo con `IDEMPOTENCY_KEY_IN_FLIGHT`.
+              schema:
+                type: integer
+              example: 2
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleError'
+                  - $ref: '#/components/schemas/IdempotencyConflictError'
+              examples:
+                archivado:
+                  summary: Lote archivado
+                  value:
+                    message: Cannot modify an archived batch
+                enVuelo:
+                  summary: Petición idéntica todavía en proceso
+                  value:
+                    code: IDEMPOTENCY_KEY_IN_FLIGHT
+                    message: A request with this Idempotency-Key is still being processed. Retry shortly.
+                    meta:
+                      retryAfterSeconds: 2
+                claveReusada:
+                  summary: La clave ya se utilizó con otro cuerpo
+                  value:
+                    code: IDEMPOTENCY_KEY_REUSED
+                    message: This Idempotency-Key was already used with a different request body.
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/upload-url:
+    post:
+      tags: [Lotes]
+      operationId: getCsvUploadUrl
+      summary: Pide una URL para subir el CSV de contactos
+      description: |
+        Primer paso para crear un lote. Devuelve una URL firmada para subir el archivo CSV directamente
+        al almacenamiento, junto con la clave que identifica ese archivo al crear el lote.
+
+        ## Proceso completo
+
+        1. `POST /auto-contact/batches/upload-url`: devuelve `uploadUrl` y `tempCsvKey`.
+        2. `PUT` del contenido del CSV a `uploadUrl`, con el header `Content-Type: text/csv`. Esta
+           petición se dirige al almacenamiento, no a la API, y no requiere credenciales.
+        3. `POST /auto-contact/batches` indicando ese `tempCsvKey`.
+
+        ## Requisitos de la subida
+
+        * La URL caduca en 1 hora. Es el plazo para completar la subida; una vez creada la clave, el
+          lote puede crearse después.
+        * El `Content-Type` debe ser `text/csv`. La URL se firma para ese tipo concreto, por lo que
+          cualquier otro valor hace que el almacenamiento rechace la subida.
+
+        ## Validez de la clave
+
+        La clave se consume al crear el lote y no puede reutilizarse para un segundo lote.
+
+        Si la creación del lote se rechaza por límite de contactos o por canal deshabilitado, el archivo
+        se descarta y es necesario subirlo de nuevo. En cambio, un rechazo por validación del cuerpo
+        (`VALIDATION_FAILED`) conserva el archivo, de modo que se puede corregir la petición y volver a
+        intentarlo con la misma clave.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileName, fileType]
+              properties:
+                fileName:
+                  type: string
+                  description: |
+                    Nombre del archivo. Forma parte de la clave generada y facilita su identificación
+                    posterior. No necesita ser único.
+                  example: contactos-agosto.csv
+                fileType:
+                  type: string
+                  enum: [text/csv]
+                  description: |
+                    Tipo de contenido con el que se firma la URL. Debe coincidir con el `Content-Type`
+                    de la subida.
+            example:
+              fileName: contactos-agosto.csv
+              fileType: text/csv
+      responses:
+        '200':
+          description: URL de subida emitida.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [uploadUrl, tempCsvKey]
+                properties:
+                  uploadUrl:
+                    type: string
+                    description: |
+                      URL firmada para subir el archivo. Caduca en 1 hora. Debe utilizarse sin modificar
+                      sus parámetros, ya que la firma forma parte de la propia URL.
+                  tempCsvKey:
+                    type: string
+                    description: |
+                      Referencia al archivo subido. Es el valor que se indica en el campo `tempCsvKey`
+                      al crear el lote.
+                    example: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
+              example:
+                uploadUrl: https://storage.example.com/csv-uploads/acme/3f8a1b2c-contactos-agosto.csv?X-Amz-Signature=...
+                tempCsvKey: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches:
+    get:
+      tags: [Lotes]
+      operationId: listBatches
+      summary: Lista los lotes de la cuenta
+      description: |
+        Devuelve los lotes de la cuenta, paginados. Incluye los lotes archivados salvo que se filtre por
+        `status`.
+
+        ## Paginación
+
+        El parámetro `page` comienza en 0. El tamaño de página predeterminado es 20.
+
+        La respuesta incluye `pagination.total` con el número total de resultados que cumplen el filtro,
+        a partir del cual se obtiene el número de páginas.
+
+        ## Contadores de progreso
+
+        Para los lotes en curso, los campos `processedCount`, `contactedCount` y `finishedCount`
+        reflejan el estado actual de la marcación. Si esa información no está disponible
+        momentáneamente, se devuelven los últimos valores registrados, que pueden presentar un ligero
+        retraso.
+
+        ## `status` y `displayStatus`
+
+        `status` es el estado registrado del lote. `displayStatus` es el estado efectivo en el momento de
+        la consulta y es el recomendado para mostrar o evaluar la situación del lote.
+
+        Los dos pueden diferir: un lote con `status: running` fuera de su ventana horaria devuelve
+        `displayStatus: scheduled`, porque no realizará llamadas hasta que la ventana se abra.
+      parameters:
+        - name: page
+          in: query
+          description: Número de página, comenzando en 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Número de lotes por página.
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+        - name: sortField
+          in: query
+          description: Campo de ordenamiento.
+          schema:
+            type: string
+            default: createdAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: status
+          in: query
+          description: |
+            Filtra por estado del lote. Si se omite, se devuelven todos los lotes, incluidos los
+            archivados.
+          schema:
+            type: string
+            enum: [running, stopped, completed, archived]
+        - name: search
+          in: query
+          description: Filtra por nombre del lote.
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Fecha de creación mínima.
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: Fecha de creación máxima.
+          schema:
+            type: string
+            format: date-time
+        - name: crewId
+          in: query
+          description: Filtra por equipo asociado al canal del lote.
+          schema:
+            type: string
+        - name: channelType
+          in: query
+          description: |
+            Tipo de canal, según el catálogo de canales de la cuenta. Por ejemplo `Livekit_SipCall`.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Página de lotes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Batch'
+                  pagination:
+                    type: object
+                    required: [total, page, limit]
+                    properties:
+                      total:
+                        type: integer
+                        description: Número total de lotes que cumplen el filtro.
+                        example: 137
+                      page:
+                        type: integer
+                        description: Número de página devuelta.
+                        example: 0
+                      limit:
+                        type: integer
+                        example: 20
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Lotes]
+      operationId: createBatch
+      summary: Crea un lote a partir de un CSV ya subido
+      description: |
+        Crea el lote e inicia la importación de los contactos del CSV. Responde `202`: la importación se
+        realiza en segundo plano.
+
+        ## Proceso completo
+
+        1. `POST /auto-contact/batches/upload-url` para obtener la URL de subida y la clave del archivo.
+        2. `PUT` del CSV a esa URL, con `Content-Type: text/csv`.
+        3. Esta operación, indicando el `tempCsvKey` obtenido y el `mapping` de columnas.
+        4. Seguimiento de la importación con el `operationId` devuelto.
+
+        ## Configuración del mapeo
+
+        El campo `mapping` determina qué columna del CSV corresponde a cada dato. Se recomienda revisarlo
+        con atención: un mapeo incorrecto no produce un error, sino un lote que marca los números de una
+        columna equivocada.
+
+        Cada entrada de `mapping.addresses` indica una columna y su prioridad de marcación, donde `1` es
+        el primer intento. Las prioridades deben ser distintas entre sí.
+
+        La existencia de las columnas en el archivo no se comprueba en esta operación, sino durante la
+        importación. Un mapeo que apunte a una columna inexistente devuelve `202` y da lugar a una
+        operación con un número elevado de contactos inválidos.
+
+        ## Validación
+
+        La respuesta `400` incluye todos los errores detectados, cada uno con su campo y un código
+        estable.
+
+        ## Seguimiento de la importación
+
+        El `operationId` de la respuesta se consulta en
+        `GET /auto-contact/batches/operations/{operationId}`, que devuelve el avance y el resultado con
+        `kind: batch.lifecycle`.
+
+        Tenga en cuenta el plazo de retención: la operación está disponible durante 1 hora y solo 10
+        minutos desde que finaliza. Pasado ese plazo la consulta devuelve `404` aunque la importación haya
+        terminado correctamente.
+
+        El resultado de la importación también puede comprobarse en el propio lote, que es permanente: el
+        campo `uploadStatus` indica si la importación finalizó y `totalContacts`, cuántos contactos se
+        cargaron.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBatchInput'
+            examples:
+              minimo:
+                summary: Lo mínimo necesario
+                value:
+                  name: Cobranzas agosto
+                  channelId: 8c1e9f30-2a4b-4d6e-9f10-3b7c5d2e8a41
+                  tempCsvKey: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
+                  mapping:
+                    identifier: id_cliente
+                    name: nombre
+                    addresses:
+                      - column: telefono
+                        priority: 1
+              completo:
+                summary: Con filtros y deduplicación
+                value:
+                  name: Cobranzas agosto
+                  channelId: 8c1e9f30-2a4b-4d6e-9f10-3b7c5d2e8a41
+                  channelPriority: 5
+                  tempCsvKey: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
+                  mapping:
+                    identifier: id_cliente
+                    name: nombre
+                    addresses:
+                      - column: telefono
+                        priority: 1
+                      - column: celular
+                        priority: 2
+                    customFields: [saldo, sucursal]
+                  filters:
+                    enabled: true
+                    conditions:
+                      - column: saldo
+                        operator: greater_than
+                        value: '1000'
+                  duplicateStrategy:
+                    enabled: true
+                    detectionCriteria: phone
+                    action: reject
+      responses:
+        '202':
+          description: |
+            Lote creado. La importación de los contactos ocurre en segundo plano.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [batchId, operationId, status]
+                properties:
+                  batchId:
+                    type: string
+                    format: uuid
+                  operationId:
+                    type: string
+                    format: uuid
+                    description: |
+                      Identificador de la importación. Se consulta en
+                      `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+                      `kind: batch.lifecycle`.
+                  status:
+                    type: string
+                    enum: [processing]
+              example:
+                batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                status: processing
+        '400':
+          description: |
+            El cuerpo no pasó la validación, el canal está deshabilitado para la cuenta, o se supera el
+            límite de contactos.
+
+            Solo `VALIDATION_FAILED` permite reintentar con la misma clave de archivo. En los otros dos
+            casos el CSV se descarta y debe subirse de nuevo.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/ContactLimitError'
+                  - $ref: '#/components/schemas/SimpleError'
+              examples:
+                validacion:
+                  summary: Errores de validación
+                  value:
+                    code: VALIDATION_FAILED
+                    message: Validación fallida en el cuerpo del request
+                    details:
+                      - field: mapping.addresses[1].priority
+                        code: DUPLICATED_IN_REQUEST
+                        reason: 'duplicated priority: each address column needs a distinct dialing order'
+                        meta:
+                          priority: 1
+                      - field: filters.conditions[0].operator
+                        code: INVALID_TYPE
+                        reason: 'must be one of: equals, not_equals, contains, not_contains, starts_with, ends_with, is_empty, not_empty, greater_than, less_than, greater_or_equal, less_or_equal'
+                        meta:
+                          received: mayor_que
+                canalDeshabilitado:
+                  summary: Canal deshabilitado para la cuenta
+                  value:
+                    code: CHANNEL_DISABLED
+                    message: The channel type "voice" is disabled for this tenant (max_channels = 0).
+                limite:
+                  summary: Límite de contactos excedido
+                  value:
+                    code: CONTACT_LIMIT_EXCEEDED
+                    message: Contact limit exceeded. You are trying to add 5000 contacts, but you can only add 120 more.
+                    maxContacts: 10000
+                    currentActive: 9880
+                    attempting: 5000
+                    exceededBy: 4880
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/{batchId}:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    get:
+      tags: [Lotes]
+      operationId: getBatch
+      summary: Consulta un lote
+      description: |
+        Devuelve los datos completos de un lote: configuración, mapeo de columnas, reglas de marcación,
+        ventana horaria y progreso.
+
+        La estructura es la misma que la de los elementos del listado.
+
+        ## Diferencia con el listado
+
+        El campo `nextActivationAt` se calcula en esta operación para el lote en cualquier estado,
+        mientras que en el listado solo se resuelve para los lotes en curso.
+
+        Para conocer cuándo un lote detenido reanudará la marcación, utilice esta operación: en el
+        listado ese campo puede venir vacío aunque el lote tenga una ventana horaria configurada.
+
+        ## `status` y `displayStatus`
+
+        Igual que en el listado, `status` es el estado registrado y `displayStatus` el estado efectivo en
+        el momento de la consulta. Un lote con `status: running` fuera de su ventana horaria devuelve
+        `displayStatus: scheduled`.
+      responses:
+        '200':
+          description: El lote.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        '500':
+          description: |
+            Error interno, o lote inexistente.
+
+            Actualmente un lote que no existe o que no pertenece a la cuenta se devuelve con este código
+            y el mensaje `Batch not found`, en lugar de `404`. Conviene comprobar el campo `message`
+            antes de interpretar la respuesta como un fallo del servicio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                noExiste:
+                  summary: Lote inexistente o de otra cuenta
+                  value:
+                    message: Batch not found
+                fallo:
+                  summary: Error del servicio
+                  value:
+                    message: Internal server error
+
+    put:
+      tags: [Lotes]
+      operationId: updateBatch
+      summary: Edita los campos configurables de un lote
+      description: |
+        Modifica la prioridad de canal o la ventana horaria de un lote. Puede aplicarse también a un lote
+        en curso: los cambios se aplican a los intentos posteriores.
+
+        ## Campos editables
+
+        Solo `channelPriority` y `schedule`. El mapeo de columnas, los filtros y los contactos no se
+        pueden modificar una vez importados.
+
+        Las reglas de marcación se modifican con
+        `PUT /auto-contact/batches/{batchId}/rules`.
+
+        ## Ventana horaria
+
+        Un `startTime` posterior a `endTime` es válido y representa una ventana que cruza la medianoche,
+        por ejemplo de 22:00 a 06:00. No se admite que ambos valores sean iguales, ya que definiría una
+        ventana de duración cero.
+
+        Enviar `schedule: null` elimina la ventana propia del lote, que pasa a usar la configurada en la
+        cuenta.
+
+        ## Cuerpo sin campos editables
+
+        Una petición que no incluya ningún campo editable se rechaza con `400`, en lugar de devolver
+        `200` sin haber aplicado cambios.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                channelPriority:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  description: |
+                    Prioridad del lote al distribuir la capacidad del canal entre lotes simultáneos.
+                schedule:
+                  oneOf:
+                    - $ref: '#/components/schemas/BatchSchedule'
+                    - type: 'null'
+                  description: |
+                    Ventana horaria propia del lote. `null` para usar la configurada en la cuenta.
+            examples:
+              soloPrioridad:
+                summary: Cambiar la prioridad
+                value:
+                  channelPriority: 8
+              ventanaNocturna:
+                summary: Ventana que cruza la medianoche
+                value:
+                  schedule:
+                    startTime: '22:00'
+                    endTime: '06:00'
+                    timezone: America/Argentina/Buenos_Aires
+                    daysOfWeek: [1, 2, 3, 4, 5]
+      responses:
+        '200':
+          description: Lote actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  channelPriority:
+                    type: integer
+                  schedule:
+                    oneOf:
+                      - $ref: '#/components/schemas/BatchSchedule'
+                      - type: 'null'
+                  updatedAt:
+                    type: string
+                    format: date-time
+                  updatedBy:
+                    type: string
+        '400':
+          description: |
+            El cuerpo no incluye ningún campo editable, o alguno no pasó la validación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                sinCamposEditables:
+                  summary: Sin campos editables
+                  value:
+                    code: VALIDATION_FAILED
+                    message: Validación fallida en el cuerpo del request
+                    details:
+                      - field: ''
+                        code: REQUIRED
+                        reason: 'required: at least one editable field (channelPriority, schedule)'
+                        meta:
+                          editableFields: [channelPriority, schedule]
+                          received: [name]
+                ventanaInvalida:
+                  summary: Ventana horaria de duración cero
+                  value:
+                    code: VALIDATION_FAILED
+                    message: Validación fallida en el cuerpo del request
+                    details:
+                      - field: schedule
+                        code: INVALID_TYPE
+                        reason: 'startTime and endTime cannot be the same: that is a zero-length window. A startTime later than endTime is valid and means an overnight window'
+                        meta:
+                          startTime: '09:00'
+                          endTime: '09:00'
+        '404':
+          description: El lote no existe o no pertenece a la cuenta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Lotes]
+      operationId: deleteBatch
+      summary: Elimina un lote y sus contactos
+      description: |
+        Elimina el lote junto con sus contactos y su historial. Responde `202`: la eliminación se realiza
+        en segundo plano.
+
+        ## Operación irreversible
+
+        Los contactos, sus intentos y el registro de actividad del lote se eliminan de forma permanente,
+        sin posibilidad de recuperación.
+
+        Para conservar la información, utilice el archivado del lote, que mantiene el lote consultable y
+        genera una copia descargable de sus contactos.
+
+        ## Seguimiento
+
+        La eliminación de un lote con muchos contactos requiere varios minutos, por lo que se procesa en
+        segundo plano. El `operationId` devuelto permite seguir el avance en
+        `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+        `kind: batch.lifecycle`.
+
+        La operación está disponible durante 1 hora y solo 10 minutos desde que finaliza. Una vez
+        completada la eliminación, el lote deja de aparecer en el listado.
+
+        ## Requisitos
+
+        El lote debe estar detenido. Un lote en curso responde `409`: es necesario detenerlo antes de
+        eliminarlo.
+
+        Si ya hay una eliminación o un archivado en curso, la petición responde también `409`, de modo que
+        un reintento no genera un segundo proceso de eliminación.
+      responses:
+        '202':
+          description: |
+            Eliminación aceptada. El lote y sus contactos se eliminan en segundo plano.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [operationId, status]
+                properties:
+                  operationId:
+                    type: string
+                    format: uuid
+                    description: |
+                      Identificador de la operación de eliminación, consultable en
+                      `GET /auto-contact/batches/operations/{operationId}`.
+                  status:
+                    type: string
+                    enum: [deleting]
+              example:
+                operationId: 8b4d2f61-9c3a-4e57-b8f2-1a6d5c4e3b90
+                status: deleting
+        '404':
+          description: El lote no existe o no pertenece a la cuenta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: Batch not found
+        '409':
+          description: |
+            El lote está en un estado que no admite la eliminación: está en curso, o ya hay otra operación
+            de ciclo de vida en proceso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                enCurso:
+                  summary: El lote está en curso
+                  value:
+                    message: No se puede eliminar un lote que está en curso. Pausá el lote antes de eliminarlo.
+                yaEliminando:
+                  summary: Ya hay una eliminación en curso
+                  value:
+                    message: El lote ya se está eliminando.
+                archivando:
+                  summary: El lote se está archivando
+                  value:
+                    message: El lote se está archivando. Esperá a que termine.
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/{batchId}/start:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    post:
+      tags: [Lotes]
+      operationId: startBatch
+      summary: Arranca la marcación de un lote
+      description: |
+        Inicia la marcación de un lote. Responde `202`: el arranque se procesa en segundo plano.
+
+        ## Seguimiento
+
+        El arranque implica preparar los contactos y cargarlos en el motor de marcación, lo que en lotes
+        grandes requiere varios minutos. El `operationId` devuelto permite seguir el avance en
+        `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+        `kind: batch.lifecycle`.
+
+        Esa operación se compone de dos etapas y su campo `progress` refleja el avance conjunto de ambas
+        en una escala de 0 a 100.
+
+        La operación está disponible durante 1 hora y solo 10 minutos desde que finaliza. Para comprobar
+        el estado del arranque más allá de ese plazo, consulte el lote: `queueSyncStatus` indica si la
+        carga de contactos ha finalizado.
+
+        ## Cuándo comienza realmente la marcación
+
+        La respuesta `202` confirma que el arranque se ha aceptado, no que el lote esté ya marcando. Para
+        determinarlo, consulte el campo `queueSyncStatus` del lote:
+
+        | `queueSyncStatus` | Situación |
+        |---|---|
+        | `syncing` | El arranque está en curso; el lote aún no marca |
+        | `completed` | Los contactos están cargados y el lote puede marcar |
+
+        Un lote puede presentar `status: running` con `queueSyncStatus: syncing`, lo que significa que
+        está arrancando.
+
+        ## Ventana horaria
+
+        Si el lote se arranca fuera de su ventana horaria, el arranque se completa correctamente pero la
+        marcación no comienza hasta que la ventana se abre. En ese caso el lote devuelve
+        `displayStatus: scheduled` y `nextActivationAt` con la fecha prevista.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  enum: [manual, scheduled]
+                  default: manual
+                  description: |
+                    Motivo del arranque. Queda registrado en el historial de cambios de estado del lote.
+
+                    Solo se admiten estos dos valores. El resto de los motivos que pueden aparecer en el
+                    historial los registra el propio servicio.
+            example:
+              reason: manual
+      responses:
+        '202':
+          description: |
+            Arranque aceptado. El lote todavía no está marcando.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [operationId, status]
+                properties:
+                  operationId:
+                    type: string
+                    format: uuid
+                    description: |
+                      Identificador de la operación de arranque, consultable en
+                      `GET /auto-contact/batches/operations/{operationId}`.
+                  status:
+                    type: string
+                    enum: [starting]
+              example:
+                operationId: 5c2e8a14-7b09-4f3d-a1e6-8d4b2c9f0e71
+                status: starting
+        '400':
+          description: El `reason` no es uno de los aceptados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                code: VALIDATION_FAILED
+                message: Validación fallida en el cuerpo del request
+                details:
+                  - field: reason
+                    code: INVALID_TYPE
+                    reason: 'must be one of: manual, scheduled'
+                    meta:
+                      received: porque_quise
+                      allowed: [manual, scheduled]
+        '500':
+          description: |
+            Error interno, o una condición del lote que impide arrancarlo.
+
+            Actualmente el lote inexistente y las condiciones de estado (lote ya en curso, importación
+            sin finalizar, lote archivado) se devuelven con este código en lugar de `404` y `409`. El
+            campo `message` identifica el caso concreto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                noExiste:
+                  summary: El lote no existe
+                  value:
+                    message: Batch not found
+                yaCorriendo:
+                  summary: El lote ya está en curso
+                  value:
+                    message: Batch is already running
+                importando:
+                  summary: La importación de contactos no ha finalizado
+                  value:
+                    message: La importación de contactos del lote aún está en curso
+                archivado:
+                  summary: El lote está archivado
+                  value:
+                    message: Cannot modify an archived batch
+
+  /auto-contact/batches/{batchId}/stop:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    post:
+      tags: [Lotes]
+      operationId: stopBatch
+      summary: Detiene la marcación de un lote
+      description: |
+        Detiene la marcación de un lote. A diferencia del arranque, es una operación sincrónica: responde
+        `200` con el estado ya aplicado.
+
+        ## Efecto sobre los contactos
+
+        Los contactos pendientes se mantienen y el progreso alcanzado se conserva. Al arrancar de nuevo,
+        la marcación continúa desde donde se detuvo.
+
+        Las llamadas que estuvieran en curso finalizan con normalidad; no se interrumpen.
+
+        Los contactos que hubieran quedado bloqueados en proceso vuelven a estado pendiente, de modo que
+        puedan reintentarse en el siguiente arranque.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  enum: [manual, scheduled]
+                  default: manual
+                  description: |
+                    Motivo de la detención. `manual` corresponde a una detención solicitada;
+                    `scheduled`, a una detención por horario.
+
+                    Queda registrado en el historial del lote y permite distinguir después por qué dejó
+                    de marcar.
+            example:
+              reason: manual
+      responses:
+        '200':
+          description: Lote detenido.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, status]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [stopped]
+                  statusReason:
+                    type: string
+                  statusChangedAt:
+                    type: string
+                    format: date-time
+                  statusChangedBy:
+                    type: string
+              example:
+                id: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                status: stopped
+                statusReason: manual
+                statusChangedAt: '2026-08-10T15:42:00.000Z'
+                statusChangedBy: user@example.com
+        '400':
+          description: El `reason` no es uno de los aceptados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                code: VALIDATION_FAILED
+                message: Validación fallida en el cuerpo del request
+                details:
+                  - field: reason
+                    code: INVALID_TYPE
+                    reason: 'must be one of: manual, scheduled'
+                    meta:
+                      received: porque_quise
+                      allowed: [manual, scheduled]
+        '500':
+          description: |
+            Error interno, o una condición del lote que impide detenerlo.
+
+            Igual que en el arranque, el lote inexistente y las condiciones de estado se devuelven con
+            este código en lugar de `404` y `409`. El campo `message` identifica el caso concreto.
+
+            El caso más habitual es intentar detener un lote que ya está detenido, que puede tratarse
+            como que el lote ya se encuentra en el estado solicitado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                noExiste:
+                  summary: El lote no existe
+                  value:
+                    message: Batch not found
+                yaDetenido:
+                  summary: El lote ya está detenido
+                  value:
+                    message: Batch is already stopped
+                archivado:
+                  summary: El lote está archivado
+                  value:
+                    message: Cannot modify an archived batch
+
+  /auto-contact/batches/{batchId}/rules:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    put:
+      tags: [Lotes]
+      operationId: updateBatchRules
+      summary: Reemplaza las reglas de marcación del lote
+      description: |
+        Define cuántas veces se intenta contactar a cada contacto, el tiempo de espera entre intentos y la
+        ventana horaria de marcación.
+
+        ## Sustitución completa
+
+        El cuerpo debe contener el objeto de reglas completo. Las reglas forman un conjunto coherente, por
+        lo que no se admiten modificaciones parciales: aceptar campos aislados podría dar lugar a
+        configuraciones contradictorias, como más reintentos por resultado que el máximo por contacto.
+
+        Enviar `null` elimina las reglas propias del lote, que pasa a usar las configuradas en la cuenta.
+
+        ## Efecto sobre un lote en curso
+
+        Los cambios se aplican a los intentos posteriores. Los contactos que ya tuvieran una fecha
+        programada la conservan: reducir `timeBetweenAttempts` no adelanta los intentos ya planificados.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/BatchRules'
+                - type: 'null'
+            examples:
+              reglasPropias:
+                summary: Reglas propias del lote
+                value:
+                  strategy:
+                    maxAttemptsPerAddress: 2
+                    maxAttemptsPerContact: 4
+                    timeBetweenAttempts: 60
+                    scheduleStart: '09:00'
+                    scheduleEnd: '20:00'
+                    timezone: America/Argentina/Buenos_Aires
+                    daysOfWeek: [1, 2, 3, 4, 5]
+                    processAllContactsFirst: true
+                  resultRules:
+                    NO_ANSWER:
+                      retryDelay: 30
+                      maxRetries: 2
+                    BUSY:
+                      retryDelay: 15
+                      maxRetries: 3
+              heredarDeLaCuenta:
+                summary: Usar las reglas de la cuenta
+                value: null
+      responses:
+        '200':
+          description: Reglas actualizadas.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          description: |
+            La estructura del cuerpo es incorrecta, o algún valor está fuera de rango.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                code: VALIDATION_FAILED
+                message: Validación fallida en las reglas
+                details:
+                  - field: strategy
+                    code: REQUIRED
+                    reason: 'required: attempt limits, wait between attempts and the dialing window'
+        '404':
+          description: El lote no existe o no pertenece a la cuenta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/blocked-addresses:
+    get:
+      tags: [Direcciones bloqueadas]
+      operationId: listBlockedAddresses
+      summary: Lista las direcciones bloqueadas
+      description: |
+        Devuelve las direcciones bloqueadas de la cuenta, paginadas.
+
+        El parámetro `page` comienza en 0. El tamaño de página predeterminado es 50.
+      parameters:
+        - name: addressType
+          in: query
+          description: Filtra por tipo de dirección.
+          schema:
+            type: string
+            enum: [phone, email, whatsapp]
+        - name: page
+          in: query
+          description: Número de página, comenzando en 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Número de direcciones por página.
+          schema:
+            type: integer
+            minimum: 1
+            default: 50
+      responses:
+        '200':
+          description: Página de direcciones bloqueadas.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BlockedAddress'
+                  pagination:
+                    type: object
+                    required: [total, page, limit]
+                    properties:
+                      total:
+                        type: integer
+                        description: Número total de direcciones bloqueadas que cumplen el filtro.
+                        example: 428
+                      page:
+                        type: integer
+                        example: 0
+                      limit:
+                        type: integer
+                        example: 50
+              example:
+                data:
+                  - id: 6b1e4d90-8c2a-4f73-b5e1-9d0a3c7f2b48
+                    address: '5491155551234'
+                    addressType: phone
+                    reason: Solicitud del titular
+                    blockedBy: user@example.com
+                    createdAt: '2026-08-04T10:15:00.000Z'
+                    updatedAt: '2026-08-04T10:15:00.000Z'
+                pagination:
+                  total: 428
+                  page: 0
+                  limit: 50
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Direcciones bloqueadas]
+      operationId: blockAddresses
+      summary: Bloquea una o varias direcciones
+      description: |
+        Añade direcciones a la lista de bloqueo de la cuenta. Una dirección bloqueada queda excluida de la
+        marcación en todos los lotes, presentes y futuros.
+
+        ## Alcance del bloqueo
+
+        El bloqueo es de ámbito de cuenta, no de lote. Se utiliza cuando la persona solicita no ser
+        contactada.
+
+        Para dejar de llamar a un contacto en una campaña concreta sin afectar al resto, utilice la
+        anulación del contacto:
+        `POST /auto-contact/batches/{batchId}/contacts/{contactId}/cancel`.
+
+        ## Direcciones ya bloqueadas
+
+        Una dirección que ya estaba bloqueada no se duplica ni produce error: se cuenta en `skipped`. Esto
+        permite reenviar una lista completa sin necesidad de comprobar antes qué direcciones existen.
+
+        ## Normalización
+
+        Las direcciones se normalizan a minúsculas y se eliminan los espacios de los extremos antes de
+        almacenarlas. La unicidad se establece por la combinación de dirección y tipo, de modo que el
+        mismo valor puede bloquearse como `phone` y como `whatsapp` de forma independiente.
+
+        ## Aplicación
+
+        La sincronización con el motor de marcación se realiza en segundo plano tras responder. Las
+        llamadas ya en curso en el momento del bloqueo no se interrumpen.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [addressType]
+              properties:
+                addresses:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: |
+                    Direcciones a bloquear. Para una sola dirección puede utilizarse el campo `address`.
+                  example: ['5491155551234', '5491155555678']
+                address:
+                  type: string
+                  description: |
+                    Dirección única a bloquear. Alternativa a `addresses` para un solo valor.
+                  example: '5491155551234'
+                addressType:
+                  type: string
+                  enum: [phone, email, whatsapp]
+                  description: |
+                    Tipo de las direcciones enviadas. Se aplica a todas las direcciones de la petición.
+                reason:
+                  type: string
+                  description: |
+                    Motivo del bloqueo. Se almacena a título informativo y aparece en el listado.
+                  example: Solicitud del titular
+            examples:
+              variasDirecciones:
+                summary: Varias direcciones
+                value:
+                  addresses: ['5491155551234', '5491155555678']
+                  addressType: phone
+                  reason: Solicitud del titular
+              unaDireccion:
+                summary: Una sola dirección
+                value:
+                  address: cliente@example.com
+                  addressType: email
+                  reason: Baja de comunicaciones comerciales
+      responses:
+        '201':
+          description: |
+            Direcciones procesadas. Los recuentos indican cuántas se bloquearon y cuántas ya lo estaban.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [blocked, skipped]
+                properties:
+                  blocked:
+                    type: integer
+                    description: Direcciones añadidas a la lista de bloqueo.
+                    example: 2
+                  skipped:
+                    type: integer
+                    description: |
+                      Direcciones que ya estaban bloqueadas y no se han vuelto a registrar.
+                    example: 1
+              example:
+                blocked: 2
+                skipped: 1
+        '400':
+          description: No se ha indicado ninguna dirección.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: address or addresses is required
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Direcciones bloqueadas]
+      operationId: unblockAddresses
+      summary: Desbloquea una o varias direcciones
+      description: |
+        Elimina direcciones de la lista de bloqueo de la cuenta. A partir de ese momento vuelven a estar
+        disponibles para la marcación.
+
+        Las direcciones se indican en el cuerpo de la petición, con el mismo formato que en el bloqueo.
+
+        El recuento `unblocked` refleja cuántas direcciones se han eliminado. Una dirección que no estaba
+        bloqueada no produce error: simplemente no se contabiliza, de modo que la operación puede
+        repetirse sin efectos adicionales.
+
+        La sincronización con el motor de marcación se realiza en segundo plano tras responder.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [addressType]
+              properties:
+                addresses:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  description: |
+                    Direcciones a desbloquear. Para una sola dirección puede utilizarse el campo
+                    `address`.
+                address:
+                  type: string
+                  description: |
+                    Dirección única a desbloquear. Alternativa a `addresses` para un solo valor.
+                addressType:
+                  type: string
+                  enum: [phone, email, whatsapp]
+                  description: |
+                    Tipo de las direcciones enviadas. Forma parte de la identificación del bloqueo, por
+                    lo que debe coincidir con el tipo con el que se registró.
+            example:
+              addresses: ['5491155551234']
+              addressType: phone
+      responses:
+        '200':
+          description: Direcciones procesadas.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [unblocked]
+                properties:
+                  unblocked:
+                    type: integer
+                    description: Direcciones eliminadas de la lista de bloqueo.
+                    example: 1
+              example:
+                unblocked: 1
+        '400':
+          description: No se ha indicado ninguna dirección.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: address or addresses is required
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/operations/{operationId}:
+    parameters:
+      - name: operationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: |
+          Identificador de la operación, devuelto por la operación asíncrona que se desea consultar.
+
+    get:
+      tags: [Operaciones]
+      operationId: getOperation
+      summary: Consulta el estado de una operación
+      description: |
+        Devuelve el estado y el resultado de una operación asíncrona.
+
+        ## Tipos de operación
+
+        Esta operación resuelve cualquier `operationId` devuelto por la API. El campo `kind` indica de
+        qué tipo se trata, ya que la información que aporta cada uno es distinta:
+
+        | `kind` | Origen | Información que aporta |
+        |---|---|---|
+        | `contacts.load` | Carga de contactos | Recuento de contactos insertados, actualizados, duplicados e inválidos |
+        | `batch.lifecycle` | Creación, arranque, archivado, eliminación y exportación de un lote | Porcentaje de avance y etapa en curso |
+
+        Utilice `kind` para determinar la estructura de la respuesta. Una carga de contactos no incluye
+        `progress`, y una operación de ciclo de vida no incluye `insertedCount`.
+
+        ## Estados de una carga de contactos
+
+        | `status` | Significado |
+        |---|---|
+        | `pending` | Aceptada, sin bloques procesados todavía |
+        | `running` | En proceso |
+        | `succeeded` | Finalizada; se insertaron todos los contactos |
+        | `partial` | Finalizada; se insertó una parte |
+        | `failed` | Finalizada; no se insertó ninguno |
+
+        El estado `partial` no indica un error: en una carga masiva es un resultado habitual, ya que
+        algunos contactos pueden descartarse por duplicado o por validación.
+
+        ## Interpretación de los recuentos
+
+        `requestedCount` es el número de contactos enviados. Los cuatro campos siguientes detallan qué
+        ocurrió con ellos:
+
+        * `insertedCount`: contactos añadidos como nuevos
+        * `updatedCount`: contactos que ya existían y se actualizaron
+        * `duplicateCount`: contactos que ya existían y se descartaron
+        * `invalidCount`: contactos rechazados por validación
+
+        La suma de los cuatro solo coincide con `requestedCount` cuando la operación ha finalizado. Si
+        todavía está en proceso, quedan bloques pendientes de procesar.
+
+        ## Campo `errors`
+
+        Contiene una muestra de hasta 20 rechazos. Los recuentos son el dato exacto; esta lista permite
+        identificar el motivo de los rechazos.
+
+        ## Tiempo de retención
+
+        | `kind` | Disponible durante |
+        |---|---|
+        | `contacts.load` | 6 horas |
+        | `batch.lifecycle` | 1 hora, y 10 minutos desde que finaliza |
+
+        Una operación de ciclo de vida consultada más de 10 minutos después de finalizar devuelve `404`,
+        aunque se haya completado correctamente. Para conservar el resultado, consúltelo al finalizar, o
+        bien consulte el estado del lote, que es permanente.
+      responses:
+        '200':
+          description: Estado de la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+              examples:
+                terminadaParcial:
+                  summary: Terminó, entró una parte
+                  value:
+                    operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                    batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                    type: contacts.insert
+                    status: partial
+                    requestedCount: 150
+                    totalChunks: 3
+                    chunksCompleted: 3
+                    insertedCount: 140
+                    invalidCount: 4
+                    duplicateCount: 6
+                    updatedCount: 0
+                    errors:
+                      - identifier: CLI-042
+                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                      - identifier: CLI-077
+                        reason: Duplicate of an existing contact, rejected by the batch policy (matched phone)
+                    createdAt: '2026-08-10T12:00:00.000Z'
+                    completedAt: '2026-08-10T12:00:04.120Z'
+                enCurso:
+                  summary: Todavía procesándose
+                  value:
+                    kind: contacts.load
+                    operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                    batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                    type: contacts.insert
+                    status: running
+                    requestedCount: 150
+                    totalChunks: 3
+                    chunksCompleted: 1
+                    insertedCount: 50
+                    invalidCount: 0
+                    duplicateCount: 0
+                    updatedCount: 0
+                    errors: []
+                    createdAt: '2026-08-10T12:00:00.000Z'
+                    completedAt: null
+                arranqueEnCurso:
+                  summary: Arranque de lote, a mitad de la primera etapa
+                  value:
+                    kind: batch.lifecycle
+                    operationId: 5c2e8a14-7b09-4f3d-a1e6-8d4b2c9f0e71
+                    batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                    type: start
+                    status: processing
+                    progress: 48
+                    processedCount: 242000
+                    totalCount: 250000
+                    phase: export
+                    phaseNumber: 1
+                    phaseCount: 2
+                    phaseLabel: Exportando contactos
+                    errorMessage: null
+                    createdAt: '2026-08-10T12:00:00.000Z'
+                    completedAt: null
+                altaTerminada:
+                  summary: Alta de lote terminada
+                  value:
+                    kind: batch.lifecycle
+                    operationId: 7a3f1d90-2c5b-4e8a-b6f4-9d1e0c3a5b82
+                    batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                    type: create
+                    status: completed
+                    progress: 100
+                    processedCount: 5000
+                    totalCount: 5000
+                    phase: null
+                    phaseNumber: null
+                    phaseCount: null
+                    phaseLabel: null
+                    errorMessage: null
+                    createdAt: '2026-08-10T11:58:00.000Z'
+                    completedAt: '2026-08-10T11:59:12.000Z'
+        '400':
+          description: Falta el identificador de la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                code: MISSING_PARAMETER
+                message: 'Missing required parameter: operationId'
+        '404':
+          description: |
+            La operación no existe, ha caducado o no pertenece a la cuenta.
+
+            Los plazos de retención se detallan en la descripción de esta operación y varían según el
+            tipo de operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                code: OPERATION_NOT_FOUND
+                message: Operation not found or expired
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/{batchId}/contacts/schedule/:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    put:
+      tags: [Contactos]
+      operationId: scheduleContact
+      summary: Reagenda un contacto ya cargado
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      description: |
+        Establece cuándo se volverá a intentar contactar con un contacto que ya está en el lote. Un caso
+        habitual es que la persona atienda la llamada y solicite que se le contacte más tarde.
+
+        El contacto se puede identificar mediante su `contactId` interno o mediante el `identifier`
+        asignado en el sistema de origen. Debe enviarse exactamente uno de los dos campos.
+
+        Acepta el header `Idempotency-Key`.
+
+        ## Diferencia con el campo `scheduledAt` de la carga
+
+        El campo `scheduledAt` de la carga de contactos programa el primer intento de un contacto nuevo.
+        Esta operación reprograma un contacto ya cargado, en cualquier momento.
+
+        ## Procesamiento
+
+        La respuesta `200` confirma que la solicitud se ha aceptado. La reprogramación la aplica el motor
+        de marcación, de modo que una consulta inmediatamente posterior puede no reflejar todavía la
+        nueva fecha.
+
+        ## Restricciones de la fecha
+
+        `scheduledAt` debe tener formato ISO 8601, ser una fecha futura y estar dentro de los próximos 30
+        días. Cada caso devuelve `400` con un mensaje que identifica el motivo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scheduledAt]
+              properties:
+                contactId:
+                  type: string
+                  format: uuid
+                  description: Identificador interno asignado por el servicio al importar el contacto.
+                  example: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                identifier:
+                  type: string
+                  description: Identificador del contacto en el sistema de origen.
+                  example: CLI-001
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  description: |
+                    Fecha y hora del próximo intento. Debe ser futura y estar dentro de los próximos 30
+                    días.
+                  example: '2026-09-19T07:07:17.443Z'
+                resetAttempts:
+                  type: boolean
+                  description: Indica si se reinicia el contador de intentos al reagendar.
+                  example: true
+                reason:
+                  type: string
+                  description: |
+                    Motivo de la reprogramación. Queda registrado a título informativo y no afecta al
+                    comportamiento de la marcación.
+                  example: El cliente pidió que lo llamen más tarde
+              oneOf:
+                - required: [contactId]
+                  not:
+                    required: [identifier]
+                - required: [identifier]
+                  not:
+                    required: [contactId]
+            examples:
+              porContactId:
+                summary: Reagendar mediante el identificador interno
+                value:
+                  contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                  scheduledAt: '2026-09-19T07:07:17.443Z'
+                  resetAttempts: true
+                  reason: El cliente pidió que lo llamen más tarde
+              porIdentifier:
+                summary: Reagendar mediante el identificador externo
+                value:
+                  identifier: CLI-001
+                  scheduledAt: '2026-09-19T07:07:17.443Z'
+                  resetAttempts: true
+                  reason: El cliente pidió que lo llamen más tarde
+      responses:
+        '200':
+          description: Reprogramación aceptada.
+          headers:
+            Idempotency-Replayed:
+              $ref: '#/components/headers/IdempotencyReplayed'
+            Idempotency-Status:
+              $ref: '#/components/headers/IdempotencyStatus'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [contactId, batchId, scheduledAt, scheduled]
+                properties:
+                  contactId:
+                    type: string
+                    format: uuid
+                  batchId:
+                    type: string
+                    format: uuid
+                  scheduledAt:
+                    type: string
+                    format: date-time
+                  scheduled:
+                    type: boolean
+                  reason:
+                    type: string
+              example:
+                contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                scheduledAt: '2026-09-19T07:07:17.443Z'
+                scheduled: true
+                reason: El cliente pidió que lo llamen más tarde
+        '400':
+          description: |
+            Falta `scheduledAt`, la fecha no es válida, no es futura, supera los 30 días, o la
+            `Idempotency-Key` tiene un formato incorrecto.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleError'
+                  - $ref: '#/components/schemas/IdempotencyKeyError'
+              examples:
+                faltante:
+                  value:
+                    message: 'Missing or invalid required field: scheduledAt (ISO 8601 datetime string expected)'
+                formato:
+                  value:
+                    message: 'Invalid date format: scheduledAt must be a valid ISO 8601 datetime'
+                pasado:
+                  value:
+                    message: 'Invalid date: scheduledAt must be a future date'
+                fueraDeRango:
+                  value:
+                    message: 'Invalid date: scheduledAt must be within 30 days from now'
+                claveInvalida:
+                  summary: '`Idempotency-Key` mal formada'
+                  value:
+                    code: INVALID_IDEMPOTENCY_KEY
+                    message: 'Invalid Idempotency-Key header: it must not be empty'
+                    details:
+                      - field: Idempotency-Key
+                        code: EMPTY
+                        reason: must not be empty
+                    meta:
+                      rejection: EMPTY
+        '401':
+          description: Credencial ausente o inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: Unauthorized
+        '404':
+          description: El lote no existe o no pertenece a la cuenta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: Batch not found
+        '409':
+          description: |
+            Conflicto de idempotencia: hay una petición idéntica en proceso, o la clave se ha utilizado
+            con un cuerpo distinto.
+          headers:
+            Retry-After:
+              description: |
+                Segundos a esperar antes de reintentar. Solo con `IDEMPOTENCY_KEY_IN_FLIGHT`.
+              schema:
+                type: integer
+              example: 2
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdempotencyConflictError'
+              examples:
+                enVuelo:
+                  value:
+                    code: IDEMPOTENCY_KEY_IN_FLIGHT
+                    message: A request with this Idempotency-Key is still being processed. Retry shortly.
+                    meta:
+                      retryAfterSeconds: 2
+                claveReusada:
+                  value:
+                    code: IDEMPOTENCY_KEY_REUSED
+                    message: This Idempotency-Key was already used with a different request body.
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auto-contact/batches/{batchId}/contacts/{contactId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+      - name: contactId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: |
+          Identificador del contacto asignado por el servicio, según lo devuelve la consulta de contactos
+          del lote. No corresponde al campo `identifier` del sistema de origen.
+
+    post:
+      tags: [Contactos]
+      operationId: cancelContact
+      summary: Anula la marcación de un contacto
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      description: |
+        Cierra un contacto para que no vuelva a ser llamado en este lote. Se utiliza, por ejemplo, cuando
+        el cliente ya ha regularizado su situación o solicita no recibir más llamadas de esta campaña.
+
+        El contacto pasa a estado final con `result: CANCELLED_BY_USER`, valor que queda disponible en el
+        detalle del contacto y en su historial de intentos.
+
+        ## Anulación y bloqueo son operaciones distintas
+
+        | Operación | Alcance | Cuándo utilizarla |
+        |---|---|---|
+        | Anulación (esta operación) | Un contacto en un lote concreto | No se desea seguir llamando en esta campaña |
+        | Bloqueo (`POST /auto-contact/blocked-addresses`) | Una dirección en toda la cuenta | La persona solicita no ser contactada nunca |
+
+        La anulación mantiene la dirección disponible para otras campañas. Si la persona ha solicitado no
+        ser contactada, es necesario bloquear la dirección.
+
+        ## Comprobación previa
+
+        Antes de aceptar la solicitud se comprueba el estado del contacto. Un identificador inexistente
+        devuelve `404`, y un contacto ya cerrado devuelve `409`, en lugar de aceptar una anulación que no
+        llegaría a aplicarse.
+
+        Si esa comprobación no puede realizarse, la respuesta es `503` y la anulación no se registra. En
+        ese caso conviene reintentar.
+
+        ## Contactos ya cerrados
+
+        Si el contacto ya está en estado `contacted` o `finished`, la respuesta es `409` con
+        `code: CONTACT_TERMINAL_STATE`. Suele indicar que el estado del contacto en el sistema de origen
+        no coincide con el real.
+
+        ## Efecto en los recuentos del lote
+
+        Un contacto anulado se cuenta como finalizado y no como contactado: incrementa `finishedCount` y
+        no `contactedCount`, de modo que la tasa de contactación no se ve afectada y el lote puede
+        completarse.
+
+        ## Procesamiento
+
+        La respuesta `200` confirma que la solicitud se ha aceptado. El cierre lo aplica el motor de
+        marcación, de modo que una consulta inmediatamente posterior puede no reflejarlo todavía.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: |
+                    Motivo de la anulación. Queda registrado en la dirección que iba a marcarse y aparece
+                    en el detalle del contacto. Es informativo.
+                  example: El cliente ya regularizó su deuda
+            example:
+              reason: El cliente ya regularizó su deuda
+      responses:
+        '200':
+          description: Anulación aceptada.
+          headers:
+            Idempotency-Replayed:
+              $ref: '#/components/headers/IdempotencyReplayed'
+            Idempotency-Status:
+              $ref: '#/components/headers/IdempotencyStatus'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [contactId, batchId, cancelled, status, result]
+                properties:
+                  contactId:
+                    type: string
+                    format: uuid
+                  batchId:
+                    type: string
+                    format: uuid
+                  cancelled:
+                    type: boolean
+                  status:
+                    type: string
+                    enum: [finished]
+                    description: |
+                      Estado en el que queda el contacto. `finished` es un estado final y excluye al
+                      contacto de la marcación.
+                  result:
+                    type: string
+                    enum: [CANCELLED_BY_USER]
+                    description: |
+                      Último resultado registrado del contacto. Permite distinguir una anulación de un
+                      cierre por intentos agotados.
+                  reason:
+                    type: string
+              example:
+                contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+                cancelled: true
+                status: finished
+                result: CANCELLED_BY_USER
+                reason: El cliente ya regularizó su deuda
+        '400':
+          description: |
+            Falta un parámetro de la ruta, o la `Idempotency-Key` tiene un formato incorrecto.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SimpleError'
+                  - $ref: '#/components/schemas/IdempotencyKeyError'
+              examples:
+                claveInvalida:
+                  summary: '`Idempotency-Key` mal formada'
+                  value:
+                    code: INVALID_IDEMPOTENCY_KEY
+                    message: 'Invalid Idempotency-Key header: it must not be empty'
+                    details:
+                      - field: Idempotency-Key
+                        code: EMPTY
+                        reason: must not be empty
+                    meta:
+                      rejection: EMPTY
+        '401':
+          description: Credencial ausente o inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                message: Unauthorized
+        '404':
+          description: |
+            El lote no existe o no pertenece a la cuenta, o el contacto no pertenece a ese lote.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              examples:
+                loteInexistente:
+                  value:
+                    code: BATCH_NOT_FOUND
+                    message: Batch not found
+                contactoInexistente:
+                  value:
+                    code: CONTACT_NOT_FOUND
+                    message: Contact not found in this batch
+        '409':
+          description: |
+            El contacto ya está cerrado, o hay un conflicto de idempotencia.
+          headers:
+            Retry-After:
+              description: |
+                Segundos a esperar antes de reintentar. Solo con `IDEMPOTENCY_KEY_IN_FLIGHT`.
+              schema:
+                type: integer
+              example: 2
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/IdempotencyConflictError'
+              examples:
+                yaCerrado:
+                  summary: El contacto ya está en estado terminal
+                  value:
+                    code: CONTACT_TERMINAL_STATE
+                    message: Contact is already closed and cannot be cancelled
+                    details:
+                      - field: contactId
+                        code: CONTACT_TERMINAL_STATE
+                        reason: "contact is in terminal state 'contacted'"
+                        meta:
+                          status: contacted
+                    meta:
+                      status: contacted
+                enVuelo:
+                  value:
+                    code: IDEMPOTENCY_KEY_IN_FLIGHT
+                    message: A request with this Idempotency-Key is still being processed. Retry shortly.
+                    meta:
+                      retryAfterSeconds: 2
+        '503':
+          description: |
+            No se ha podido comprobar el estado del contacto, por lo que la anulación no se ha
+            registrado.
+
+            No se ha aplicado ningún cambio. Reintente la solicitud.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example:
+                code: TEMPORARILY_UNAVAILABLE
+                message: Contact data is temporarily unavailable, so the cancellation could not be verified
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: API key obtenida desde la interfaz de Inagent, dentro del marcador.
+
+  parameters:
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Id del lote.
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        pattern: '^[\x20-\x7E]+$'
+      description: |
+        Clave para hacer el reintento seguro. Opcional.
+
+        Un UUID por operación lógica, reusado en los reintentos de ese mismo envío. Ver "Reintentos
+        seguros" en la descripción de la API.
+      example: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
+
+  headers:
+    IdempotencyReplayed:
+      description: |
+        Presente con valor `true` cuando la respuesta es una repetición de un request ya procesado con
+        la misma clave. No se ejecutó nada nuevo.
+      schema:
+        type: string
+        enum: ['true']
+
+    IdempotencyStatus:
+      description: |
+        Aparece con valor `bypassed` cuando se envió una clave válida pero la petición se procesó sin
+        protección de idempotencia, porque el servicio que la gestiona no estaba disponible.
+
+        La respuesta es válida, pero esa petición concreta no cuenta con la garantía de reintento seguro:
+        si no se recibe respuesta, verifique el estado antes de reintentar.
+      schema:
+        type: string
+        enum: [bypassed]
+
+  schemas:
+    Batch:
+      type: object
+      description: |
+        Lote de marcación. Es la estructura que devuelven tanto la consulta de un lote como cada elemento
+        del listado.
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        channelId:
+          type: string
+          format: uuid
+        channelName:
+          type: string
+        channelType:
+          type: string
+          description: |
+            Tipo de canal, tal como lo expone el catálogo de canales. Por ejemplo `Livekit_SipCall`.
+          example: Livekit_SipCall
+        channelPriority:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: |
+            Peso al repartir la capacidad del canal entre lotes que corren a la vez.
+        crewId:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [stopped, running, completed, archived, deleting, archiving]
+          description: |
+            Estado **persistido**.
+
+            `deleting` y `archiving` son transitorios: el lote **no admite ninguna acción** mientras
+            está en uno de ellos, y cualquier intento responde `409`.
+        displayStatus:
+          type: string
+          description: |
+            Estado efectivo del lote en el momento de la consulta. Es el valor recomendado para mostrar o
+            evaluar la situación del lote.
+
+            Puede no coincidir con `status`: un lote con `status: running` fuera de su ventana horaria
+            devuelve `scheduled`, ya que no realizará llamadas hasta que la ventana se abra.
+          example: scheduled
+        statusReason:
+          type: string
+          enum: [created, manual, scheduled, no more contacts, system]
+          description: |
+            Por qué está en ese estado. `manual` y `scheduled` son los que puede declarar un cliente al
+            arrancar o detener; el resto los escribe el servicio.
+        statusChangedAt:
+          type: [string, 'null']
+          format: date-time
+        statusChangedBy:
+          type: [string, 'null']
+        statusDetail:
+          type: [string, 'null']
+        nextActivationAt:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            Fecha y hora en que un lote en espera reanudará la marcación. `null` si no procede.
+
+            En el listado puede venir vacío aunque el lote tenga una ventana horaria configurada, ya que
+            allí solo se calcula para los lotes en curso. Para obtener el valor en cualquier estado,
+            consulte el lote por su identificador.
+        totalContacts:
+          type: integer
+          description: Contactos del lote.
+        fileRowCount:
+          type: integer
+          description: |
+            Filas del CSV original. Puede ser mayor que `totalContacts`: las filas sin dirección
+            utilizable, o descartadas por filtros o duplicados, no llegan a ser contactos.
+        processedCount:
+          type: integer
+          description: |
+            Número de contactos ya procesados. En un lote en curso refleja el estado actual de la
+            marcación; si esa información no está disponible momentáneamente, se devuelve el último valor
+            registrado.
+        contactedCount:
+          type: integer
+          description: Contactos efectivamente contactados.
+        finishedCount:
+          type: integer
+          description: |
+            Contactos cerrados sin haber sido contactados: se agotaron sus intentos o sus direcciones.
+        uploadStatus:
+          type: string
+          description: Estado de la importación del CSV.
+        uploadProgress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        queueSyncStatus:
+          type: string
+          enum: [pending, syncing, completed, failed]
+          description: |
+            Estado de la carga de los contactos en el motor de marcación.
+
+            Es necesario para distinguir un lote que está arrancando de uno que ya está marcando: el lote
+            pasa a `running` antes de que la carga finalice.
+        mapping:
+          type: object
+          description: Qué columna del CSV es cada cosa.
+        filters:
+          type: [object, 'null']
+        schedule:
+          oneOf:
+            - $ref: '#/components/schemas/BatchSchedule'
+            - type: 'null'
+          description: Ventana horaria propia. `null` si hereda la de la cuenta.
+        rules:
+          type: [object, 'null']
+          description: |
+            Reglas de marcación del lote. `null` si usa las reglas globales de la cuenta.
+        duplicateStrategy:
+          type: [object, 'null']
+        isFavorite:
+          type: boolean
+        s3CsvKey:
+          type: string
+          description: Ubicación interna del CSV importado.
+        s3SnapshotKey:
+          type: [string, 'null']
+          description: Ubicación interna del snapshot, en lotes archivados.
+        channel:
+          type: [object, 'null']
+          description: Datos del canal resuelto.
+        enabled:
+          type: boolean
+        deleted:
+          type: boolean
+        TenantId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    BlockedAddress:
+      type: object
+      description: |
+        Dirección excluida de la marcación en toda la cuenta.
+      properties:
+        id:
+          type: string
+          format: uuid
+        address:
+          type: string
+          description: |
+            Dirección bloqueada, normalizada en minúsculas y sin espacios en los extremos.
+          example: '5491155551234'
+        addressType:
+          type: string
+          enum: [phone, email, whatsapp]
+          description: |
+            Tipo de dirección. Junto con `address` identifica el bloqueo de forma única.
+        reason:
+          type: [string, 'null']
+          description: Motivo del bloqueo, si se indicó al registrarlo.
+          example: Solicitud del titular
+        blockedBy:
+          type: string
+          description: Usuario que registró el bloqueo.
+          example: user@example.com
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateBatchInput:
+      type: object
+      required: [name, channelId, tempCsvKey, mapping]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: |
+            Nombre del lote. Tiene que ser único en la cuenta: repetirlo responde `400`.
+          example: Cobranzas agosto
+        channelId:
+          type: string
+          format: uuid
+          description: Canal a través del cual se realizarán las llamadas.
+        channelPriority:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: |
+            Peso del lote al repartir la capacidad del canal entre lotes que corren a la vez. Más
+            alto recibe más capacidad.
+        tempCsvKey:
+          type: string
+          description: |
+            Clave del CSV ya subido, tal como la devuelve `POST /auto-contact/batches/upload-url` en su
+            campo `tempCsvKey`.
+
+            Se consume al crear el lote: no sirve para un segundo alta.
+          example: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
+        expectedRowCount:
+          type: integer
+          description: |
+            Número de filas previsto en el archivo. Se utiliza únicamente para estimar el progreso de la
+            importación antes de terminar de contarlo; no valida nada.
+        mapping:
+          $ref: '#/components/schemas/BatchMapping'
+        filters:
+          $ref: '#/components/schemas/BatchFilters'
+        duplicateStrategy:
+          oneOf:
+            - $ref: '#/components/schemas/DuplicateStrategy'
+            - type: 'null'
+          description: |
+            Política ante contactos repetidos. `null` u omitido importa todo sin deduplicar.
+        rules:
+          type: object
+          additionalProperties: true
+          description: |
+            Reglas de marcación propias del lote (intentos, esperas, ventana horaria). Omitido, el
+            lote hereda las reglas de la cuenta para su tipo de canal.
+
+    BatchMapping:
+      type: object
+      required: [identifier, name, addresses]
+      description: |
+        Qué columna del CSV es cada cosa.
+
+        Los nombres son los del **encabezado del archivo**, tal como figuran.
+      properties:
+        identifier:
+          type: string
+          description: |
+            Columna que contiene el identificador del contacto en el sistema de origen. Permite
+            relacionar los resultados con los registros propios.
+          example: id_cliente
+        name:
+          type: string
+          description: Columna con el nombre del contacto.
+          example: nombre
+        addresses:
+          type: array
+          minItems: 1
+          maxItems: 10
+          description: |
+            Columnas con los teléfonos o emails, cada una con su orden de marcación.
+          items:
+            type: object
+            required: [column, priority]
+            properties:
+              column:
+                type: string
+                description: |
+                  Columna con la dirección. No se puede repetir entre entradas: marcaría el mismo
+                  número dos veces, consumiendo intentos del límite.
+                example: telefono
+              priority:
+                type: integer
+                minimum: 1
+                description: |
+                  Orden de marcación: **1 se intenta primero**. Tiene que ser distinta en cada
+                  entrada — dos iguales dejarían el orden indefinido.
+                example: 1
+        priority:
+          type: string
+          description: |
+            Columna opcional con la prioridad del contacto, para que unos se marquen antes que otros.
+        customFields:
+          type: array
+          items:
+            type: string
+          description: |
+            Columnas adicionales que se almacenan con cada contacto. No intervienen en la marcación y
+            quedan disponibles para el asistente.
+          example: [saldo, sucursal]
+
+    BatchSchedule:
+      type: object
+      required: [startTime, endTime]
+      description: |
+        Ventana horaria en la que el lote puede realizar llamadas.
+      properties:
+        startTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: Hora de inicio, formato `HH:mm` de 24 horas.
+          example: '09:00'
+        endTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+          description: |
+            Hora de fin, formato `HH:mm`. **Puede ser menor que `startTime`**: eso significa una
+            ventana que cruza la medianoche. Lo que no puede es ser igual.
+          example: '20:00'
+        timezone:
+          type: string
+          description: |
+            Zona horaria IANA con la que se interpretan las horas. Si se omite, se utiliza la configurada
+            en la cuenta.
+          example: America/Argentina/Buenos_Aires
+        daysOfWeek:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+            minimum: 0
+            maximum: 6
+          description: |
+            Días habilitados, `0` domingo a `6` sábado. Omitido, todos los días.
+          example: [1, 2, 3, 4, 5]
+
+    BatchRules:
+      type: object
+      required: [strategy]
+      description: |
+        Reglas de marcación del lote. Objeto completo: no admite actualizaciones parciales.
+      properties:
+        strategy:
+          type: object
+          description: |
+            Límites de intentos y ventana horaria. Los rangos los valida el servicio; los valores
+            fuera de rango responden `400`.
+          properties:
+            maxAttemptsPerAddress:
+              type: integer
+              description: Intentos máximos por cada teléfono o email del contacto.
+            maxAttemptsPerContact:
+              type: integer
+              description: |
+                Intentos máximos por contacto, sumando todas sus direcciones. Tiene que ser coherente
+                con `maxAttemptsPerAddress`.
+            timeBetweenAttempts:
+              type: integer
+              description: Minutos de espera entre intentos al mismo contacto.
+            scheduleStart:
+              type: string
+              pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+              example: '09:00'
+            scheduleEnd:
+              type: string
+              pattern: '^([01]\d|2[0-3]):([0-5]\d)$'
+              example: '20:00'
+            timezone:
+              type: string
+              example: America/Argentina/Buenos_Aires
+            daysOfWeek:
+              type: array
+              items:
+                type: integer
+                minimum: 0
+                maximum: 6
+              description: |
+                Días habilitados, `0` domingo a `6` sábado. Vacío u omitido significa todos los días.
+            processAllContactsFirst:
+              type: boolean
+              description: |
+                Con `true`, se recorre la lista completa de contactos antes de reintentar con los que no
+                atendieron. Con `false`, cada contacto se reintenta en cuanto vence su tiempo de espera.
+        resultRules:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              retryDelay:
+                type: integer
+                description: Minutos a esperar antes de reintentar tras este resultado.
+              maxRetries:
+                type: integer
+                description: |
+                  Reintentos para este resultado. `0` significa no reintentar.
+          description: |
+            Reglas por resultado de la llamada, indexadas por el resultado (`NO_ANSWER`, `BUSY`, etc.).
+            Qué resultados aplican depende del tipo de canal del lote.
+        amd:
+          type: object
+          description: Detección de contestador automático.
+          properties:
+            amdEnabled:
+              type: boolean
+            amdAction:
+              type: string
+              enum: [HANGUP, LEAVE_MESSAGE, CONTINUE]
+
+    BatchFilters:
+      type: object
+      required: [enabled]
+      description: |
+        Filtra qué filas del CSV se importan. Sin filtros se importa el archivo completo.
+      properties:
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            type: object
+            required: [column, operator]
+            properties:
+              column:
+                type: string
+                description: Columna del CSV sobre la que se filtra.
+              operator:
+                type: string
+                enum:
+                  - equals
+                  - not_equals
+                  - contains
+                  - not_contains
+                  - starts_with
+                  - ends_with
+                  - is_empty
+                  - not_empty
+                  - greater_than
+                  - less_than
+                  - greater_or_equal
+                  - less_or_equal
+              value:
+                type: string
+                description: |
+                  Valor contra el que se compara. Obligatorio salvo con `is_empty` y `not_empty`, que
+                  no comparan contra nada.
+
+    DuplicateStrategy:
+      type: object
+      required: [enabled]
+      description: |
+        Qué hacer cuando un contacto del CSV ya existe en la cuenta.
+
+        `detectionCriteria` y `action` solo se exigen con `enabled: true`.
+      properties:
+        enabled:
+          type: boolean
+        detectionCriteria:
+          type: string
+          enum: [identifier, phone, email]
+          description: Por qué campo se considera que dos contactos son el mismo.
+        action:
+          type: string
+          enum:
+            - reject
+            - reject_if_identifier_matches
+            - reject_always
+            - update
+            - update_if_identifier_matches
+            - update_always
+            - replace
+            - replace_if_identifier_matches
+            - replace_always
+            - skip_if_contacted
+            - skip_if_contacted_identifier_matches
+            - skip_if_contacted_always
+          description: |
+            Acción a aplicar sobre el contacto duplicado: descartarlo (`reject`), combinar los datos
+            nuevos con los existentes (`update`), sustituirlos (`replace`), o descartarlo solo si ya fue
+            contactado (`skip_if_contacted`).
+
+            Los sufijos delimitan cuándo se aplica la acción: `_if_identifier_matches` la restringe a los
+            casos en que además coincide el `identifier`, y `_always` la aplica sin condiciones
+            adicionales.
+
+    ContactInput:
+      type: object
+      required: [name, addresses]
+      description: |
+        Contacto que se va a cargar en el lote.
+
+        El campo `identifier` no es obligatorio: si se omite, el servicio genera uno automáticamente. Se
+        recomienda indicarlo siempre que exista, ya que es lo que permite relacionar el contacto con el
+        registro del sistema de origen.
+      properties:
+        identifier:
+          type: string
+          description: |
+            Identificador del contacto en el sistema de origen. Si se omite, el servicio genera uno
+            automáticamente.
+          example: CLI-001
+        name:
+          type: string
+          description: Nombre del contacto. Obligatorio y no vacío.
+          example: Juan Pérez
+        addresses:
+          type: array
+          minItems: 1
+          description: |
+            Direcciones por las que intentar el contacto, con su orden de marcación.
+          items:
+            $ref: '#/components/schemas/ContactAddress'
+        customFields:
+          type: object
+          additionalProperties: true
+          description: |
+            Datos adicionales que se almacenan con el contacto. No intervienen en la marcación y quedan
+            disponibles para el asistente y para la consulta posterior del contacto.
+          example:
+            campaign: verano2025
+            source: crm
+        scheduledAt:
+          type: string
+          format: date-time
+          description: |
+            Cuándo intentar la PRIMERA marcación. Futura y dentro de 30 días.
+
+            Sin este campo el contacto entra a la selección del siguiente ciclo.
+          example: '2026-08-20T14:30:00.000Z'
+
+    ContactAddress:
+      type: object
+      required: [address, type, priority]
+      properties:
+        address:
+          type: string
+          description: |
+            El teléfono o email. El formato se valida según `type`:
+
+            * `phone` y `whatsapp`: dígitos con `+` opcional, entre 7 y 15 caracteres.
+            * `email`: formato de email.
+          example: '5491155551234'
+        type:
+          type: string
+          enum: [phone, email, whatsapp]
+        priority:
+          type: integer
+          minimum: 1
+          description: |
+            Orden de marcación: **1 se intenta primero**. Entero positivo.
+          example: 1
+
+    Operation:
+      oneOf:
+        - $ref: '#/components/schemas/ContactsLoadOperation'
+        - $ref: '#/components/schemas/BatchLifecycleOperation'
+      discriminator:
+        propertyName: kind
+        mapping:
+          contacts.load: '#/components/schemas/ContactsLoadOperation'
+          batch.lifecycle: '#/components/schemas/BatchLifecycleOperation'
+      description: |
+        Una operación asincrónica. Las dos variantes se distinguen por `kind`: no son el mismo recurso
+        con campos opcionales, sino dos formas distintas que informan cosas distintas.
+
+    ContactsLoadOperation:
+      type: object
+      description: |
+        Una carga de contactos. Informa qué pasó con cada contacto del request.
+      required:
+        - kind
+        - operationId
+        - batchId
+        - type
+        - status
+        - requestedCount
+        - totalChunks
+        - chunksCompleted
+        - insertedCount
+        - invalidCount
+        - duplicateCount
+        - updatedCount
+        - errors
+        - createdAt
+      properties:
+        kind:
+          type: string
+          enum: [contacts.load]
+          description: |
+            Identifica el tipo de operación. Utilice este campo para determinar la estructura de la respuesta.
+        operationId:
+          type: string
+          format: uuid
+        batchId:
+          type: string
+          format: uuid
+          description: |
+            El lote sobre el que corrió la carga. Viaja en la respuesta para que no tengas que
+            recordarlo.
+        type:
+          type: string
+          enum: [contacts.insert]
+        status:
+          type: string
+          enum: [pending, running, succeeded, partial, failed]
+          description: |
+            `partial` significa que entró una parte de los contactos. En una carga masiva es un
+            desenlace normal, no un error.
+        requestedCount:
+          type: integer
+          description: Número de contactos enviados en la petición.
+          example: 150
+        totalChunks:
+          type: integer
+          description: |
+            Bloques en los que se partió la carga. La operación cierra cuando todos reportaron.
+          example: 3
+        chunksCompleted:
+          type: integer
+          description: |
+            Bloques ya procesados. Con `chunksCompleted < totalChunks` los contadores todavía están
+            incompletos.
+          example: 3
+        insertedCount:
+          type: integer
+          description: Contactos que entraron como nuevos.
+        invalidCount:
+          type: integer
+          description: Rechazados por validación de datos.
+        duplicateCount:
+          type: integer
+          description: Descartados por la política de duplicados del lote.
+        updatedCount:
+          type: integer
+          description: |
+            Ya existían y se les aplicó lo enviado. Cubre tanto el merge como el reemplazo: la
+            diferencia entre los dos la decide la política del lote, no el resultado de la carga.
+        errors:
+          type: array
+          maxItems: 20
+          description: |
+            Muestra de rechazos, hasta 20. Los contadores son el dato preciso; esto sirve para
+            entender por qué se rechazaron.
+          items:
+            type: object
+            required: [reason]
+            properties:
+              identifier:
+                type: string
+                description: |
+                  Identificador del contacto rechazado, cuando puede determinarse.
+                example: CLI-042
+              reason:
+                type: string
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            Cuándo terminó de procesarse. `null` mientras `status` sea `pending` o `running`.
+
+    BatchLifecycleOperation:
+      type: object
+      description: |
+        Una operación de ciclo de vida del lote: el alta, el arranque, el archivado, el borrado o una
+        exportación. Informa avance porcentual, no contadores por contacto.
+
+        **Se retiene 1 hora, y solo 10 minutos desde que termina.** Es bastante menos que las 6 horas
+        de una carga de contactos: si te importa el desenlace, consultalo cuando termina.
+      required:
+        - kind
+        - operationId
+        - batchId
+        - type
+        - status
+        - progress
+        - processedCount
+        - totalCount
+        - createdAt
+      properties:
+        kind:
+          type: string
+          enum: [batch.lifecycle]
+          description: |
+            Identifica el tipo de operación. Utilice este campo para determinar la estructura de la respuesta.
+        operationId:
+          type: string
+          format: uuid
+        batchId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [create, start, delete, export, archive]
+        status:
+          type: string
+          enum: [processing, completed, error]
+          description: |
+            Los valores son distintos de los de una carga de contactos. En una operación de ciclo de vida
+            no existe el estado `partial`, ya que no procesa elementos que puedan rechazarse
+            individualmente.
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: |
+            Avance de la operación **completa**, con todas sus etapas.
+
+            En una operación de varias etapas no se deriva de `processedCount`/`totalCount`: el
+            arranque reparte el avance en mitades (exportación 0-50%, carga en el motor 50-100%), así
+            que a mitad de la exportación es 25% aunque los contadores digan 125.000 de 250.000. Los
+            dos números responden preguntas distintas y se leen juntos con `phaseLabel`.
+          example: 48
+        processedCount:
+          type: integer
+          description: |
+            Ítems procesados **en la etapa actual**. Es una cantidad real de dominio: en el arranque de
+            un lote de 250.000 contactos, llega a 250.000 en cada una de las dos etapas.
+        totalCount:
+          type: integer
+          description: Ítems totales de la etapa actual.
+        phase:
+          type: [string, 'null']
+          enum: [export, load, null]
+          description: |
+            Identificador estable de la etapa. `null` en operaciones de una sola etapa.
+        phaseNumber:
+          type: [integer, 'null']
+          description: Índice de la etapa, empezando en 1. `null` si la operación tiene una sola.
+        phaseCount:
+          type: [integer, 'null']
+          description: Cuántas etapas tiene la operación en total.
+        phaseLabel:
+          type: [string, 'null']
+          description: |
+            Texto de la etapa, para mostrar. Con `phaseNumber` y `phaseCount` arma un mensaje que se
+            entiende sin explicar por qué el porcentaje no coincide con los contadores:
+            "Paso 1 de 2 · Exportando contactos".
+          example: Exportando contactos
+        errorMessage:
+          type: [string, 'null']
+          description: |
+            Motivo del fallo. Presente solo con `status: error`.
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            Cuándo terminó. `null` mientras `status` sea `processing`.
+
+    SimpleError:
+      type: object
+      required: [message]
+      description: |
+        Error con mensaje descriptivo.
+
+        Algunos traen `code` estable (los más nuevos); otros solo `message`.
+
+        Los mensajes pueden aparecer en español o en inglés según el caso, y algunos errores todavía no
+        incluyen `code`. Cuando esté presente, utilice `code` para tratar el error de forma programática.
+      properties:
+        code:
+          type: string
+          description: |
+            Presente en los errores ya normalizados (`MISSING_PARAMETER`, `OPERATION_NOT_FOUND`,
+            `VALIDATION_FAILED`, `INVALID_IDEMPOTENCY_KEY`, y los de idempotencia).
+        message:
+          type: string
+
+    ValidationError:
+      type: object
+      required: [message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_FAILED]
+          description: |
+            Presente cuando el rechazo corresponde a la validación de contactos. No aparece en los
+            rechazos por límites de la petición, como un cuerpo vacío o más de 1000 contactos.
+        message:
+          type: string
+        details:
+          description: |
+            Detalle del rechazo. La estructura varía según el caso: una lista de textos para los límites
+            de la petición, o una lista de `FieldRejection` cuando el rechazo es de validación de
+            contactos.
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                $ref: '#/components/schemas/FieldRejection'
+
+    FieldRejection:
+      type: object
+      required: [index, field, code, reason]
+      description: |
+        Campo rechazado de un contacto concreto.
+
+        Se incluyen todos los rechazos, no solo el primero de cada contacto: un contacto con tres campos
+        incorrectos genera tres entradas.
+
+        Utilice `code`, que es estable, para tratar el error de forma programática. El campo `reason` es
+        un texto descriptivo de apoyo y puede cambiar sin aviso.
+      properties:
+        index:
+          type: integer
+          description: Posición del contacto en el array enviado, base 0.
+          example: 3
+        field:
+          type: string
+          description: |
+            Ruta del campo rechazado, precedida por la posición del contacto. Permite localizarlo en la
+            petición enviada.
+          example: contacts[3].addresses[0].address
+        code:
+          type: string
+          enum:
+            - REQUIRED
+            - INVALID_TYPE
+            - INVALID_PHONE_FORMAT
+            - INVALID_EMAIL_FORMAT
+            - INVALID_ADDRESS_TYPE
+            - INVALID_PRIORITY
+            - EMPTY_ARRAY
+            - INVALID_DATE
+            - DATE_NOT_FUTURE
+            - DATE_OUT_OF_RANGE
+            - DUPLICATED_IN_REQUEST
+          description: |
+            Código estable del motivo del rechazo. Es el valor recomendado para tratar el error de forma
+            programática y para traducir el mensaje al idioma del usuario final.
+        reason:
+          type: string
+          description: |
+            Descripción del rechazo, en español. Informativa: puede cambiar sin aviso.
+        meta:
+          type: object
+          additionalProperties: true
+          description: |
+            Datos del rechazo: el valor recibido, el esperado o el límite aplicado. Permiten construir un
+            mensaje propio sin necesidad de interpretar el texto de `reason`.
+          example:
+            received: '123'
+            expected: '+?digits, 7-15 characters'
+        error:
+          type: string
+          deprecated: true
+          description: |
+            Contiene el mismo valor que `reason`. Se mantiene por compatibilidad con versiones anteriores;
+            utilice `reason`.
+
+    IdempotencyKeyError:
+      type: object
+      required: [code, message]
+      description: |
+        La clave de idempotencia recibida no cumple los requisitos de formato.
+
+        Se rechaza en lugar de ignorarse, para no procesar la petición sin la protección que el cliente
+        espera tener.
+      properties:
+        code:
+          type: string
+          enum: [INVALID_IDEMPOTENCY_KEY]
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                enum: [Idempotency-Key]
+              code:
+                type: string
+                enum: [EMPTY, TOO_LONG, INVALID_CHARACTERS]
+              reason:
+                type: string
+              meta:
+                type: object
+                additionalProperties: true
+        meta:
+          type: object
+          description: |
+            `rejection` es el dato estable para ramificar; el texto de `reason` es informativo.
+          properties:
+            rejection:
+              type: string
+              enum: [EMPTY, TOO_LONG, INVALID_CHARACTERS]
+          additionalProperties: true
+
+    IdempotencyConflictError:
+      type: object
+      required: [code, message]
+      description: |
+        Conflicto de idempotencia. Los dos casos se resuelven distinto:
+
+        * `IDEMPOTENCY_KEY_IN_FLIGHT`: hay una petición idéntica en proceso. Espere el tiempo indicado en
+          `Retry-After` y reintente con la misma clave.
+        * `IDEMPOTENCY_KEY_REUSED`: la clave ya se utilizó con un cuerpo distinto. Utilice una clave nueva
+          para la nueva petición.
+      properties:
+        code:
+          type: string
+          enum: [IDEMPOTENCY_KEY_IN_FLIGHT, IDEMPOTENCY_KEY_REUSED]
+        message:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+          properties:
+            retryAfterSeconds:
+              type: integer
+
+    ContactLimitError:
+      type: object
+      required: [code, message]
+      description: |
+        Límite de contactos activos de la cuenta excedido. Es el único error de estos endpoints que
+        trae un `code` estable.
+      properties:
+        code:
+          type: string
+          enum: [CONTACT_LIMIT_EXCEEDED]
+        message:
+          type: string
+        maxContacts:
+          type: integer
+          description: Tope de contactos activos de la cuenta.
+        currentActive:
+          type: integer
+          description: Cuántos hay activos ahora.
+        attempting:
+          type: integer
+          description: Cuántos intentabas agregar.
+        exceededBy:
+          type: integer
+          description: Por cuántos se excede el tope.
+
+  responses:
+    InternalError:
+      description: Error interno.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SimpleError'

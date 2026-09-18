@@ -1,55 +1,20 @@
 ---
 title: "Insertar contactos en un lote"
 description: "Añade uno o varios contactos a un lote existente del marcador."
-api: "POST https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/contacts/"
-auth: "key"
+openapi: "api-reference/dialer/openapi.yaml POST /auto-contact/batches/{batchId}/contacts"
 ---
 
-Añade contactos a un lote existente y deja la operación en cola para su procesamiento.
+Añade hasta 1000 contactos a un lote existente y deja la operación en cola para su procesamiento. Puedes enviar un contacto directamente en la raíz del body o varios dentro de `contacts`.
 
-## Autenticación
-
-<ParamField header="apikey" type="string" required>
-  API key obtenida desde la interfaz de Inagent, dentro del marcador.
-</ParamField>
-
-## Parámetros de ruta
-
-<ParamField path="batchId" type="string" required>
-  Identificador único del lote que recibirá los contactos.
-</ParamField>
-
-## Body
-
-<ParamField body="contacts" type="array" required>
-  Lista de contactos que se incorporarán al lote.
-</ParamField>
-
-<ParamField body="contacts[].identifier" type="string" required>
-  Identificador único externo definido por el cliente para el contacto. No es el `contactId` interno que genera el sistema al importar el contacto.
-</ParamField>
-
-<ParamField body="contacts[].name" type="string">
-  Nombre del contacto.
-</ParamField>
-
-<ParamField body="contacts[].addresses" type="array" required>
-  Direcciones de contacto. Cada elemento contiene `address`, `type` y `priority`.
-</ParamField>
-
-<ParamField body="contacts[].contactPriority" type="integer">
-  Prioridad asignada al contacto.
-</ParamField>
-
-<ParamField body="contacts[].customFields" type="object">
-  Campos personalizados asociados al contacto.
-</ParamField>
+<Info>
+  `identifier` es opcional, aunque se recomienda enviarlo para relacionar el resultado con el registro del sistema de origen. Si se omite, el servicio genera uno automáticamente.
+</Info>
 
 ## Ejemplo
 
 ```bash cURL
 curl --request POST \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts/' \
+  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts' \
   --header 'Content-Type: application/json' \
   --header 'apikey: TU_API_KEY' \
   --data '{

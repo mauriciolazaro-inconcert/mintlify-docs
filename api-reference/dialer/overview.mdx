@@ -1,9 +1,9 @@
 ---
 title: "API del marcador"
-description: "Autentica y consulta la API del marcador nativo de Inagent."
+description: "Crea, configura y opera lotes de marcación automática mediante la API de Inagent."
 ---
 
-La API del **marcador de Inagent** permite consultar lotes, incorporar contactos, reagendar contactos y revisar el historial operativo y de llamadas.
+La API del **marcador de Inagent** permite administrar el ciclo de vida completo de los lotes, cargar y gestionar contactos, mantener una lista de direcciones bloqueadas y consultar operaciones asíncronas.
 
 ## URL base
 
@@ -13,83 +13,88 @@ https://api.backend.inconcertcc.com/engine/v1/api/auto-contact
 
 ## Autenticación
 
-Todos los endpoints de esta sección requieren una API key en el header `apikey`.
+Todas las peticiones requieren la API key asociada al lote en el header `apikey`.
 
 ```http
 apikey: TU_API_KEY
 ```
 
-Puedes obtener la API key desde la interfaz de Inagent, dentro del marcador.
+El servicio obtiene la cuenta a partir de esa credencial. Si un lote no pertenece a la cuenta, responde `404`, igual que si no existiera.
 
 <Warning>
   Trata la API key como una credencial. No la incluyas en repositorios, código cliente, logs ni ejemplos compartidos.
 </Warning>
 
-## Ejemplo autenticado
+## Operaciones asíncronas
 
-<CodeGroup>
+La carga de contactos, la creación, el arranque y la eliminación de lotes responden `202 Accepted`. La respuesta confirma que el trabajo fue aceptado, pero no que haya terminado.
 
-```bash cURL
-curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10' \
-  --header 'apikey: TU_API_KEY'
+Estas respuestas incluyen un `operationId` y un header `Location`. Consulta el resultado mediante `GET /batches/operations/{operationId}`.
+
+| Tipo de operación | Tiempo de retención |
+| --- | --- |
+| Carga de contactos | 6 horas |
+| Ciclo de vida del lote | 1 hora y, una vez finalizada, 10 minutos |
+
+<Info>
+  Si una operación ya expiró, el endpoint de consulta devuelve `404`. Para una importación de lote también puedes revisar los campos permanentes `uploadStatus` y `totalContacts` del propio lote.
+</Info>
+
+## Reintentos seguros
+
+Las operaciones de escritura aceptan el header opcional `Idempotency-Key`. Genera un valor único —por ejemplo, un UUID— antes del primer intento y reutilízalo únicamente al repetir esa misma petición con el mismo body.
+
+```http
+Idempotency-Key: 6e789e2c-5ce7-4f15-982a-92a2bdfbe293
 ```
 
-```javascript JavaScript
-const response = await fetch(
-  "https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10",
-  {
-    headers: {
-      apikey: process.env.INAGENT_DIALER_API_KEY
-    }
-  }
-);
+La clave debe contener entre 1 y 255 caracteres ASCII imprimibles y se conserva durante 24 horas.
 
-const data = await response.json();
-```
+| Header de respuesta | Significado |
+| --- | --- |
+| `Idempotency-Replayed: true` | Se devolvió la respuesta original sin volver a procesar la petición. |
+| `Retry-After` | Segundos que debes esperar ante `409 IDEMPOTENCY_KEY_IN_FLIGHT`. |
+| `Idempotency-Status: bypassed` | La petición se procesó sin protección porque el servicio de idempotencia no estaba disponible. |
 
-```python Python
-import os
-import requests
+Las respuestas `5xx` no se almacenan. Si recibes `Idempotency-Status: bypassed` y pierdes la respuesta, verifica el estado del recurso antes de reintentar.
 
-response = requests.get(
-    "https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches",
-    headers={"apikey": os.environ["INAGENT_DIALER_API_KEY"]},
-    params={"page": 0, "size": 10},
-    timeout=10,
-)
-response.raise_for_status()
-data = response.json()
-```
+## Crear un lote desde un CSV
 
-</CodeGroup>
+<Steps>
+  <Step title="Solicita una URL de carga">
+    Llama a `POST /batches/upload-url` con el nombre del archivo y `fileType: text/csv`. La URL firmada caduca en una hora.
+  </Step>
+  <Step title="Sube el CSV">
+    Envía el contenido mediante `PUT` a `uploadUrl` con `Content-Type: text/csv`. Esta petición va al almacenamiento y no requiere la API key.
+  </Step>
+  <Step title="Crea el lote">
+    Llama a `POST /batches` con el `tempCsvKey`, la configuración del lote y el mapeo de columnas.
+  </Step>
+  <Step title="Consulta la importación">
+    Utiliza el `operationId` de la respuesta para seguir el procesamiento.
+  </Step>
+</Steps>
 
-## Endpoints disponibles
+## Áreas de la API
 
 <CardGroup cols={2}>
-  <Card title="Consultar lotes" icon="list" href="./list-batches">
-    Lista y filtra los lotes del marcador.
+  <Card title="Lotes" icon="layer-group" href="./list-batches">
+    Consulta, crea, configura, inicia, detiene y elimina lotes de marcación.
   </Card>
-  <Card title="Obtener un lote" icon="box" href="./get-batch">
-    Recupera la configuración y el estado de un lote.
+  <Card title="Contactos" icon="address-book" href="./add-contacts">
+    Carga contactos, reagenda intentos y anula contactos de un lote.
   </Card>
-  <Card title="Insertar contactos" icon="user-plus" href="./add-contacts">
-    Añade uno o varios contactos a un lote existente.
+  <Card title="Direcciones bloqueadas" icon="ban" href="./list-blocked-addresses">
+    Gestiona las direcciones excluidas de la marcación en toda la cuenta.
   </Card>
-  <Card title="Reagendar un contacto" icon="calendar-clock" href="./schedule-contact">
-    Programa un nuevo intento para un contacto del lote.
+  <Card title="Operaciones asíncronas" icon="rotate" href="./get-operation">
+    Consulta el avance y el resultado de los trabajos aceptados con `202`.
   </Card>
-  <Card title="Log de cambios" icon="clock-rotate-left" href="./batch-logs">
-    Consulta las operaciones registradas sobre un lote.
-  </Card>
-  <Card title="Historial del lote" icon="phone" href="./batch-call-history">
-    Revisa los intentos de llamada registrados en un lote.
-  </Card>
-  <Card title="Historial del contacto" icon="address-card" href="./contact-call-history">
-    Consulta los intentos de un contacto concreto.
+  <Card title="Historial y auditoría" icon="clock-rotate-left" href="./batch-logs">
+    Revisa cambios del lote e intentos de llamada del lote o de un contacto.
   </Card>
 </CardGroup>
 
 <Info>
-  Los ejemplos de esta sección reutilizan los mismos identificadores de lote, canal y contacto para facilitar la comparación entre peticiones. `identifier` es el identificador externo definido por el cliente; `contactId` es el identificador interno que genera el sistema al importar cada contacto.
+  `identifier` es el identificador externo definido por el cliente. `contactId` es el identificador interno que genera el servicio al importar cada contacto.
 </Info>
