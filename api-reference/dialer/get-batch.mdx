@@ -1,7 +1,7 @@
 ---
 title: "Obtener un lote"
 description: "Consulta el estado y la configuración de un lote del marcador."
-openapi: "api-reference/dialer/openapi.yaml GET /auto-contact/batches/{batchId}"
+openapi: "api-reference/dialer/openapi.yaml GET /batches/{batchId}"
 ---
 
 Devuelve la información de un lote concreto, incluidos su estado, métricas, configuración y canal asociado.
@@ -22,7 +22,7 @@ Devuelve la información de un lote concreto, incluidos su estado, métricas, co
 
 ```bash cURL
 curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e' \
   --header 'apikey: TU_API_KEY'
 ```
 

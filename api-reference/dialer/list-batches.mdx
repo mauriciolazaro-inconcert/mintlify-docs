@@ -1,7 +1,7 @@
 ---
 title: "Consultar lotes"
 description: "Lista y filtra los lotes del marcador de Inagent."
-openapi: "api-reference/dialer/openapi.yaml GET /auto-contact/batches"
+openapi: "api-reference/dialer/openapi.yaml GET /batches"
 ---
 
 Devuelve los lotes del marcador que coinciden con los filtros enviados.
@@ -46,7 +46,7 @@ Devuelve los lotes del marcador que coinciden con los filtros enviados.
 
 ```bash cURL
 curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches?page=0&size=10&sortField=createdAt&sortOrder=desc&status=archived&startDate=2026-08-31T22%3A00%3A00.000Z&endDate=2026-09-16T21%3A59%3A59.999Z' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches?page=0&size=10&sortField=createdAt&sortOrder=desc&status=archived&startDate=2026-08-31T22%3A00%3A00.000Z&endDate=2026-09-16T21%3A59%3A59.999Z' \
   --header 'apikey: TU_API_KEY'
 ```
 

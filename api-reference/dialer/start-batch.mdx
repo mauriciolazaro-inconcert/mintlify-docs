@@ -1,7 +1,14 @@
 ---
 title: "Iniciar un lote"
 description: "Arranca la marcación de un lote."
-openapi: "api-reference/dialer/openapi.yaml POST /auto-contact/batches/{batchId}/start"
+openapi: "api-reference/dialer/openapi.yaml POST /batches/{batchId}/start"
 ---
 
 Solicita el arranque asíncrono de la marcación del lote.
+
+```bash cURL
+curl --request POST \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/5b591fcb-6beb-4157-b932-e8e707eeb6d7/start' \
+  --header 'apikey: TU_API_KEY' \
+  --data ''
+```

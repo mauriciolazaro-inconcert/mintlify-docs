@@ -7,7 +7,7 @@ info:
   description: |
     API de AutoContact: gestión de lotes de marcación automática y de los contactos que los integran.
 
-    Todos los recursos se publican bajo `/auto-contact/`.
+    Todos los recursos se publican bajo `/autocontact/api/v1/`.
 
     ## Autenticación
 
@@ -23,7 +23,7 @@ info:
     eliminación.
 
     Esas respuestas incluyen un `operationId` que se consulta en
-    `GET /auto-contact/batches/operations/{operationId}` para conocer el resultado.
+    `GET /batches/operations/{operationId}` para conocer el resultado.
 
     Tiempo de retención de las operaciones:
 
@@ -65,7 +65,7 @@ info:
     procesar la petición.
 
 servers:
-  - url: https://api.backend.inconcertcc.com/engine/v1/api
+  - url: https://api.backend.inconcertcc.com/autocontact/api/v1
     description: API de Inagent
 
 security:
@@ -86,7 +86,7 @@ tags:
       Seguimiento de las operaciones asíncronas que devuelven `202`.
 
 paths:
-  /auto-contact/batches/{batchId}/contacts:
+  /batches/{batchId}/contacts:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -126,7 +126,7 @@ paths:
         según la política de deduplicación configurada en el lote.
 
         Para conocer el resultado, consulte
-        `GET /auto-contact/batches/operations/{operationId}` con el identificador que devuelve esta
+        `GET /batches/operations/{operationId}` con el identificador que devuelve esta
         respuesta. La URL completa también viene en el header `Location`.
 
         Las validaciones de formato (campos obligatorios, formato de teléfono y correo, prioridades) se
@@ -200,6 +200,21 @@ paths:
                       type: phone
                       priority: 1
                   scheduledAt: '2026-08-20T14:30:00.000Z'
+              recontactarDuplicado:
+                summary: Volver a llamar a un contacto duplicado
+                value:
+                  identifier: CLI-003
+                  name: Juan Pérez 3
+                  addresses:
+                    - address: '5491155551233'
+                      type: phone
+                      priority: 1
+                  customFields:
+                    campaign: verano2025
+                    source: crm
+                    source2: crm2
+                  onDuplicate: recontact
+                  resetAttempts: true
       responses:
         '202':
           description: |
@@ -210,7 +225,7 @@ paths:
                 URL de la operación asociada a esta carga, donde se consulta su resultado.
               schema:
                 type: string
-              example: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+              example: /autocontact/api/v1/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
             Idempotency-Replayed:
               $ref: '#/components/headers/IdempotencyReplayed'
             Idempotency-Status:
@@ -226,13 +241,13 @@ paths:
                     format: uuid
                     description: |
                       Identifica esta carga. Se resuelve en
-                      `GET /auto-contact/batches/operations/{operationId}`.
+                      `GET /batches/operations/{operationId}`.
                     example: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
                   operationUrl:
                     type: string
                     description: |
                       URL del recurso de operación, la misma que viene en el header `Location`.
-                    example: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                    example: /autocontact/api/v1/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
                   status:
                     type: string
                     enum: [queued]
@@ -250,7 +265,7 @@ paths:
                     type: string
               example:
                 operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
-                operationUrl: /auto-contact/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
+                operationUrl: /autocontact/api/v1/batches/operations/9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
                 status: queued
                 contactsReceived: 150
                 chunksPublished: 3
@@ -367,7 +382,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/upload-url:
+  /batches/upload-url:
     post:
       tags: [Lotes]
       operationId: getCsvUploadUrl
@@ -378,10 +393,10 @@ paths:
 
         ## Proceso completo
 
-        1. `POST /auto-contact/batches/upload-url`: devuelve `uploadUrl` y `tempCsvKey`.
+        1. `POST /batches/upload-url`: devuelve `uploadUrl` y `tempCsvKey`.
         2. `PUT` del contenido del CSV a `uploadUrl`, con el header `Content-Type: text/csv`. Esta
            petición se dirige al almacenamiento, no a la API, y no requiere credenciales.
-        3. `POST /auto-contact/batches` indicando ese `tempCsvKey`.
+        3. `POST /batches` indicando ese `tempCsvKey`.
 
         ## Requisitos de la subida
 
@@ -447,7 +462,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches:
+  /batches:
     get:
       tags: [Lotes]
       operationId: listBatches
@@ -574,14 +589,20 @@ paths:
     post:
       tags: [Lotes]
       operationId: createBatch
-      summary: Crea un lote a partir de un CSV ya subido
+      summary: Crea un lote desde la API o a partir de un CSV
       description: |
-        Crea el lote e inicia la importación de los contactos del CSV. Responde `202`: la importación se
-        realiza en segundo plano.
+        Crea un lote vacío para cargar contactos mediante la API, o crea el lote e inicia la importación
+        de los contactos de un CSV. Responde `202`: la creación se realiza en segundo plano.
 
-        ## Proceso completo
+        ## Crear un lote sin CSV
 
-        1. `POST /auto-contact/batches/upload-url` para obtener la URL de subida y la clave del archivo.
+        Indique `source: api` y omita `tempCsvKey` y `mapping`. Puede definir `duplicateStrategy` y
+        `rules` en la misma petición. Después, cargue los contactos con
+        `POST /batches/{batchId}/contacts`.
+
+        ## Crear un lote desde un CSV
+
+        1. `POST /batches/upload-url` para obtener la URL de subida y la clave del archivo.
         2. `PUT` del CSV a esa URL, con `Content-Type: text/csv`.
         3. Esta operación, indicando el `tempCsvKey` obtenido y el `mapping` de columnas.
         4. Seguimiento de la importación con el `operationId` devuelto.
@@ -607,7 +628,7 @@ paths:
         ## Seguimiento de la importación
 
         El `operationId` de la respuesta se consulta en
-        `GET /auto-contact/batches/operations/{operationId}`, que devuelve el avance y el resultado con
+        `GET /batches/operations/{operationId}`, que devuelve el avance y el resultado con
         `kind: batch.lifecycle`.
 
         Tenga en cuenta el plazo de retención: la operación está disponible durante 1 hora y solo 10
@@ -624,8 +645,43 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateBatchInput'
             examples:
+              desdeApi:
+                summary: Lote sin CSV y con reglas personalizadas
+                value:
+                  name: Lote lunes 09-21
+                  channelId: 1c8ade96-4ce0-40fa-90b0-30916df5e673
+                  source: api
+                  duplicateStrategy:
+                    enabled: true
+                    detectionCriteria: identifier
+                    action: update
+                  rules:
+                    strategy:
+                      maxAttemptsPerContact: 1
+                      maxAttemptsPerAddress: 1
+                      timeBetweenAttempts: 1
+                      scheduleStart: '09:00'
+                      scheduleEnd: '23:50'
+                      timezone: America/Bogota
+                      daysOfWeek: [1]
+                      processAllContactsFirst: true
+                    addressPriority:
+                      tryAllBeforeRetry: true
+                    resultRules:
+                      noAnswer:
+                        retryDelay: 1
+                        maxRetries: 1
+                      busy:
+                        retryDelay: 1
+                        maxRetries: 1
+                      voicemail:
+                        retryDelay: 1
+                        maxRetries: 1
+                    amd:
+                      amdEnabled: true
+                      amdAction: HANGUP
               minimo:
-                summary: Lo mínimo necesario
+                summary: Lote desde un CSV
                 value:
                   name: Cobranzas agosto
                   channelId: 8c1e9f30-2a4b-4d6e-9f10-3b7c5d2e8a41
@@ -665,7 +721,7 @@ paths:
       responses:
         '202':
           description: |
-            Lote creado. La importación de los contactos ocurre en segundo plano.
+            Creación del lote aceptada. Si se indicó un CSV, su importación ocurre en segundo plano.
           content:
             application/json:
               schema:
@@ -679,8 +735,8 @@ paths:
                     type: string
                     format: uuid
                     description: |
-                      Identificador de la importación. Se consulta en
-                      `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+                      Identificador de la creación. Se consulta en
+                      `GET /batches/operations/{operationId}`, que lo devuelve con
                       `kind: batch.lifecycle`.
                   status:
                     type: string
@@ -694,8 +750,8 @@ paths:
             El cuerpo no pasó la validación, el canal está deshabilitado para la cuenta, o se supera el
             límite de contactos.
 
-            Solo `VALIDATION_FAILED` permite reintentar con la misma clave de archivo. En los otros dos
-            casos el CSV se descarta y debe subirse de nuevo.
+            Cuando la petición usa un CSV, solo `VALIDATION_FAILED` permite reintentar con la misma
+            clave de archivo. En los otros dos casos el CSV se descarta y debe subirse de nuevo.
           content:
             application/json:
               schema:
@@ -737,7 +793,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/{batchId}:
+  /batches/{batchId}:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -806,7 +862,7 @@ paths:
         pueden modificar una vez importados.
 
         Las reglas de marcación se modifican con
-        `PUT /auto-contact/batches/{batchId}/rules`.
+        `PUT /batches/{batchId}/rules`.
 
         ## Ventana horaria
 
@@ -937,7 +993,7 @@ paths:
 
         La eliminación de un lote con muchos contactos requiere varios minutos, por lo que se procesa en
         segundo plano. El `operationId` devuelto permite seguir el avance en
-        `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+        `GET /batches/operations/{operationId}`, que lo devuelve con
         `kind: batch.lifecycle`.
 
         La operación está disponible durante 1 hora y solo 10 minutos desde que finaliza. Una vez
@@ -965,7 +1021,7 @@ paths:
                     format: uuid
                     description: |
                       Identificador de la operación de eliminación, consultable en
-                      `GET /auto-contact/batches/operations/{operationId}`.
+                      `GET /batches/operations/{operationId}`.
                   status:
                     type: string
                     enum: [deleting]
@@ -1004,7 +1060,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/{batchId}/start:
+  /batches/{batchId}/start:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -1019,7 +1075,7 @@ paths:
 
         El arranque implica preparar los contactos y cargarlos en el motor de marcación, lo que en lotes
         grandes requiere varios minutos. El `operationId` devuelto permite seguir el avance en
-        `GET /auto-contact/batches/operations/{operationId}`, que lo devuelve con
+        `GET /batches/operations/{operationId}`, que lo devuelve con
         `kind: batch.lifecycle`.
 
         Esa operación se compone de dos etapas y su campo `progress` refleja el avance conjunto de ambas
@@ -1080,7 +1136,7 @@ paths:
                     format: uuid
                     description: |
                       Identificador de la operación de arranque, consultable en
-                      `GET /auto-contact/batches/operations/{operationId}`.
+                      `GET /batches/operations/{operationId}`.
                   status:
                     type: string
                     enum: [starting]
@@ -1132,7 +1188,7 @@ paths:
                   value:
                     message: Cannot modify an archived batch
 
-  /auto-contact/batches/{batchId}/stop:
+  /batches/{batchId}/stop:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -1243,7 +1299,7 @@ paths:
                   value:
                     message: Cannot modify an archived batch
 
-  /auto-contact/batches/{batchId}/rules:
+  /batches/{batchId}/rules:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -1329,7 +1385,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/blocked-addresses:
+  /blocked-addresses:
     get:
       tags: [Direcciones bloqueadas]
       operationId: listBlockedAddresses
@@ -1417,7 +1473,7 @@ paths:
 
         Para dejar de llamar a un contacto en una campaña concreta sin afectar al resto, utilice la
         anulación del contacto:
-        `POST /auto-contact/batches/{batchId}/contacts/{contactId}/cancel`.
+        `POST /batches/{batchId}/contacts/{contactId}/cancel`.
 
         ## Direcciones ya bloqueadas
 
@@ -1581,7 +1637,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/operations/{operationId}:
+  /batches/operations/{operationId}:
     parameters:
       - name: operationId
         in: path
@@ -1761,7 +1817,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/{batchId}/contacts/schedule/:
+  /batches/{batchId}/contacts/schedule/:
     parameters:
       - $ref: '#/components/parameters/BatchId'
 
@@ -1963,7 +2019,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /auto-contact/batches/{batchId}/contacts/{contactId}/cancel:
+  /batches/{batchId}/contacts/{contactId}/cancel:
     parameters:
       - $ref: '#/components/parameters/BatchId'
       - name: contactId
@@ -1994,7 +2050,7 @@ paths:
         | Operación | Alcance | Cuándo utilizarla |
         |---|---|---|
         | Anulación (esta operación) | Un contacto en un lote concreto | No se desea seguir llamando en esta campaña |
-        | Bloqueo (`POST /auto-contact/blocked-addresses`) | Una dirección en toda la cuenta | La persona solicita no ser contactada nunca |
+        | Bloqueo (`POST /blocked-addresses`) | Una dirección en toda la cuenta | La persona solicita no ser contactada nunca |
 
         La anulación mantiene la dirección disponible para otras campañas. Si la persona ha solicitado no
         ser contactada, es necesario bloquear la dirección.
@@ -2416,7 +2472,17 @@ components:
 
     CreateBatchInput:
       type: object
-      required: [name, channelId, tempCsvKey, mapping]
+      required: [name, channelId]
+      oneOf:
+        - title: Lote desde un CSV
+          required: [tempCsvKey, mapping]
+          not:
+            required: [source]
+        - title: Lote desde la API
+          required: [source]
+          properties:
+            source:
+              const: api
       properties:
         name:
           type: string
@@ -2436,10 +2502,16 @@ components:
           description: |
             Peso del lote al repartir la capacidad del canal entre lotes que corren a la vez. Más
             alto recibe más capacidad.
+        source:
+          type: string
+          enum: [api]
+          description: |
+            Indica que el lote se crea vacío y que sus contactos se cargarán mediante la API. Omítalo
+            cuando el lote se cree desde un CSV.
         tempCsvKey:
           type: string
           description: |
-            Clave del CSV ya subido, tal como la devuelve `POST /auto-contact/batches/upload-url` en su
+            Clave del CSV ya subido, tal como la devuelve `POST /batches/upload-url` en su
             campo `tempCsvKey`.
 
             Se consume al crear el lote: no sirve para un segundo alta.
@@ -2460,8 +2532,7 @@ components:
           description: |
             Política ante contactos repetidos. `null` u omitido importa todo sin deduplicar.
         rules:
-          type: object
-          additionalProperties: true
+          $ref: '#/components/schemas/BatchRules'
           description: |
             Reglas de marcación propias del lote (intentos, esperas, ventana horaria). Omitido, el
             lote hereda las reglas de la cuenta para su tipo de canal.
@@ -2615,8 +2686,17 @@ components:
                 description: |
                   Reintentos para este resultado. `0` significa no reintentar.
           description: |
-            Reglas por resultado de la llamada, indexadas por el resultado (`NO_ANSWER`, `BUSY`, etc.).
-            Qué resultados aplican depende del tipo de canal del lote.
+            Reglas por resultado de la llamada. Entre las claves admitidas se encuentran `noAnswer`,
+            `busy` y `voicemail`. Qué resultados aplican depende del tipo de canal del lote.
+        addressPriority:
+          type: object
+          description: Define cómo se recorren las direcciones de un contacto antes de reintentarlas.
+          properties:
+            tryAllBeforeRetry:
+              type: boolean
+              description: |
+                Con `true`, se prueban todas las direcciones del contacto antes de reintentar una ya
+                utilizada.
         amd:
           type: object
           description: Detección de contestador automático.
@@ -2669,7 +2749,7 @@ components:
       type: object
       required: [enabled]
       description: |
-        Qué hacer cuando un contacto del CSV ya existe en la cuenta.
+        Qué hacer cuando un contacto que se incorpora al lote ya existe en la cuenta.
 
         `detectionCriteria` y `action` solo se exigen con `enabled: true`.
       properties:
@@ -2747,6 +2827,17 @@ components:
 
             Sin este campo el contacto entra a la selección del siguiente ciclo.
           example: '2026-08-20T14:30:00.000Z'
+        onDuplicate:
+          type: string
+          enum: [recontact]
+          description: |
+            Usa `recontact` para volver a llamar al contacto aunque su `identifier` ya exista en el
+            lote.
+        resetAttempts:
+          type: boolean
+          description: |
+            Con `true`, reinicia los contadores de intentos cuando el contacto duplicado se vuelve a
+            poner en marcación.
 
     ContactAddress:
       type: object

@@ -1,7 +1,7 @@
 ---
 title: "Historial de llamadas de un lote"
 description: "Consulta los intentos de llamada registrados en un lote."
-api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/event-history"
+api: "GET https://api.backend.inconcertcc.com/autocontact/api/v1/batches/{batchId}/event-history"
 auth: "key"
 ---
 
@@ -33,7 +33,7 @@ Devuelve los intentos de llamada registrados para los contactos de un lote.
 
 ```bash cURL
 curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/event-history?limit=20&offset=0' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/event-history?limit=20&offset=0' \
   --header 'apikey: TU_API_KEY'
 ```
 
@@ -112,6 +112,8 @@ curl --request GET \
 ```
 
 </ResponseExample>
+
+Consulta [Códigos de resultado](./contact-result-codes) para interpretar `result_code` y su etiqueta.
 
 <Note>
   La respuesta diferencia el `contactId`, generado internamente por el sistema, del `identifier`, definido por el cliente durante la importación. Usa el `contactId` para consultar el historial o reagendar un contacto concreto.

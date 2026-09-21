@@ -1,7 +1,14 @@
 ---
 title: "Detener un lote"
 description: "Detiene la marcación de un lote activo."
-openapi: "api-reference/dialer/openapi.yaml POST /auto-contact/batches/{batchId}/stop"
+openapi: "api-reference/dialer/openapi.yaml POST /batches/{batchId}/stop"
 ---
 
 Detiene la marcación del lote sin eliminarlo ni borrar sus contactos.
+
+```bash cURL
+curl --request POST \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/5b591fcb-6beb-4157-b932-e8e707eeb6d7/stop' \
+  --header 'apikey: TU_API_KEY' \
+  --data ''
+```

@@ -1,10 +1,12 @@
 ---
 title: "Insertar contactos en un lote"
 description: "Añade uno o varios contactos a un lote existente del marcador."
-openapi: "api-reference/dialer/openapi.yaml POST /auto-contact/batches/{batchId}/contacts"
+openapi: "api-reference/dialer/openapi.yaml POST /batches/{batchId}/contacts"
 ---
 
 Añade hasta 1000 contactos a un lote existente y deja la operación en cola para su procesamiento. Puedes enviar un contacto directamente en la raíz del body o varios dentro de `contacts`.
+
+Para volver a llamar a un contacto cuyo `identifier` ya existe en el lote, envía `onDuplicate: "recontact"`. Usa `resetAttempts: true` si además quieres reiniciar sus contadores de intentos.
 
 <Info>
   `identifier` es opcional, aunque se recomienda enviarlo para relacionar el resultado con el registro del sistema de origen. Si se omite, el servicio genera uno automáticamente.
@@ -14,49 +16,26 @@ Añade hasta 1000 contactos a un lote existente y deja la operación en cola par
 
 ```bash cURL
 curl --request POST \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts' \
   --header 'Content-Type: application/json' \
   --header 'apikey: TU_API_KEY' \
   --data '{
-    "contacts": [
+    "identifier": "CLI-003",
+    "name": "Juan Pérez 3",
+    "addresses": [
       {
-        "identifier": "CLI-002",
-        "name": "Juan Pérez",
-        "addresses": [
-          { "address": "5491155551234", "type": "phone", "priority": 1 }
-        ],
-        "contactPriority": 0,
-        "customFields": { "campaign": "verano2025", "source": "crm" }
-      },
-      {
-        "identifier": "CLI-003",
-        "name": "María García",
-        "addresses": [
-          { "address": "5491166661234", "type": "phone", "priority": 1 },
-          { "address": "maria@example.com", "type": "email", "priority": 2 }
-        ],
-        "contactPriority": 0,
-        "customFields": { "campaign": "verano2025", "source": "crm" }
-      },
-      {
-        "identifier": "CLI-004",
-        "name": "Pedro López",
-        "addresses": [
-          { "address": "5491177771234", "type": "phone", "priority": 1 }
-        ],
-        "contactPriority": 0,
-        "customFields": { "campaign": "verano2025", "source": "crm" }
-      },
-      {
-        "identifier": "CLI-005",
-        "name": "Ana Martínez",
-        "addresses": [
-          { "address": "5491188881234", "type": "phone", "priority": 1 }
-        ],
-        "contactPriority": 0,
-        "customFields": { "campaign": "verano2025", "source": "crm" }
+        "address": "5491155551233",
+        "type": "phone",
+        "priority": 1
       }
-    ]
+    ],
+    "customFields": {
+      "campaign": "verano2025",
+      "source": "crm",
+      "source2": "crm2"
+    },
+    "onDuplicate": "recontact",
+    "resetAttempts": true
   }'
 ```
 
@@ -65,7 +44,7 @@ curl --request POST \
 ```json Response
 {
   "operationId": "626343ed-dbff-4644-a8ce-cee2471b2106",
-  "operationUrl": "/auto-contact/batches/operations/626343ed-dbff-4644-a8ce-cee2471b2106",
+  "operationUrl": "/autocontact/api/v1/batches/operations/626343ed-dbff-4644-a8ce-cee2471b2106",
   "status": "queued",
   "contactsReceived": 1,
   "chunksPublished": 1,

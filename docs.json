@@ -167,7 +167,8 @@
 								"pages": [
 									"api-reference/dialer/batch-logs",
 									"api-reference/dialer/batch-call-history",
-									"api-reference/dialer/contact-call-history"
+									"api-reference/dialer/contact-call-history",
+									"api-reference/dialer/contact-result-codes"
 								]
 							}
 						]

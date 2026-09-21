@@ -1,0 +1,31 @@
+---
+title: "Códigos de resultado"
+description: "Interpreta el resultado de los intentos de contacto del marcador."
+---
+
+Los historiales de llamada devuelven el código en `result_code` y su descripción en `result_description`. Distintos códigos pueden representar el mismo resultado funcional.
+
+| Código | Etiqueta |
+| --- | --- |
+| `200`, `ANSWERED`, `SUCCESS` | Contestada / Exitoso |
+| `400`, `404`, `INVALID` | Número inválido |
+| `403` | No permitido |
+| `407` | Autenticación requerida |
+| `408` | Timeout |
+| `410`, `480`, `NO_ANSWER` | No disponible |
+| `484` | Número incompleto |
+| `486`, `BUSY` | Ocupado |
+| `487` | Cancelada |
+| `488` | No compatible |
+| `500` | Error de servidor |
+| `502` | Error de gateway |
+| `503` | Servicio no disponible |
+| `504` | Timeout de gateway |
+| `603` | Rechazada |
+| `FAILED` | Fallido |
+| `VOICEMAIL` | Voicemail en el detalle / Contestadora en analytics |
+| Sin mapear | `Error {código}` |
+
+<Info>
+  Si el código no aparece en la tabla, la etiqueta se presenta como `Error {código}`.
+</Info>

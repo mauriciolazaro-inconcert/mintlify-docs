@@ -8,7 +8,7 @@ La API del **marcador de Inagent** permite administrar el ciclo de vida completo
 ## URL base
 
 ```text
-https://api.backend.inconcertcc.com/engine/v1/api/auto-contact
+https://api.backend.inconcertcc.com/autocontact/api/v1
 ```
 
 ## Autenticación
@@ -57,6 +57,12 @@ La clave debe contener entre 1 y 255 caracteres ASCII imprimibles y se conserva 
 | `Idempotency-Status: bypassed` | La petición se procesó sin protección porque el servicio de idempotencia no estaba disponible. |
 
 Las respuestas `5xx` no se almacenan. Si recibes `Idempotency-Status: bypassed` y pierdes la respuesta, verifica el estado del recurso antes de reintentar.
+
+## Crear un lote desde la API
+
+Envía `POST /batches` con `source: "api"`, el nombre y el canal. Puedes incluir `duplicateStrategy` y `rules` para dejar configuradas la deduplicación, los intentos, la ventana horaria, las prioridades y el comportamiento ante cada resultado desde la creación.
+
+El lote se crea sin contactos. Añádelos después mediante `POST /batches/{batchId}/contacts`.
 
 ## Crear un lote desde un CSV
 

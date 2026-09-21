@@ -1,7 +1,7 @@
 ---
 title: "Consultar el log de un lote"
 description: "Obtén el registro de cambios y operaciones de un lote del marcador."
-api: "GET https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/{batchId}/logs"
+api: "GET https://api.backend.inconcertcc.com/autocontact/api/v1/batches/{batchId}/logs"
 auth: "key"
 ---
 
@@ -31,7 +31,7 @@ Devuelve el registro de operaciones realizadas sobre un lote.
 
 ```bash cURL
 curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/engine/v1/api/auto-contact/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/logs?limit=50&offset=0' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/logs?limit=50&offset=0' \
   --header 'apikey: TU_API_KEY'
 ```
 
