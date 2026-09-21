@@ -4,40 +4,110 @@ description: "Añade uno o varios contactos a un lote existente del marcador."
 openapi: "api-reference/dialer/openapi.yaml POST /batches/{batchId}/contacts"
 ---
 
-Añade hasta 1000 contactos a un lote existente y deja la operación en cola para su procesamiento. Puedes enviar un contacto directamente en la raíz del body o varios dentro de `contacts`.
+Añade hasta 1000 contactos a un lote existente y deja la operación en cola para su procesamiento. El mismo endpoint admite dos formatos de body:
 
-Para volver a llamar a un contacto cuyo `identifier` ya existe en el lote, envía `onDuplicate: "recontact"`. Usa `resetAttempts: true` si además quieres reiniciar sus contadores de intentos.
+- **Un contacto:** envía sus propiedades directamente en la raíz del body.
+- **Varios contactos:** envía un objeto con el array `contacts`. Cada elemento del array es un contacto completo.
+
+No envíes un contacto individual dentro de `contacts` salvo que quieras utilizar el formato de carga múltiple.
 
 <Info>
   `identifier` es opcional, aunque se recomienda enviarlo para relacionar el resultado con el registro del sistema de origen. Si se omite, el servicio genera uno automáticamente.
 </Info>
 
-## Ejemplo
+## Tratamiento de contactos duplicados
 
-```bash cURL
+`onDuplicate` y `resetAttempts` son campos opcionales de cada contacto:
+
+- Omite ambos campos para procesar el contacto con la política de duplicados configurada en el lote.
+- Envía `"onDuplicate": "recontact"` cuando quieras volver a poner en marcación un contacto cuyo `identifier` ya existe en el lote.
+- Añade `"resetAttempts": true` si, además de recontactarlo, quieres reiniciar sus contadores de intentos.
+
+En una carga múltiple, estos campos se incluyen dentro del objeto del contacto al que deben aplicarse, no en la raíz del body. Por tanto, una misma petición puede solicitar la reactivación de algunos contactos y aplicar el tratamiento habitual a otros.
+
+<Tip>
+  Usa `resetAttempts` junto con `onDuplicate: "recontact"`. Si no necesitas reiniciar los intentos, puedes enviar solo `onDuplicate`.
+</Tip>
+
+## Ejemplos de solicitud
+
+<CodeGroup>
+
+```bash Un contacto
 curl --request POST \
   --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts' \
   --header 'Content-Type: application/json' \
   --header 'apikey: TU_API_KEY' \
   --data '{
-    "identifier": "CLI-003",
-    "name": "Juan Pérez 3",
+    "identifier": "CLI-001",
+    "name": "Alex Romero",
     "addresses": [
       {
-        "address": "5491155551233",
+        "address": "34910000001",
         "type": "phone",
         "priority": 1
       }
     ],
     "customFields": {
-      "campaign": "verano2025",
-      "source": "crm",
-      "source2": "crm2"
+      "campaign": "renovaciones",
+      "source": "crm"
     },
     "onDuplicate": "recontact",
     "resetAttempts": true
   }'
 ```
+
+```bash Varios contactos
+curl --request POST \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/e8b63614-f5db-4fd4-84ab-258b7070262e/contacts' \
+  --header 'Content-Type: application/json' \
+  --header 'apikey: TU_API_KEY' \
+  --data '{
+    "contacts": [
+      {
+        "identifier": "CLI-002",
+        "name": "Andrea Torres",
+        "addresses": [
+          {
+            "address": "34910000002",
+            "type": "phone",
+            "priority": 1
+          }
+        ],
+        "customFields": {
+          "campaign": "renovaciones",
+          "source": "crm"
+        },
+        "onDuplicate": "recontact",
+        "resetAttempts": true
+      },
+      {
+        "identifier": "CLI-003",
+        "name": "Daniel Vega",
+        "addresses": [
+          {
+            "address": "34910000003",
+            "type": "phone",
+            "priority": 1
+          },
+          {
+            "address": "daniel.vega@example.com",
+            "type": "email",
+            "priority": 2
+          }
+        ],
+        "customFields": {
+          "campaign": "renovaciones",
+          "source": "crm"
+        }
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+En el ejemplo múltiple, el primer contacto solicita recontacto y reinicio de intentos. El segundo omite ambos campos, por lo que conserva el tratamiento de duplicados habitual del lote.
 
 <ResponseExample>
 
