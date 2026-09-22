@@ -1,7 +1,21 @@
 ---
 title: "Anular un contacto"
 description: "Cierra un contacto para que no vuelva a llamarse en ese lote."
-openapi: "api-reference/dialer/openapi.yaml POST /batches/{batchId}/contacts/{contactId}/cancel"
+openapi: "api-reference/dialer/openapi.yaml PUT /batches/{batchId}/contacts/cancel/"
 ---
 
-La anulación afecta únicamente al contacto dentro del lote indicado. Para excluir una dirección de toda la cuenta, utiliza el endpoint de bloqueo.
+La anulación afecta únicamente al contacto dentro del lote indicado. Identifica el contacto en el body mediante uno de estos campos:
+
+- `identifier`: identificador externo definido en el sistema de origen. Es la opción recomendada para integrar un CRM u otro sistema externo.
+- `contactId`: identificador interno generado por Inagent.
+
+Envía exactamente uno de los dos campos. Puedes añadir `reason` para dejar registrado el motivo de la anulación.
+
+```json identifier
+{
+  "identifier": "CLI-001",
+  "reason": "El cliente ya regularizó su deuda"
+}
+```
+
+Para excluir una dirección de toda la cuenta, utiliza el endpoint de bloqueo. Anular un contacto solo impide que vuelva a llamarse dentro de este lote; la dirección continúa disponible para otros lotes.

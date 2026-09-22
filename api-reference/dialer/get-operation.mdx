@@ -5,3 +5,7 @@ openapi: "api-reference/dialer/openapi.yaml GET /batches/operations/{operationId
 ---
 
 Utiliza el `operationId` devuelto por una operación con respuesta `202` para seguir su progreso y recuperar su resultado.
+
+Revisa primero el campo `kind`: `contacts.load` devuelve el desglose de los contactos cargados, mientras que `batch.lifecycle` informa del progreso y la etapa de una operación sobre el lote.
+
+En una carga de contactos, `recontactedCount` indica cuántos contactos existentes se volvieron a poner en marcación mediante `onDuplicate: "recontact"`.

@@ -9,10 +9,10 @@ Reagenda un contacto ya cargado en el lote. En el body debes enviar **exactament
 - `contactId`: identificador interno que genera Inagent al importar el contacto.
 - `identifier`: identificador externo definido en el sistema de origen.
 
-El campo `scheduledAt` debe contener una fecha futura en formato ISO 8601 y situada dentro de los próximos 30 días.
+El campo `scheduledAt` fija cuándo se realizará el próximo intento. Debe contener una fecha futura en UTC, con formato ISO 8601, y estar situada dentro de los próximos 30 días.
 
 <Info>
-  `resetAttempts` indica si el contador de intentos debe reiniciarse al aplicar el reagendamiento. La respuesta `200` confirma que la solicitud fue aceptada; el motor de marcación puede tardar en reflejar la nueva fecha.
+  Usa `resetAttempts: true` si el contacto ya agotó sus intentos o ya fue contactado. Sin este campo, la fecha se guarda, pero el contacto no vuelve a ponerse en marcación en esos casos. La respuesta `200` confirma que la solicitud fue aceptada; el motor de marcación puede tardar en reflejar la nueva fecha.
 </Info>
 
 ## Ejemplos de body
@@ -22,7 +22,7 @@ El campo `scheduledAt` debe contener una fecha futura en formato ISO 8601 y situ
 ```json contactId
 {
   "contactId": "7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b",
-  "scheduledAt": "2026-09-19T07:07:17.443Z",
+  "scheduledAt": "2026-09-23T08:41:43.522Z",
   "resetAttempts": true,
   "reason": "El cliente pidió que lo llamen más tarde"
 }
@@ -31,7 +31,7 @@ El campo `scheduledAt` debe contener una fecha futura en formato ISO 8601 y situ
 ```json identifier
 {
   "identifier": "CLI-001",
-  "scheduledAt": "2026-09-19T07:07:17.443Z",
+  "scheduledAt": "2026-09-23T08:41:43.522Z",
   "resetAttempts": true,
   "reason": "El cliente pidió que lo llamen más tarde"
 }

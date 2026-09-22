@@ -15,11 +15,19 @@ No envíes un contacto individual dentro de `contacts` salvo que quieras utiliza
   `identifier` es opcional, aunque se recomienda enviarlo para relacionar el resultado con el registro del sistema de origen. Si se omite, el servicio genera uno automáticamente.
 </Info>
 
+Si omites `scheduledAt`, el contacto entra en la selección del siguiente ciclo y se marca a la brevedad posible. Si lo incluyes, debe ser una fecha futura expresada en UTC y fija cuándo se realizará el primer intento.
+
+Los campos `contactPriority` y `customFields` son opcionales. `contactPriority` ordena el contacto frente a los demás contactos del lote: cuanto menor sea su valor, antes se seleccionará. `customFields` permite guardar datos propios que viajarán con el contacto.
+
+<Warning>
+  Envía los teléfonos con el código de país y únicamente dígitos, sin el signo `+`. Un número que contenga `+` se rechaza con una respuesta `400`.
+</Warning>
+
 ## Tratamiento de contactos duplicados
 
 `onDuplicate` y `resetAttempts` son campos opcionales de cada contacto:
 
-- Omite ambos campos para procesar el contacto con la política de duplicados configurada en el lote.
+- Si el contacto ya existe y omites `onDuplicate`, sus datos se actualizan, se trata como duplicado y no se vuelve a poner en marcación.
 - Envía `"onDuplicate": "recontact"` cuando quieras volver a poner en marcación un contacto cuyo `identifier` ya existe en el lote.
 - Añade `"resetAttempts": true` si, además de recontactarlo, quieres reiniciar sus contadores de intentos.
 
@@ -48,6 +56,7 @@ curl --request POST \
         "priority": 1
       }
     ],
+    "contactPriority": 0,
     "customFields": {
       "campaign": "renovaciones",
       "source": "crm"
@@ -74,6 +83,7 @@ curl --request POST \
             "priority": 1
           }
         ],
+        "contactPriority": 0,
         "customFields": {
           "campaign": "renovaciones",
           "source": "crm"
@@ -96,6 +106,7 @@ curl --request POST \
             "priority": 2
           }
         ],
+        "contactPriority": 1,
         "customFields": {
           "campaign": "renovaciones",
           "source": "crm"

@@ -1,90 +1,73 @@
 ---
 title: "Historial de llamadas de un contacto"
 description: "Consulta los intentos de llamada de un contacto dentro de un lote."
-api: "GET https://api.backend.inconcertcc.com/autocontact/api/v1/batches/contacts/{contactId}/event-history"
-auth: "key"
+openapi: "api-reference/dialer/openapi.yaml GET /batches/{batchId}/contacts/event-history"
 ---
 
-Devuelve los intentos de llamada de un contacto concreto dentro de un lote.
+Devuelve los intentos ya realizados sobre un contacto dentro del lote. Puedes localizarlo mediante su `identifier` externo o mediante el `contactId` interno.
 
 <Info>
-  Cada posición de los arrays de `data` corresponde, en el mismo orden, al nombre incluido en `columns`.
+  Usa preferentemente `identifier` para relacionar la consulta con el registro de tu CRM u otro sistema de origen. Envía exactamente uno de los dos identificadores.
 </Info>
 
-## Parámetros
+El parámetro `timezone` es opcional y determina la zona horaria de `occurredAt`. Si lo omites, las fechas se devuelven en UTC.
 
-<ParamField header="apikey" type="string" required>
-  API key obtenida desde la interfaz de Inagent, dentro del marcador.
-</ParamField>
+## Ejemplos de consulta
 
-<ParamField path="contactId" type="string" required>
-  Identificador interno del contacto devuelto por el historial del lote.
-</ParamField>
+<CodeGroup>
 
-<ParamField query="batchId" type="string" required>
-  Identificador del lote al que pertenece el contacto.
-</ParamField>
-
-<ParamField query="limit" type="integer">
-  Cantidad máxima de registros solicitados.
-</ParamField>
-
-<ParamField query="offset" type="integer">
-  Desplazamiento desde el primer registro.
-</ParamField>
-
-## Ejemplo
-
-```bash cURL
+```bash identifier
 curl --request GET \
-  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/contacts/01a07b9f-cd7f-772c-adc5-e05f5b20d196/event-history?limit=50&offset=0&batchId=e8b63614-f5db-4fd4-84ab-258b7070262e' \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/bf3d6869-4809-4474-be09-ff1c0f9e0a3a/contacts/event-history?identifier=CLI-001&timezone=Europe%2FMadrid&limit=20&offset=0' \
   --header 'apikey: TU_API_KEY'
 ```
+
+```bash contactId
+curl --request GET \
+  --url 'https://api.backend.inconcertcc.com/autocontact/api/v1/batches/bf3d6869-4809-4474-be09-ff1c0f9e0a3a/contacts/event-history?contactId=7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b&limit=20&offset=0' \
+  --header 'apikey: TU_API_KEY'
+```
+
+</CodeGroup>
 
 <ResponseExample>
 
 ```json Response
 {
+  "contact": {
+    "contactId": "7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b",
+    "identifier": "CLI-001"
+  },
   "data": [
-    [
-      "e8b63614-f5db-4fd4-84ab-258b7070262e",
-      "01a07b9f-cd7f-772c-adc5-e05f5b20d196",
-      "CLI-002",
-      "Juan Pérez",
-      "+5491155551234",
-      "503",
-      "Service Unavailable",
-      "2026-09-07T11:28:22.603Z",
-      "55210458-1957-4023-b7cc-82bbb5124aaa",
-      "874b769d-0425-4d49-9e6d-a66643a910fc",
-      1
-    ]
-  ],
-  "columns": [
-    "batchId",
-    "contactId",
-    "identifier",
-    "name",
-    "address",
-    "result_code",
-    "result_description",
-    "createdAt",
-    "channelId",
-    "dialId",
-    "attemptCount"
+    {
+      "batchId": "bf3d6869-4809-4474-be09-ff1c0f9e0a3a",
+      "contactId": "7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b",
+      "identifier": "CLI-001",
+      "name": "Juan Pérez",
+      "address": "5491155551234",
+      "result": "NO_ANSWER",
+      "resultDetail": "No contesta",
+      "attemptNumber": 1,
+      "occurredAt": "2026-09-21 10:41:43.000",
+      "channelId": "c1a2b3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "dialId": "d9e8f7a6-5b4c-4d3e-2f1a-0b9c8d7e6f5a"
+    }
   ],
   "pagination": {
     "total": 1,
-    "limit": 50,
+    "limit": 20,
     "offset": 0
-  }
+  },
+  "timezone": "Europe/Madrid"
 }
 ```
 
 </ResponseExample>
 
-Consulta [Códigos de resultado](./contact-result-codes) para interpretar `result_code` y su etiqueta.
+Los campos sin datos se devuelven como `null`, no como cadenas vacías. Un contacto cargado que todavía no fue marcado devuelve `data` vacío y `pagination.total: 0`; esto no significa que el contacto no exista.
 
-<Note>
-  En estos ejemplos, el `contactId` consultado corresponde al identificador externo `CLI-002` y al lote `e8b63614-f5db-4fd4-84ab-258b7070262e`.
-</Note>
+<Warning>
+  `occurredAt` utiliza el formato `YYYY-MM-DD HH:mm:ss.SSS` y no incluye un offset. Interprétalo junto con el campo `timezone` de la respuesta. Evita pasarlo directamente a `new Date(occurredAt)`, porque JavaScript usaría la zona horaria del cliente, que puede ser distinta de la solicitada.
+</Warning>
+
+Consulta [Códigos de resultado](./contact-result-codes) para interpretar `result`.

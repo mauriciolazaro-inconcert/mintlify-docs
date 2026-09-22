@@ -11,8 +11,9 @@ info:
 
     ## Autenticación
 
-    Las peticiones se autentican con el header `apikey`, usando la credencial asociada al lote. El
-    servicio deriva la cuenta de esa credencial y verifica que el recurso solicitado le pertenezca.
+    Las peticiones se autentican con el header `apikey`. La misma credencial permite operar los lotes
+    de la cuenta a los que tenga acceso. El servicio deriva la cuenta de esa credencial y verifica que
+    el recurso solicitado le pertenezca.
 
     Un lote que no pertenece a la cuenta responde `404`, igual que un lote inexistente.
 
@@ -141,7 +142,19 @@ paths:
         El campo `scheduledAt` es opcional y determina cuándo se intentará contactar por primera vez. Si
         se omite, el contacto entra en el siguiente ciclo de marcación.
 
-        La fecha debe ser futura y estar dentro de los próximos 30 días.
+        La fecha debe ser futura, expresarse en UTC y estar dentro de los próximos 30 días.
+
+        ## Contactos duplicados
+
+        Si el `identifier` ya existe y se omite `onDuplicate`, los datos se actualizan, el contacto se
+        trata como duplicado y no vuelve a ponerse en marcación. Con `onDuplicate: recontact`, el mismo
+        request permite insertar el contacto cuando no existe o volver a llamarlo cuando ya estaba en
+        el lote.
+
+        ## Formato del teléfono
+
+        Los números de teléfono deben incluir el código de país y contener únicamente dígitos, sin el
+        signo `+`. Un número que contenga `+` se rechaza con `400`.
       requestBody:
         required: true
         content:
@@ -171,6 +184,7 @@ paths:
                     - address: juan@example.com
                       type: email
                       priority: 2
+                  contactPriority: 0
                   customFields:
                     campaign: verano2025
                     source: crm
@@ -184,12 +198,14 @@ paths:
                         - address: '5491155551234'
                           type: phone
                           priority: 1
+                      contactPriority: 0
                     - identifier: CLI-002
                       name: María López
                       addresses:
                         - address: '5491155555678'
                           type: phone
                           priority: 1
+                      contactPriority: 1
               conAgendamiento:
                 summary: Con la primera llamada programada
                 value:
@@ -199,7 +215,8 @@ paths:
                     - address: '5491155559999'
                       type: phone
                       priority: 1
-                  scheduledAt: '2026-08-20T14:30:00.000Z'
+                  scheduledAt: '2026-09-23T08:41:43.522Z'
+                  contactPriority: 0
               recontactarDuplicado:
                 summary: Volver a llamar a un contacto duplicado
                 value:
@@ -213,6 +230,7 @@ paths:
                     campaign: verano2025
                     source: crm
                     source2: crm2
+                  contactPriority: 0
                   onDuplicate: recontact
                   resetAttempts: true
       responses:
@@ -302,11 +320,11 @@ paths:
                       - index: 3
                         field: contacts[3].addresses[0].address
                         code: INVALID_PHONE_FORMAT
-                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe contener solo dígitos, 7-15 caracteres)"
                         meta:
                           received: '123'
-                          expected: '+?digits, 7-15 characters'
-                        error: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                          expected: 'digits only, 7-15 characters'
+                        error: "addresses[0]: formato inválido para tipo 'phone': '123' (debe contener solo dígitos, 7-15 caracteres)"
                       - index: 7
                         field: contacts[7].name
                         code: REQUIRED
@@ -1473,7 +1491,7 @@ paths:
 
         Para dejar de llamar a un contacto en una campaña concreta sin afectar al resto, utilice la
         anulación del contacto:
-        `POST /batches/{batchId}/contacts/{contactId}/cancel`.
+        `PUT /batches/{batchId}/contacts/cancel/`.
 
         ## Direcciones ya bloqueadas
 
@@ -1683,16 +1701,16 @@ paths:
 
         ## Interpretación de los recuentos
 
-        `requestedCount` es el número de contactos enviados. Los cuatro campos siguientes detallan qué
-        ocurrió con ellos:
+        `requestedCount` es el número de contactos enviados. Los campos siguientes detallan qué ocurrió
+        durante el procesamiento:
 
         * `insertedCount`: contactos añadidos como nuevos
         * `updatedCount`: contactos que ya existían y se actualizaron
         * `duplicateCount`: contactos que ya existían y se descartaron
         * `invalidCount`: contactos rechazados por validación
+        * `recontactedCount`: contactos existentes que volvieron a ponerse en marcación
 
-        La suma de los cuatro solo coincide con `requestedCount` cuando la operación ha finalizado. Si
-        todavía está en proceso, quedan bloques pendientes de procesar.
+        Mientras la operación está en proceso, los contadores todavía pueden estar incompletos.
 
         ## Campo `errors`
 
@@ -1720,6 +1738,7 @@ paths:
                 terminadaParcial:
                   summary: Terminó, entró una parte
                   value:
+                    kind: contacts.load
                     operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
                     batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
                     type: contacts.insert
@@ -1731,9 +1750,10 @@ paths:
                     invalidCount: 4
                     duplicateCount: 6
                     updatedCount: 0
+                    recontactedCount: 0
                     errors:
                       - identifier: CLI-042
-                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe ser +?dígitos, 7-15 caracteres)"
+                        reason: "addresses[0]: formato inválido para tipo 'phone': '123' (debe contener solo dígitos, 7-15 caracteres)"
                       - identifier: CLI-077
                         reason: Duplicate of an existing contact, rejected by the batch policy (matched phone)
                     createdAt: '2026-08-10T12:00:00.000Z'
@@ -1753,6 +1773,7 @@ paths:
                     invalidCount: 0
                     duplicateCount: 0
                     updatedCount: 0
+                    recontactedCount: 0
                     errors: []
                     createdAt: '2026-08-10T12:00:00.000Z'
                     completedAt: null
@@ -1849,8 +1870,11 @@ paths:
 
         ## Restricciones de la fecha
 
-        `scheduledAt` debe tener formato ISO 8601, ser una fecha futura y estar dentro de los próximos 30
-        días. Cada caso devuelve `400` con un mensaje que identifica el motivo.
+        `scheduledAt` debe tener formato ISO 8601, expresarse en UTC, ser una fecha futura y estar dentro
+        de los próximos 30 días. Cada caso devuelve `400` con un mensaje que identifica el motivo.
+
+        Si el contacto ya agotó sus intentos o ya fue contactado, envíe `resetAttempts: true`. Sin este
+        campo la fecha se guarda, pero el contacto no vuelve a ponerse en marcación en esos casos.
       requestBody:
         required: true
         content:
@@ -1874,10 +1898,12 @@ paths:
                   description: |
                     Fecha y hora del próximo intento. Debe ser futura y estar dentro de los próximos 30
                     días.
-                  example: '2026-09-19T07:07:17.443Z'
+                  example: '2026-09-23T08:41:43.522Z'
                 resetAttempts:
                   type: boolean
-                  description: Indica si se reinicia el contador de intentos al reagendar.
+                  description: |
+                    Indica si se reinicia el contador de intentos al reagendar. Es necesario para volver
+                    a marcar un contacto que agotó sus intentos o que ya fue contactado.
                   example: true
                 reason:
                   type: string
@@ -1897,14 +1923,14 @@ paths:
                 summary: Reagendar mediante el identificador interno
                 value:
                   contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
-                  scheduledAt: '2026-09-19T07:07:17.443Z'
+                  scheduledAt: '2026-09-23T08:41:43.522Z'
                   resetAttempts: true
                   reason: El cliente pidió que lo llamen más tarde
               porIdentifier:
                 summary: Reagendar mediante el identificador externo
                 value:
                   identifier: CLI-001
-                  scheduledAt: '2026-09-19T07:07:17.443Z'
+                  scheduledAt: '2026-09-23T08:41:43.522Z'
                   resetAttempts: true
                   reason: El cliente pidió que lo llamen más tarde
       responses:
@@ -1937,7 +1963,7 @@ paths:
               example:
                 contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
                 batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
-                scheduledAt: '2026-09-19T07:07:17.443Z'
+                scheduledAt: '2026-09-23T08:41:43.522Z'
                 scheduled: true
                 reason: El cliente pidió que lo llamen más tarde
         '400':
@@ -2019,20 +2045,166 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /batches/{batchId}/contacts/{contactId}/cancel:
+  /batches/{batchId}/contacts/event-history:
     parameters:
       - $ref: '#/components/parameters/BatchId'
-      - name: contactId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-        description: |
-          Identificador del contacto asignado por el servicio, según lo devuelve la consulta de contactos
-          del lote. No corresponde al campo `identifier` del sistema de origen.
 
-    post:
+    get:
+      tags: [Contactos]
+      operationId: getContactEventHistory
+      summary: Consulta el historial de intentos de un contacto
+      description: |
+        Devuelve únicamente los intentos ya ejecutados sobre un contacto dentro del lote. Un contacto
+        cargado que todavía no fue marcado devuelve `data` vacío y `pagination.total: 0`; esto no
+        significa que el contacto no exista.
+
+        El contacto se puede localizar mediante su `identifier` externo o mediante el `contactId`
+        interno. Debe enviarse exactamente uno de los dos parámetros. Para integraciones con un CRM u
+        otro sistema de origen, se recomienda utilizar `identifier`.
+
+        `timezone` determina la zona horaria de `occurredAt`. Si se omite, las fechas se devuelven en
+        UTC. `occurredAt` tiene el formato `YYYY-MM-DD HH:mm:ss.SSS` y no incluye un offset; debe
+        interpretarse junto con el campo `timezone` de la respuesta. Los campos sin datos se devuelven
+        como `null`, no como cadenas vacías.
+      parameters:
+        - name: identifier
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Identificador del contacto en el sistema de origen. Recomendado.
+          example: CLI-001
+        - name: contactId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Identificador interno asignado por Inagent al importar el contacto.
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            type: string
+            default: UTC
+          description: Zona horaria IANA utilizada para expresar `occurredAt`.
+          example: Europe/Madrid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Cantidad máxima de intentos que se devolverán.
+          example: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+          description: Desplazamiento desde el primer intento.
+          example: 0
+      responses:
+        '200':
+          description: Historial de intentos del contacto.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [contact, data, pagination, timezone]
+                properties:
+                  contact:
+                    type: object
+                    required: [contactId, identifier]
+                    properties:
+                      contactId:
+                        type: string
+                        format: uuid
+                      identifier:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - batchId
+                        - contactId
+                        - identifier
+                        - name
+                        - address
+                        - result
+                        - resultDetail
+                        - attemptNumber
+                        - occurredAt
+                        - channelId
+                        - dialId
+                      properties:
+                        batchId:
+                          type: string
+                          format: uuid
+                        contactId:
+                          type: string
+                          format: uuid
+                        identifier:
+                          type: string
+                        name:
+                          type: [string, 'null']
+                        address:
+                          type: [string, 'null']
+                        result:
+                          type: [string, 'null']
+                        resultDetail:
+                          type: [string, 'null']
+                        attemptNumber:
+                          type: integer
+                        occurredAt:
+                          type: string
+                          description: Fecha y hora en la zona indicada por `timezone`, sin sufijo de zona.
+                          example: '2026-09-21 10:41:43.000'
+                        channelId:
+                          type: [string, 'null']
+                          format: uuid
+                        dialId:
+                          type: [string, 'null']
+                          format: uuid
+                  pagination:
+                    type: object
+                    required: [total, limit, offset]
+                    properties:
+                      total:
+                        type: integer
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+                  timezone:
+                    type: string
+              example:
+                contact:
+                  contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                  identifier: CLI-001
+                data:
+                  - batchId: bf3d6869-4809-4474-be09-ff1c0f9e0a3a
+                    contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                    identifier: CLI-001
+                    name: Juan Pérez
+                    address: '5491155551234'
+                    result: NO_ANSWER
+                    resultDetail: No contesta
+                    attemptNumber: 1
+                    occurredAt: '2026-09-21 10:41:43.000'
+                    channelId: c1a2b3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+                    dialId: d9e8f7a6-5b4c-4d3e-2f1a-0b9c8d7e6f5a
+                pagination:
+                  total: 1
+                  limit: 20
+                  offset: 0
+                timezone: Europe/Madrid
+  /batches/{batchId}/contacts/cancel/:
+    parameters:
+      - $ref: '#/components/parameters/BatchId'
+
+    put:
       tags: [Contactos]
       operationId: cancelContact
       summary: Anula la marcación de un contacto
@@ -2041,6 +2213,10 @@ paths:
       description: |
         Cierra un contacto para que no vuelva a ser llamado en este lote. Se utiliza, por ejemplo, cuando
         el cliente ya ha regularizado su situación o solicita no recibir más llamadas de esta campaña.
+
+        El contacto se puede identificar mediante su `identifier` externo o mediante el `contactId`
+        interno. Debe enviarse exactamente uno de los dos campos. Para integraciones con un CRM u otro
+        sistema de origen, se recomienda utilizar `identifier`.
 
         El contacto pasa a estado final con `result: CANCELLED_BY_USER`, valor que queda disponible en el
         detalle del contacto y en su historial de intentos.
@@ -2081,20 +2257,45 @@ paths:
         La respuesta `200` confirma que la solicitud se ha aceptado. El cierre lo aplica el motor de
         marcación, de modo que una consulta inmediatamente posterior puede no reflejarlo todavía.
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
               type: object
+              oneOf:
+                - required: [identifier]
+                  not:
+                    required: [contactId]
+                - required: [contactId]
+                  not:
+                    required: [identifier]
               properties:
+                identifier:
+                  type: string
+                  description: Identificador del contacto en el sistema de origen.
+                  example: CLI-001
+                contactId:
+                  type: string
+                  format: uuid
+                  description: Identificador interno asignado por Inagent al importar el contacto.
+                  example: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
                 reason:
                   type: string
                   description: |
                     Motivo de la anulación. Queda registrado en la dirección que iba a marcarse y aparece
                     en el detalle del contacto. Es informativo.
                   example: El cliente ya regularizó su deuda
-            example:
-              reason: El cliente ya regularizó su deuda
+            examples:
+              porIdentifier:
+                summary: Anular mediante el identificador externo
+                value:
+                  identifier: CLI-001
+                  reason: El cliente ya regularizó su deuda
+              porContactId:
+                summary: Anular mediante el identificador interno
+                value:
+                  contactId: 7d2f8a1b-3c4e-4f50-9a6b-2c3d4e5f6a7b
+                  reason: El cliente ya regularizó su deuda
       responses:
         '200':
           description: Anulación aceptada.
@@ -2140,7 +2341,8 @@ paths:
                 reason: El cliente ya regularizó su deuda
         '400':
           description: |
-            Falta un parámetro de la ruta, o la `Idempotency-Key` tiene un formato incorrecto.
+            Falta el identificador del contacto, se enviaron `identifier` y `contactId` a la vez, o la
+            `Idempotency-Key` tiene un formato incorrecto.
           content:
             application/json:
               schema:
@@ -2819,14 +3021,21 @@ components:
           example:
             campaign: verano2025
             source: crm
+        contactPriority:
+          type: integer
+          description: |
+            Prioridad del contacto frente a los demás contactos del lote. Cuanto menor sea el valor,
+            antes se seleccionará para la marcación.
+          example: 0
         scheduledAt:
           type: string
           format: date-time
           description: |
-            Cuándo intentar la PRIMERA marcación. Futura y dentro de 30 días.
+            Cuándo intentar la PRIMERA marcación. Debe ser una fecha futura en UTC y estar dentro de
+            los próximos 30 días.
 
             Sin este campo el contacto entra a la selección del siguiente ciclo.
-          example: '2026-08-20T14:30:00.000Z'
+          example: '2026-09-23T08:41:43.522Z'
         onDuplicate:
           type: string
           enum: [recontact]
@@ -2848,7 +3057,8 @@ components:
           description: |
             El teléfono o email. El formato se valida según `type`:
 
-            * `phone` y `whatsapp`: dígitos con `+` opcional, entre 7 y 15 caracteres.
+            * `phone` y `whatsapp`: únicamente dígitos, con código de país y sin el signo `+`, entre 7
+              y 15 caracteres.
             * `email`: formato de email.
           example: '5491155551234'
         type:
@@ -2891,6 +3101,7 @@ components:
         - invalidCount
         - duplicateCount
         - updatedCount
+        - recontactedCount
         - errors
         - createdAt
       properties:
@@ -2946,6 +3157,11 @@ components:
           description: |
             Ya existían y se les aplicó lo enviado. Cubre tanto el merge como el reemplazo: la
             diferencia entre los dos la decide la política del lote, no el resultado de la carga.
+        recontactedCount:
+          type: integer
+          description: |
+            Contactos existentes que volvieron a ponerse en marcación mediante
+            `onDuplicate: recontact`.
         errors:
           type: array
           maxItems: 20
@@ -3158,7 +3374,7 @@ components:
             mensaje propio sin necesidad de interpretar el texto de `reason`.
           example:
             received: '123'
-            expected: '+?digits, 7-15 characters'
+            expected: 'digits only, 7-15 characters'
         error:
           type: string
           deprecated: true
