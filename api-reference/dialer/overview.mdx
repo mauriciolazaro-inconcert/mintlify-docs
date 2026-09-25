@@ -27,9 +27,13 @@ El servicio obtiene la cuenta a partir de esa credencial. Si un lote no pertenec
 
 ## Operaciones asíncronas
 
-La carga de contactos, la creación, el arranque y la eliminación de lotes responden `202 Accepted`. La respuesta confirma que el trabajo fue aceptado, pero no que haya terminado.
+La carga de contactos, el arranque y la eliminación de lotes responden `202 Accepted`. La respuesta confirma que el trabajo fue aceptado, pero no que haya terminado.
 
 Estas respuestas incluyen un `operationId` y un header `Location`. Consulta el resultado mediante `GET /batches/operations/{operationId}`.
+
+<Note>
+  `POST /batches` es una excepción: devuelve directamente `batchId`, `status: "created"` y `source`, sin `operationId` ni header `Location`.
+</Note>
 
 | Tipo de operación | Tiempo de retención |
 | --- | --- |
@@ -60,9 +64,9 @@ Las respuestas `5xx` no se almacenan. Si recibes `Idempotency-Status: bypassed` 
 
 ## Crear un lote desde la API
 
-Envía `POST /batches` con `source: "api"`, el nombre y el canal. Puedes incluir `duplicateStrategy` y `rules` para dejar configuradas la deduplicación, los intentos, la ventana horaria, las prioridades y el comportamiento ante cada resultado desde la creación.
+Envía `POST /batches` con `source: "api"`, el nombre, el canal y `duplicateStrategy`. Este último campo es obligatorio, no admite `null` y define cómo se tratan los contactos repetidos. Puedes incluir `rules` para dejar configurados los intentos, la ventana horaria, las prioridades y el comportamiento ante cada resultado desde la creación.
 
-El lote se crea sin contactos. Añádelos después mediante `POST /batches/{batchId}/contacts`.
+El lote se crea sin contactos. Añádelos después mediante `POST /batches/{batchId}/contacts`; la respuesta de esa carga contiene el `operationId` que permite seguir su procesamiento.
 
 ## Crear un lote desde un CSV
 
@@ -74,10 +78,10 @@ El lote se crea sin contactos. Añádelos después mediante `POST /batches/{batc
     Envía el contenido mediante `PUT` a `uploadUrl` con `Content-Type: text/csv`. Esta petición va al almacenamiento y no requiere la API key.
   </Step>
   <Step title="Crea el lote">
-    Llama a `POST /batches` con el `tempCsvKey`, la configuración del lote y el mapeo de columnas.
+    Llama a `POST /batches` con el `tempCsvKey`, la configuración del lote, `duplicateStrategy` y el mapeo de columnas.
   </Step>
   <Step title="Consulta la importación">
-    Utiliza el `operationId` de la respuesta para seguir el procesamiento.
+    Utiliza el `batchId` de la respuesta en `GET /batches/{batchId}` y revisa `uploadStatus`, `uploadProgress` y `totalContacts`.
   </Step>
 </Steps>
 

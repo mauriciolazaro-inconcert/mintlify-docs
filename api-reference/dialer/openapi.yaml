@@ -20,18 +20,20 @@ info:
     ## Operaciones asíncronas
 
     Algunas operaciones responden `202` en lugar de `200`: la petición se acepta y el trabajo continúa
-    en segundo plano. Es el caso de la carga de contactos, la creación de un lote, el arranque y la
-    eliminación.
+    en segundo plano. Es el caso de la carga de contactos, el arranque y la eliminación de un lote.
 
     Esas respuestas incluyen un `operationId` que se consulta en
     `GET /batches/operations/{operationId}` para conocer el resultado.
+
+    `POST /batches` no genera una operación: devuelve directamente el `batchId`, el estado `created` y
+    el origen del lote, sin `operationId`.
 
     Tiempo de retención de las operaciones:
 
     | Tipo de operación | Disponible durante |
     |---|---|
     | Carga de contactos | 6 horas |
-    | Ciclo de vida del lote (creación, arranque, archivado, eliminación) | 1 hora, y 10 minutos desde que finaliza |
+    | Ciclo de vida del lote (arranque, archivado, eliminación) | 1 hora, y 10 minutos desde que finaliza |
 
     ## Reintentos seguros con `Idempotency-Key`
 
@@ -610,12 +612,12 @@ paths:
       summary: Crea un lote desde la API o a partir de un CSV
       description: |
         Crea un lote vacío para cargar contactos mediante la API, o crea el lote e inicia la importación
-        de los contactos de un CSV. Responde `202`: la creación se realiza en segundo plano.
+        de los contactos de un CSV. La respuesta identifica el lote creado; no incluye `operationId`.
 
         ## Crear un lote sin CSV
 
-        Indique `source: api` y omita `tempCsvKey` y `mapping`. Puede definir `duplicateStrategy` y
-        `rules` en la misma petición. Después, cargue los contactos con
+        Indique `source: api` y omita `tempCsvKey` y `mapping`. Incluya `duplicateStrategy`, que es
+        obligatorio, y defina `rules` en la misma petición si necesita reglas propias. Después, cargue los contactos con
         `POST /batches/{batchId}/contacts`.
 
         ## Crear un lote desde un CSV
@@ -623,7 +625,7 @@ paths:
         1. `POST /batches/upload-url` para obtener la URL de subida y la clave del archivo.
         2. `PUT` del CSV a esa URL, con `Content-Type: text/csv`.
         3. Esta operación, indicando el `tempCsvKey` obtenido y el `mapping` de columnas.
-        4. Seguimiento de la importación con el `operationId` devuelto.
+        4. Seguimiento de la importación mediante `GET /batches/{batchId}`, usando el `batchId` devuelto.
 
         ## Configuración del mapeo
 
@@ -635,8 +637,8 @@ paths:
         el primer intento. Las prioridades deben ser distintas entre sí.
 
         La existencia de las columnas en el archivo no se comprueba en esta operación, sino durante la
-        importación. Un mapeo que apunte a una columna inexistente devuelve `202` y da lugar a una
-        operación con un número elevado de contactos inválidos.
+        importación. Un mapeo que apunte a una columna inexistente devuelve `202`; revise el resultado
+        de la importación en el propio lote.
 
         ## Validación
 
@@ -645,17 +647,9 @@ paths:
 
         ## Seguimiento de la importación
 
-        El `operationId` de la respuesta se consulta en
-        `GET /batches/operations/{operationId}`, que devuelve el avance y el resultado con
-        `kind: batch.lifecycle`.
-
-        Tenga en cuenta el plazo de retención: la operación está disponible durante 1 hora y solo 10
-        minutos desde que finaliza. Pasado ese plazo la consulta devuelve `404` aunque la importación haya
-        terminado correctamente.
-
-        El resultado de la importación también puede comprobarse en el propio lote, que es permanente: el
-        campo `uploadStatus` indica si la importación finalizó y `totalContacts`, cuántos contactos se
-        cargaron.
+        La respuesta no incluye `operationId` ni el header `Location`. Consulte
+        `GET /batches/{batchId}` con el identificador devuelto: `uploadStatus` indica si la importación
+        finalizó, `uploadProgress` muestra su avance y `totalContacts`, cuántos contactos se cargaron.
       requestBody:
         required: true
         content:
@@ -703,6 +697,10 @@ paths:
                 value:
                   name: Cobranzas agosto
                   channelId: 8c1e9f30-2a4b-4d6e-9f10-3b7c5d2e8a41
+                  duplicateStrategy:
+                    enabled: true
+                    detectionCriteria: identifier
+                    action: reject
                   tempCsvKey: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
                   mapping:
                     identifier: id_cliente
@@ -739,30 +737,28 @@ paths:
       responses:
         '202':
           description: |
-            Creación del lote aceptada. Si se indicó un CSV, su importación ocurre en segundo plano.
+            Lote creado. Si se indicó un CSV, su importación ocurre en segundo plano y puede seguirse
+            consultando el lote mediante su `batchId`.
           content:
             application/json:
               schema:
                 type: object
-                required: [batchId, operationId, status]
+                required: [batchId, status, source]
                 properties:
                   batchId:
                     type: string
                     format: uuid
-                  operationId:
-                    type: string
-                    format: uuid
-                    description: |
-                      Identificador de la creación. Se consulta en
-                      `GET /batches/operations/{operationId}`, que lo devuelve con
-                      `kind: batch.lifecycle`.
                   status:
                     type: string
-                    enum: [processing]
+                    enum: [created]
+                  source:
+                    type: string
+                    description: Origen del lote.
+                    example: api
               example:
                 batchId: 3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b
-                operationId: 9f1c7e2a-4b3d-4a1e-9c8f-2d5b6e7a8c90
-                status: processing
+                status: created
+                source: api
         '400':
           description: |
             El cuerpo no pasó la validación, el canal está deshabilitado para la cuenta, o se supera el
@@ -794,6 +790,15 @@ paths:
                         reason: 'must be one of: equals, not_equals, contains, not_contains, starts_with, ends_with, is_empty, not_empty, greater_than, less_than, greater_or_equal, less_or_equal'
                         meta:
                           received: mayor_que
+                estrategiaDuplicadosObligatoria:
+                  summary: Falta la estrategia de duplicados
+                  value:
+                    code: VALIDATION_FAILED
+                    message: Validación fallida en el cuerpo del request
+                    details:
+                      - field: duplicateStrategy
+                        code: REQUIRED
+                        reason: 'required: it decides what happens when a contact already in the batch is sent again; duplicate detection cannot be turned off'
                 canalDeshabilitado:
                   summary: Canal deshabilitado para la cuenta
                   value:
@@ -2674,7 +2679,7 @@ components:
 
     CreateBatchInput:
       type: object
-      required: [name, channelId]
+      required: [name, channelId, duplicateStrategy]
       oneOf:
         - title: Lote desde un CSV
           required: [tempCsvKey, mapping]
@@ -2728,11 +2733,10 @@ components:
         filters:
           $ref: '#/components/schemas/BatchFilters'
         duplicateStrategy:
-          oneOf:
-            - $ref: '#/components/schemas/DuplicateStrategy'
-            - type: 'null'
+          $ref: '#/components/schemas/DuplicateStrategy'
           description: |
-            Política ante contactos repetidos. `null` u omitido importa todo sin deduplicar.
+            Política ante contactos repetidos. Es obligatoria y no admite `null`: la detección de
+            duplicados no puede desactivarse omitiendo este campo.
         rules:
           $ref: '#/components/schemas/BatchRules'
           description: |
