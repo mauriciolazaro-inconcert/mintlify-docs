@@ -616,9 +616,10 @@ paths:
 
         ## Crear un lote sin CSV
 
-        Indique `source: api` y omita `tempCsvKey` y `mapping`. Incluya `duplicateStrategy`, que es
-        obligatorio, y defina `rules` en la misma petición si necesita reglas propias. Después, cargue los contactos con
-        `POST /batches/{batchId}/contacts`.
+        Indique `source: api` y omita `tempCsvKey` y `mapping`. Incluya `duplicateStrategy` y `rules`,
+        que son obligatorios. Dentro de `rules.resultRules` debe enviar siempre las reglas para
+        `noAnswer`, `busy` y `voicemail`, aunque no quiera realizar reintentos para alguno de esos
+        resultados. Después, cargue los contactos con `POST /batches/{batchId}/contacts`.
 
         ## Crear un lote desde un CSV
 
@@ -701,6 +702,21 @@ paths:
                     enabled: true
                     detectionCriteria: identifier
                     action: reject
+                  rules:
+                    strategy:
+                      maxAttemptsPerContact: 1
+                      maxAttemptsPerAddress: 1
+                      timeBetweenAttempts: 5
+                    resultRules:
+                      noAnswer:
+                        retryDelay: 5
+                        maxRetries: 1
+                      busy:
+                        retryDelay: 5
+                        maxRetries: 1
+                      voicemail:
+                        retryDelay: 5
+                        maxRetries: 1
                   tempCsvKey: csv-uploads/acme/3f8a1b2c-5d6e-4f70-8a9b-1c2d3e4f5a6b-contactos-agosto.csv
                   mapping:
                     identifier: id_cliente
@@ -734,6 +750,21 @@ paths:
                     enabled: true
                     detectionCriteria: phone
                     action: reject
+                  rules:
+                    strategy:
+                      maxAttemptsPerContact: 1
+                      maxAttemptsPerAddress: 1
+                      timeBetweenAttempts: 5
+                    resultRules:
+                      noAnswer:
+                        retryDelay: 5
+                        maxRetries: 1
+                      busy:
+                        retryDelay: 5
+                        maxRetries: 1
+                      voicemail:
+                        retryDelay: 5
+                        maxRetries: 1
       responses:
         '202':
           description: |
@@ -2679,7 +2710,7 @@ components:
 
     CreateBatchInput:
       type: object
-      required: [name, channelId, duplicateStrategy]
+      required: [name, channelId, duplicateStrategy, rules]
       oneOf:
         - title: Lote desde un CSV
           required: [tempCsvKey, mapping]
@@ -2738,10 +2769,16 @@ components:
             Política ante contactos repetidos. Es obligatoria y no admite `null`: la detección de
             duplicados no puede desactivarse omitiendo este campo.
         rules:
-          $ref: '#/components/schemas/BatchRules'
+          allOf:
+            - $ref: '#/components/schemas/BatchRules'
+            - type: object
+              required: [resultRules]
+              properties:
+                resultRules:
+                  $ref: '#/components/schemas/RequiredResultRules'
           description: |
-            Reglas de marcación propias del lote (intentos, esperas, ventana horaria). Omitido, el
-            lote hereda las reglas de la cuenta para su tipo de canal.
+            Reglas de marcación del lote. Es obligatorio enviarlas al crear el lote. `resultRules`
+            debe contener siempre `noAnswer`, `busy` y `voicemail`.
 
     BatchMapping:
       type: object
@@ -2912,6 +2949,33 @@ components:
             amdAction:
               type: string
               enum: [HANGUP, LEAVE_MESSAGE, CONTINUE]
+
+    RequiredResultRules:
+      type: object
+      required: [noAnswer, busy, voicemail]
+      description: |
+        Reglas obligatorias por resultado al crear un lote. Deben enviarse las tres propiedades,
+        aunque `maxRetries` sea `0` para un resultado que no se quiera reintentar.
+      properties:
+        noAnswer:
+          $ref: '#/components/schemas/ResultRetryRule'
+        busy:
+          $ref: '#/components/schemas/ResultRetryRule'
+        voicemail:
+          $ref: '#/components/schemas/ResultRetryRule'
+
+    ResultRetryRule:
+      type: object
+      required: [retryDelay, maxRetries]
+      properties:
+        retryDelay:
+          type: integer
+          description: Minutos a esperar antes de reintentar tras este resultado.
+          example: 5
+        maxRetries:
+          type: integer
+          description: Reintentos para este resultado. `0` significa no reintentar.
+          example: 1
 
     BatchFilters:
       type: object

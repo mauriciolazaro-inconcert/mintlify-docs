@@ -6,7 +6,9 @@ openapi: "api-reference/dialer/openapi.yaml POST /batches"
 
 La respuesta confirma la creación del lote con su `batchId`, `status: "created"` y `source`. Esta operación no devuelve `operationId` ni el header `Location`.
 
-Usa `source: "api"` para crear un lote vacío, sin subir un CSV. Debes incluir `duplicateStrategy` para definir cómo tratar los contactos repetidos; no admite `null` ni puede omitirse. También puedes incluir `rules` para configurar las reglas de marcación desde el inicio.
+Usa `source: "api"` para crear un lote vacío, sin subir un CSV. Debes incluir `duplicateStrategy` para definir cómo tratar los contactos repetidos; no admite `null` ni puede omitirse.
+
+También debes enviar `rules`. Dentro de `rules.resultRules`, las propiedades `noAnswer`, `busy` y `voicemail` son siempre obligatorias. Configura libremente `retryDelay` y `maxRetries` para cada resultado; si no quieres reintentar uno de ellos, envía `maxRetries: 0` en lugar de omitir su propiedad.
 
 <Info>
   Después de crear un lote con `source: "api"`, añade los contactos mediante `POST /batches/{batchId}/contacts`. Esa carga sí devuelve un `operationId` para consultar su progreso.

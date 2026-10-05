@@ -64,7 +64,7 @@ Las respuestas `5xx` no se almacenan. Si recibes `Idempotency-Status: bypassed` 
 
 ## Crear un lote desde la API
 
-Envía `POST /batches` con `source: "api"`, el nombre, el canal y `duplicateStrategy`. Este último campo es obligatorio, no admite `null` y define cómo se tratan los contactos repetidos. Puedes incluir `rules` para dejar configurados los intentos, la ventana horaria, las prioridades y el comportamiento ante cada resultado desde la creación.
+Envía `POST /batches` con `source: "api"`, el nombre, el canal, `duplicateStrategy` y `rules`. Los dos últimos campos son obligatorios. `duplicateStrategy` no admite `null` y define cómo se tratan los contactos repetidos. Dentro de `rules.resultRules` debes enviar siempre `noAnswer`, `busy` y `voicemail`, con los valores de `retryDelay` y `maxRetries` que correspondan en cada caso.
 
 El lote se crea sin contactos. Añádelos después mediante `POST /batches/{batchId}/contacts`; la respuesta de esa carga contiene el `operationId` que permite seguir su procesamiento.
 
