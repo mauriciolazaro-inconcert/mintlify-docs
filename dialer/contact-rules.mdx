@@ -1,0 +1,100 @@
+---
+title: "Reglas de contactación"
+description: "Configura horarios, límites de intentos, orden de contactación, detección de voicemail y reintentos por resultado."
+---
+
+export const ContactOrderPreview = () => {
+  const [mode, setMode] = useState("contacts");
+  const [enabled, setEnabled] = useState(true);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const c = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af", accent: "#c4b5fd" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b", accent: "#661aff" };
+  const options = [["contacts", "Entre contactos"], ["phones", "Entre teléfonos"]];
+  const label = mode === "contacts" ? "Intentar todos los contactos antes de aplicar reglas de marcación" : "Intentar todos los teléfonos del contacto antes de aplicar reglas de reintento";
+  const steps = mode === "contacts" ? (enabled ? ["Primer teléfono de Ana", "Primer teléfono de Luis", "Aplicar reintentos o pasar a otros teléfonos"] : ["Procesar Ana completamente", "Procesar Luis completamente"]) : (enabled ? ["Teléfono 1 de Ana", "Teléfono 2 de Ana", "Aplicar reintentos según resultado"] : ["Teléfono 1 y sus reintentos", "Teléfono 2 y sus reintentos"]);
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 14 }}>
+      <div style={{ color: c.muted, fontSize: 12, marginBottom: 12 }}>Ejemplo interactivo · explora cada regla por separado</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>{options.map(([key, title]) => <button type="button" key={key} aria-pressed={mode === key} onClick={() => setMode(key)} style={{ padding: "8px 12px", borderRadius: 8, cursor: "pointer", border: `1px solid ${mode === key ? c.accent : c.border}`, background: c.card, color: mode === key ? c.accent : c.text }}>{title}</button>)}</div>
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", margin: "18px 0", cursor: "pointer" }}><input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} style={{ marginTop: 3, accentColor: c.accent }} /><span>{label}</span></label>
+      <ol aria-live="polite" style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>{steps.map((step, index) => <li key={step} style={{ display: "flex", gap: 10, padding: 12, borderRadius: 10, background: c.card, border: `1px solid ${c.border}` }}><span style={{ color: c.accent, fontWeight: 700 }}>{index + 1}.</span>{step}</li>)}</ol>
+      <div style={{ marginTop: 12, color: c.muted, fontSize: 12 }}>Secuencia ilustrativa cuando las llamadas requieren continuar. Los horarios y las esperas entre intentos también se aplican.</div>
+    </div>
+  );
+}
+
+Las reglas determinan cuándo se puede llamar, cuántos intentos se permiten y qué hacer si una llamada no consigue contactar con la persona.
+
+Puedes elegirlas en el paso **Reglas** de creación del lote. Desde el detalle de un lote, el menú **Opciones → Reglas de contactación** permite acceder a sus reglas.
+
+## Reglas globales o personalizadas
+
+| Opción | Alcance |
+| --- | --- |
+| **Aplicar reglas globales de contactación** | Utiliza las reglas compartidas del tenant. Se gestionan desde **Lotes → Reglas globales de contactación**. |
+| **Crear reglas personalizadas** | Permite configurar reglas propias para el lote. |
+
+<Warning>
+  Cambiar las reglas globales afecta a **todos los lotes del tenant que las tengan seleccionadas**, incluidos los que ya están iniciados. Revisa su alcance antes de guardar cambios.
+</Warning>
+
+## Intentos y horarios
+
+| Campo | Qué controla |
+| --- | --- |
+| **Reintento máximo por dirección/número** | El máximo de intentos permitido para cada teléfono del contacto. |
+| **Reintento máximo por contacto / usuario** | El máximo de intentos del contacto, sumando todos sus teléfonos. |
+| **Tiempo de espera entre intentos** | Los minutos de espera entre intentos al mismo contacto. |
+| **Hora en que inicia la contactación** | El inicio de la ventana horaria en la que se permite llamar. |
+| **Hora límite de contactación** | El final de esa ventana horaria. |
+| **Zona horaria** | La zona con la que se interpretan las horas de contactación. |
+| **Días de contactación** | Los días habilitados para realizar las llamadas. |
+| **Usar horario diferenciado por día** | Permite establecer horarios distintos para días concretos. |
+
+Por ejemplo, puedes configurar llamadas de lunes a viernes de 09:00 a 18:00 en `Europe/Madrid`, con un horario de 09:00 a 15:00 los viernes. Estos valores son ilustrativos: ajusta la ventana a tu operativa.
+
+<Note>
+  Iniciar un lote fuera de su ventana horaria no habilita llamadas fuera de ese horario. La marcación espera a la apertura de la ventana de contactación.
+</Note>
+
+## Orden de contactación
+
+La **Priorización de datos** del asistente define qué contactos o teléfonos van antes. Las siguientes opciones determinan cómo se recorre esa lista al aplicar reintentos.
+
+### Intentar todos los contactos antes de aplicar reglas de marcación
+
+- **Activado:** se llama una vez al primer teléfono de cada contacto del lote antes de aplicar reintentos o pasar a otros teléfonos.
+- **Desactivado:** se procesa cada contacto completamente antes de pasar al siguiente.
+
+### Intentar todos los teléfonos del contacto antes de aplicar reglas de reintento
+
+- **Activado:** se intenta una vez cada teléfono del contacto antes de aplicar los reintentos según el resultado.
+- **Desactivado:** se aplican las reglas de reintento al primer teléfono y se agotan los reintentos configurados antes de pasar al siguiente.
+
+<ContactOrderPreview />
+
+## Detección de contestador automático
+
+Activa **Habilitar Detector de Voicemail** si quieres que el marcador detecte contestadores. En **Acción al detectar contestador**, elige entre **Colgar** y **Continuar con la llamada**.
+
+El acceso **Calibrar detección en Voicemail Detector Studio** permite ajustar y probar la detección con llamadas etiquetadas. Consulta [Voicemail Detector Studio](/dialer/voicemail-detector) antes de guardar una configuración para producción.
+
+## Reglas según el resultado
+
+Puedes definir condiciones de reintento para los resultados **No contestado**, **Ocupado**, **Fallido** y **Voicemail** que aparecen en la configuración.
+
+Cada regla contiene:
+
+| Campo | Significado |
+| --- | --- |
+| **Reintentar al cumplirse** | Minutos de espera antes de reintentar tras ese resultado. |
+| **Cantidad máxima de reintentos** | Número de reintentos permitido para ese resultado. Un valor de `0` indica que no se reintenta. |
+
+Estas condiciones deben ser coherentes con los límites generales por teléfono y contacto. Por ejemplo, una regla para **Ocupado** puede permitir dos reintentos con quince minutos de espera, dentro de los horarios y límites del lote.

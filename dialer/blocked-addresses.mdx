@@ -1,0 +1,67 @@
+---
+title: "Direcciones bloqueadas"
+description: "Gestiona las direcciones excluidas de la contactación del tenant y carga listas de bloqueo desde CSV."
+---
+
+export const BlockedImportPreview = () => {
+  const [reason, setReason] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const c = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b" };
+  const field = { display: "block", width: "100%", padding: 10, marginTop: 6, borderRadius: 8, border: `1px solid ${c.border}`, color: c.text, background: c.card };
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 14 }}>
+      <div style={{ color: c.muted, fontSize: 12, marginBottom: 12 }}>Ejemplo interactivo · importación de teléfonos ficticios</div>
+      <strong>Importe masivo · bloqueados.csv</strong>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: 12, marginTop: 16 }}>
+        <div><div style={{ fontSize: 12, color: c.muted }}>Tipo de dirección</div><div style={field}>Teléfono</div></div>
+        <div><div style={{ fontSize: 12, color: c.muted }}>Columna de dirección</div><div style={field}>telefono</div></div>
+        <label><span style={{ fontSize: 12, color: c.muted }}>Columna de motivo (opcional)</span><select value={reason ? "motivo" : "none"} onChange={(event) => setReason(event.target.value === "motivo")} style={field}><option value="none">Ninguna</option><option value="motivo">motivo</option></select></label>
+      </div>
+      <div aria-live="polite" style={{ marginTop: 16, borderRadius: 10, border: `1px solid ${c.border}`, padding: 14, background: c.card }}><strong>Vista previa</strong><div style={{ marginTop: 8 }}>34910000000 · Teléfono</div><div style={{ marginTop: 6, color: c.muted }}>{reason ? "Motivo: Solicitud de no contactación" : "Sin motivo seleccionado"}</div></div>
+    </div>
+  );
+}
+
+La lista de bloqueados reúne las direcciones excluidas de la contactación del marcador en el **tenant**. Abre **Campañas salientes → Bloqueados** para consultar la dirección, su tipo y el motivo de bloqueo.
+
+La interfaz admite direcciones de tipo **Teléfono** y **Email**. Para las campañas salientes por SIP de esta guía, utiliza **Teléfono**.
+
+## Agregar una dirección
+
+<Steps>
+  <Step title="Abre el formulario">Pulsa **Agregar dirección** en la vista **Bloqueados**.</Step>
+  <Step title="Indica la dirección y el tipo">Introduce la dirección que quieres bloquear y selecciona **Teléfono** o **Email**.</Step>
+  <Step title="Añade el motivo">Opcionalmente, describe por qué no debe contactarse esa dirección.</Step>
+  <Step title="Confirma">Pulsa **Confirmar** y revisa la dirección en el listado.</Step>
+</Steps>
+
+## Importar varias direcciones
+
+Prepara un CSV separado por comas. Incluye una columna con las direcciones y, si quieres registrar el motivo de cada bloqueo, otra columna con los motivos.
+
+```csv
+telefono,motivo
+34910000000,Solicitud de no contactación
+34910000001,Número excluido de la campaña
+```
+
+<Steps>
+  <Step title="Carga el archivo">Pulsa **Importe masivo** y adjunta el CSV.</Step>
+  <Step title="Selecciona el tipo">Elige el **Tipo de dirección** de la carga.</Step>
+  <Step title="Relaciona las columnas">Selecciona la **Columna de dirección**. En **Columna de motivo (opcional)**, elige la columna correspondiente o **Ninguna**.</Step>
+  <Step title="Confirma la importación">Pulsa **Confirmar** y revisa el listado de direcciones bloqueadas.</Step>
+</Steps>
+
+<BlockedImportPreview />
+
+## Gestionar la lista desde otro sistema
+
+La API permite [consultar](/api-reference/dialer/list-blocked-addresses), [bloquear](/api-reference/dialer/block-addresses) y [desbloquear direcciones](/api-reference/dialer/unblock-addresses) de la cuenta.

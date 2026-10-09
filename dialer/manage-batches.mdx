@@ -1,0 +1,83 @@
+---
+title: "Operar los lotes"
+description: "Inicia y para la contactación, consulta el avance, revisa los intentos y gestiona las acciones de cada lote."
+---
+
+## Listado de lotes
+
+Abre **Campañas salientes → Lotes**. Cada fila muestra el nombre del lote, tipo de canal, canal asociado, cantidad de contactos, creador, fecha de creación y estado. Los lotes con avance muestran también su progreso.
+
+Utiliza los filtros de **Equipo**, **Tipo de canal**, **Fecha** y **Estado**, o busca por nombre, para localizar un lote. El filtro de estado permite consultar lotes activos o archivados. El botón de actualización vuelve a cargar la información del listado.
+
+## Iniciar o parar
+
+Puedes operar el lote desde dos lugares:
+
+| Acción | En el listado | Dentro del lote |
+| --- | --- | --- |
+| **Iniciar** | Pulsa el botón de **play** de la fila. | Pulsa **Iniciar** en el detalle de contactación. |
+| **Parar** | Pulsa el botón de **stop** de la fila. | Pulsa **Parar** en el detalle de contactación. |
+
+Un lote recién creado está pendiente de iniciar. Al iniciarlo, comienza el proceso de contactación automática de acuerdo con sus reglas y horarios. Puedes volver a iniciarlo después de pararlo para reanudar la contactación.
+
+<Info>
+  Al parar un lote, **las llamadas ya conectadas continúan**. El resto de la contactación se detiene.
+</Info>
+
+## Consultar el avance
+
+En el listado, despliega el resumen junto al progreso para consultar los contadores del lote:
+
+- Cantidad de contactos.
+- Avance total del lote.
+- Gestionados y completados.
+- Contestados y por reintentar.
+
+<Note>
+  Un lote **Completado** no implica que todas sus llamadas hayan sido contestadas. Consulta los resultados para conocer qué ocurrió en cada intento.
+</Note>
+
+## Detalle de contactación
+
+Abre el menú de tres puntos de la fila y selecciona **Ver detalle de contactación**. Esta vista muestra el estado del lote, su avance, la cantidad de contactos y el **Registro de contactos**.
+
+| Dato del registro | Qué permite revisar |
+| --- | --- |
+| **Fecha / Hora** | Cuándo se registró el intento. |
+| **Intento** | El número de intento. |
+| **Identificador** | El ID del contacto procedente de la carga. |
+| **Nombre y Teléfono** | El contacto y el número utilizado. |
+| **Resultado** | El resultado de la llamada y su código. |
+| **Contexto** | El contexto mostrado para el contacto. |
+
+Despliega la fila para revisar los registros asociados al contacto. Utiliza el icono de visualización para consultar su contexto.
+
+### Registro de acciones del lote
+
+El **icono de reloj** de la cabecera abre el registro de cambios o acciones del lote, como su creación, inicio o parada. Permite revisar la actividad operativa del lote.
+
+## Menús de acciones
+
+El menú de la fila del listado contiene **Ver detalle de contactación**, **Ver dashboard**, **Marcar destacado**, **Archivar** y **Eliminar**.
+
+Dentro del detalle, el menú **Opciones** ofrece:
+
+| Opción | Uso |
+| --- | --- |
+| **Ir al dashboard** | Acceder al análisis del lote. |
+| **Reglas de contactación** | Consultar la configuración de reglas del lote. |
+| **Descargar contactos** | Descargar los contactos del lote. |
+| **Editar prioridad** | Acceder a la edición de prioridad del lote. |
+| **Configurar API** | Consultar las operaciones disponibles para gestionar sus contactos desde un sistema externo. |
+| **Archivar lote** | Archivar el lote. |
+| **Eliminar lote** | Eliminar el lote. |
+
+<Warning>
+  **Un lote archivado no puede recuperarse.** Utiliza **Parar** si necesitas detener la contactación y reanudarla después.
+</Warning>
+
+## Gestionar contactos por API
+
+En **Opciones → Configurar API**, la ventana **API de contactos del lote** permite generar una API key y consultar operaciones para cargar, reagendar y anular contactos, consultar su historial de intentos y seguir el estado de las cargas.
+
+La misma API key autentica las operaciones de los lotes de la cuenta a los que tenga acceso. Consulta la [referencia de API del marcador](/api-reference/dialer/overview) para conocer los parámetros, respuestas y ejemplos de integración.

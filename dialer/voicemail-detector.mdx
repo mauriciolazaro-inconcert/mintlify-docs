@@ -1,0 +1,132 @@
+---
+title: "Voicemail Detector Studio"
+description: "Etiqueta llamadas, prueba ajustes de detección de contestador y guarda una configuración para el país seleccionado del tenant."
+---
+
+export const VoicemailLabelsPreview = () => {
+  const calls = [{ id: "A", detected: "Persona" }, { id: "B", detected: "Voicemail" }, { id: "C", detected: "Persona" }];
+  const [labels, setLabels] = useState({ A: "", B: "", C: "" });
+  const [tested, setTested] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const c = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af", accent: "#c4b5fd" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b", accent: "#661aff" };
+  const complete = calls.every((call) => labels[call.id] !== "");
+  const evaluated = calls.filter((call) => labels[call.id] && labels[call.id] !== "Omitir");
+  const matches = evaluated.filter((call) => labels[call.id] === call.detected).length;
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 14 }}>
+      <div style={{ fontSize: 12, color: c.muted, marginBottom: 12 }}>Ejemplo interactivo · clasificaciones ficticias, sin audios</div>
+      <strong>Seleccionar y etiquetar</strong>
+      <p style={{ color: c.muted, margin: "10px 0 16px" }}>Asigna el resultado real de cada llamada. El ejemplo compara tus etiquetas con tres clasificaciones de muestra.</p>
+      <div style={{ display: "grid", gap: 10 }}>{calls.map((call) => <div key={call.id} style={{ padding: 12, borderRadius: 10, background: c.card, border: `1px solid ${c.border}`, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}><strong style={{ flex: "1 1 100px" }}>Llamada {call.id}</strong><label style={{ flex: "1 1 160px" }}><span style={{ display: "block", fontSize: 12, marginBottom: 4, color: c.muted }}>Resultado real · llamada {call.id}</span><select value={labels[call.id]} onChange={(event) => { setLabels({ ...labels, [call.id]: event.target.value }); setTested(false); }} style={{ width: "100%", padding: 8, borderRadius: 8, border: `1px solid ${c.border}`, color: c.text, background: c.card }}><option value="">Seleccionar…</option><option value="Persona">Persona</option><option value="Voicemail">Voicemail</option><option value="Omitir">Omitir</option></select></label>{tested && <span style={{ flex: "1 1 180px", color: c.muted }}>{labels[call.id] === "Omitir" ? "Excluida de la evaluación" : `Nuevo resultado: ${call.detected} · ${labels[call.id] === call.detected ? "Coincide" : "No coincide"}`}</span>}</div>)}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 16 }}><button type="button" disabled={!complete} onClick={() => setTested(true)} style={{ padding: "9px 14px", borderRadius: 8, border: `1px solid ${c.border}`, cursor: complete ? "pointer" : "default", opacity: complete ? 1 : 0.5, color: c.text, background: c.card }}>Comparar etiquetas</button><span aria-live="polite" style={{ color: c.muted, fontSize: 12 }}>{complete ? `${evaluated.length} llamadas para evaluar · ${calls.length - evaluated.length} omitidas` : "Selecciona el resultado real de las tres llamadas."}</span></div>
+      {tested && <div aria-live="polite" style={{ padding: 14, marginTop: 14, borderRadius: 10, border: `1px solid ${c.border}`, background: c.card, color: c.accent }}>{evaluated.length ? `${matches} de ${evaluated.length} clasificaciones coinciden con tus etiquetas.` : "Todas las llamadas están omitidas: no hay resultados que comparar."}</div>}
+    </div>
+  );
+}
+
+**Voicemail Detector Studio** permite probar y ajustar la detección de contestadores automáticos (AMD) con un conjunto de llamadas cuyo resultado real has etiquetado.
+
+Abre **Campañas salientes → Análisis → Voicemail → Voicemail Detector Studio**. También puedes acceder desde **Calibrar detección en Voicemail Detector Studio** en las reglas de contactación.
+
+Selecciona el **País** con el que quieres trabajar. El asistente tiene tres pasos: **Seleccionar y etiquetar**, **Ejecutar test** y **Guardar config**.
+
+<Warning>
+  Al guardar la configuración en el último paso, se aplica al **país seleccionado de todo el tenant** para futuros contactos. Revisa los resultados y el país antes de guardarla.
+</Warning>
+
+## 1. Seleccionar y etiquetar
+
+En **Cargar set existente**, elige un conjunto guardado o **Crear set nuevo**. La lista de llamadas muestra su clasificación registrada, fecha, país, reproductor de audio y el campo **Resultado real**.
+
+1. Escucha el audio de cada llamada.
+2. Selecciona su resultado real.
+3. Usa **Agregar llamadas** si necesitas ampliar el conjunto, o el icono de papelera para quitar una llamada de la selección.
+4. Completa las etiquetas de todas las llamadas antes de continuar.
+
+| Etiqueta | Cuándo seleccionarla |
+| --- | --- |
+| **Persona** | El audio corresponde a una persona. |
+| **Voicemail** | El audio corresponde a un contestador automático. |
+| **Omitir** | La llamada debe quedar excluida de la evaluación. |
+
+La clasificación registrada y el **Resultado real** son datos distintos: utiliza lo que escuchas en el audio para asignar la etiqueta que servirá de referencia en la prueba.
+
+Para guardar un conjunto nuevo, introduce su nombre en **Nuevo set** y pulsa **Crear set nuevo**. Cuando todas las llamadas tengan una etiqueta, pulsa **Siguiente**.
+
+<VoicemailLabelsPreview />
+
+## 2. Ejecutar test
+
+La pantalla resume cuántas llamadas hay en el conjunto y cuántas están etiquetadas como persona, voicemail u omitidas. Selecciona la **Configuración** que quieres probar o pulsa **Editar configuración** para ajustarla.
+
+### Editor de configuración
+
+El editor organiza los ajustes en cuatro pestañas. Los valores mostrados en una configuración son sus ajustes actuales; no constituyen valores recomendados para todos los países o campañas.
+
+<Tabs>
+  <Tab title="Parámetros generales">
+    | Campo | Qué configura |
+    | --- | --- |
+    | **Timeout global (ms)** | El tiempo máximo global de la detección. |
+    | **Acción al detectar voicemail** | **Colgar** o **Continuar con la llamada** al detectar un contestador. |
+    | **País** | El país de la configuración. |
+  </Tab>
+  <Tab title="Detección de tono">
+    Configura el **Umbral de confianza** del análisis de tono y los **Targets de tono** para detectar tonos de voicemail, fax y señales especiales.
+
+    Cada target tiene un **Nombre**, **Frecuencia mínima y máxima (Hz)**, **Duración mínima (ms)** y un interruptor **Activo**. Puedes añadir targets con **Agregar target** o eliminar los que no necesites.
+
+    En **Extracción de frecuencia**, selecciona una llamada, delimita una región en su forma de onda y pulsa **Analizar selección** para analizar ese fragmento.
+  </Tab>
+  <Tab title="Clasificación de audio">
+    Los parámetros de clasificación de audio permiten ajustar la detección de voz para distinguir entre una persona y un buzón de voz:
+
+    - **Silencio inicial máximo**.
+    - **Duración mínima para detectar voicemail**.
+    - **Silencio para detectar fin del habla**.
+    - **Palabras mínimas para detectar como voicemail**.
+
+    Respeta las unidades que muestra cada control al modificar los valores.
+  </Tab>
+  <Tab title="Clasificación de texto">
+    Configura el **Umbral de confianza** de la clasificación de transcripción y los **Patrones de detección**: frases o patrones que indican un contestador automático.
+
+    Puedes editar, eliminar o agregar patrones. Por ejemplo, expresiones como `please leave a message` o `after the tone` aparecen en mensajes de buzón de voz. Ajusta los patrones a las llamadas que estás evaluando.
+  </Tab>
+</Tabs>
+
+### Aplicar al test o guardar como preset
+
+| Acción del editor | Efecto |
+| --- | --- |
+| **Aplicar al test** | Utiliza los ajustes editados para la prueba del conjunto. |
+| **Guardar como preset** | Guarda una plantilla reutilizable; no la aplica a producción. |
+| **Cancelar** | Cierra la edición sin aplicar los ajustes al test. |
+
+### Ejecutar y revisar la prueba
+
+Pulsa **Ejecutar test** y espera a que termine la detección. La pantalla presenta las métricas **Precisión**, **Falsos positivos**, **Falsos negativos** y **Evaluadas**.
+
+- Un **falso positivo** es una llamada etiquetada como persona que el detector clasifica como voicemail.
+- Un **falso negativo** es una llamada etiquetada como voicemail que el detector clasifica como persona.
+- Las llamadas etiquetadas como **Omitir** quedan fuera de la evaluación.
+
+La tabla permite comparar el **Resultado esperado** con el **Nuevo resultado**, escuchar el audio y consultar la **Capa** de detección y la **Confianza** mostrada para cada llamada.
+
+Si encuentras diferencias, revisa el audio y los ajustes, aplica los cambios al test y vuelve a ejecutarlo sobre el conjunto. Cuando hayas revisado los resultados, pulsa **Siguiente**.
+
+## 3. Guardar configuración
+
+El último paso vuelve a mostrar las métricas de la prueba. Comprueba el **país seleccionado** y pulsa **Guardar configuración** para aplicar la configuración a producción para futuros contactos de ese país en el tenant.
+
+<Info>
+  **Guardar un preset**, **aplicar al test** y **guardar la configuración de producción** son acciones distintas. La configuración se aplica a producción con **Guardar configuración** en el último paso del asistente.
+</Info>

@@ -69,6 +69,18 @@
 						"pages": ["knowledge/overview", "knowledge/native-text", "knowledge/documents-pdf", "knowledge/external-sites", "knowledge/videos"]
 					},
 					{
+						"group": "Campañas salientes",
+						"pages": [
+							"dialer/overview",
+							"dialer/create-batch",
+							"dialer/contact-rules",
+							"dialer/manage-batches",
+							"dialer/analysis",
+							"dialer/voicemail-detector",
+							"dialer/blocked-addresses"
+						]
+					},
+					{
 						"group": "Supervisión de equipos",
 						"pages": ["supervision/overview", "supervision/whisper", "supervision/transfer", "supervision/impersonate", "supervision/finishconversation", "supervision/instant-stats"]
 					},

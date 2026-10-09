@@ -1,0 +1,49 @@
+---
+title: "Campañas salientes"
+description: "Organiza llamadas salientes por SIP con el marcador de Inagent: contactos, reglas, seguimiento y detección de contestadores."
+---
+
+El **marcador de Inagent**, o dialer, permite realizar llamadas salientes de forma automática a los contactos de un lote. Desde **Campañas salientes** puedes cargar los contactos, definir cuándo y en qué orden llamarlos, configurar reintentos y consultar los resultados.
+
+Cada **lote** está asociado a un **canal SIP**. En el canal se configura el equipo de agentes virtuales que participa en las llamadas.
+
+## Antes de comenzar
+
+Necesitas un [canal SIP configurado](/channels/voice/sip-trunk) y asociado al equipo que atenderá las llamadas. Una vez creado el canal, puedes seleccionarlo al crear el lote.
+
+Prepara un archivo CSV separado por **comas**, con un identificador, el nombre del contacto y al menos un teléfono con código de país. Añade columnas de contexto si el agente virtual necesita información adicional para la conversación.
+
+## Acceder al marcador
+
+Abre **Campañas salientes** en el menú principal. La sección contiene tres vistas:
+
+| Vista | Qué puedes hacer |
+| --- | --- |
+| **Lotes** | Crear lotes, iniciar o parar llamadas y consultar el detalle de contactación. |
+| **Análisis** | Consultar métricas, tipos de resultado y registros de detección de voicemail. |
+| **Bloqueados** | Gestionar las direcciones excluidas de la contactación en el tenant. |
+
+## De los contactos a las llamadas
+
+<Steps>
+  <Step title="Crea el lote">Selecciona el canal y carga el CSV de contactos.</Step>
+  <Step title="Relaciona los campos">Mapea identificador, nombre y teléfonos. Selecciona los datos de contexto que recibirá el agente virtual.</Step>
+  <Step title="Define prioridades y reglas">Establece el orden de los teléfonos y contactos, los horarios y las condiciones de reintento.</Step>
+  <Step title="Inicia la contactación">Guarda el lote y pulsa **Iniciar**, o el botón de play del listado.</Step>
+  <Step title="Revisa los resultados">Consulta el registro de contactos y las métricas en **Análisis**.</Step>
+</Steps>
+
+## Guías del marcador
+
+<CardGroup cols={2}>
+  <Card title="Crear un lote" icon="file-csv" href="/dialer/create-batch">Prepara el CSV, mapea los campos y configura la priorización.</Card>
+  <Card title="Reglas de contactación" icon="sliders" href="/dialer/contact-rules">Define intentos, horarios, orden de contactación y reintentos.</Card>
+  <Card title="Operar los lotes" icon="play" href="/dialer/manage-batches">Inicia, para y consulta el avance y las acciones de cada lote.</Card>
+  <Card title="Análisis" icon="chart-column" href="/dialer/analysis">Consulta métricas generales, personalizadas y resultados de llamada.</Card>
+  <Card title="Voicemail Detector Studio" icon="voicemail" href="/dialer/voicemail-detector">Evalúa y ajusta la detección de contestadores con llamadas etiquetadas.</Card>
+  <Card title="Direcciones bloqueadas" icon="ban" href="/dialer/blocked-addresses">Añade direcciones individuales o importa una lista desde CSV.</Card>
+</CardGroup>
+
+## Automatizar desde un sistema externo
+
+La [API del marcador](/api-reference/dialer/overview) permite gestionar lotes y contactos desde otros sistemas. También puedes acceder a **Configurar API** desde el detalle de un lote para consultar sus operaciones y generar una API key.

@@ -1,0 +1,65 @@
+---
+title: "Análisis de campañas"
+description: "Consulta las métricas de los lotes, los indicadores personalizados del equipo y la distribución de resultados de llamada."
+---
+
+export const CampaignAnalysisPreview = () => {
+  const [tab, setTab] = useState("Generales");
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const c = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af", accent: "#c4b5fd" } : { bg: "#f8fafc", card: "#fff", border: "#e2e8f0", text: "#172033", muted: "#64748b", accent: "#661aff" };
+  const tabs = ["Generales", "Métricas personalizadas", "Tipo de resultado"];
+  const data = tab === "Generales" ? [["Total contactos", "20", ""], ["Lotes", "1", ""], ["Contactos procesados", "20", ""]] : tab === "Métricas personalizadas" ? [["Cantidad total de sesiones", "12", "Suma"], ["Duración de conversación", "45 s", "Promedio"], ["Conversaciones resueltas", "75 %", "Porcentaje"]] : [["Contestada", "12", "60 %"], ["No disponible", "5", "25 %"], ["Contestadora", "3", "15 %"]];
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 14 }}>
+      <div style={{ fontSize: 12, color: c.muted, marginBottom: 12 }}>Ejemplo interactivo · cifras ficticias</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>{tabs.map((name) => <button type="button" key={name} aria-pressed={tab === name} onClick={() => setTab(name)} style={{ padding: "8px 12px", borderRadius: 8, cursor: "pointer", border: `1px solid ${tab === name ? c.accent : c.border}`, color: tab === name ? c.accent : c.text, background: c.card }}>{name}</button>)}</div>
+      <div aria-live="polite" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))", gap: 10 }}>{data.map(([label, value, detail]) => <div key={label} style={{ padding: 16, border: `1px solid ${c.border}`, borderRadius: 12, background: c.card }}><div style={{ fontSize: 12, color: c.muted }}>{label}</div><div style={{ fontSize: 28, fontWeight: 700, margin: "10px 0 4px" }}>{value}</div><div style={{ color: c.accent, fontSize: 12 }}>{detail}</div></div>)}</div>
+    </div>
+  );
+}
+
+Abre **Campañas salientes → Análisis** o utiliza **Ver dashboard** desde el menú de un lote. En la vista de análisis puedes alternar entre **Lotes** y **Voicemail**.
+
+## Filtrar el análisis
+
+Selecciona el **Equipo**, el **Canal**, el intervalo de **Fecha** y el **Lote** que quieres consultar. Puedes analizar un lote concreto o todos los lotes de la selección. Utiliza **Filtrar** cuando el selector lo solicite y el botón de actualización para recargar los datos.
+
+## Análisis de lotes
+
+La vista **Lotes** organiza la información en tres pestañas.
+
+<CampaignAnalysisPreview />
+
+### Generales
+
+Las tarjetas muestran **Total contactos**, **Tasa de contacto**, **Lotes** y **Contactos procesados** para la selección de filtros. Utiliza esta vista para revisar el volumen y la contactación de las campañas.
+
+### Métricas personalizadas
+
+Esta pestaña muestra las **métricas configuradas para el equipo en reportería avanzada**, con sus agregaciones y gráficos. Por ejemplo, cantidad de sesiones, uso de herramientas, conversaciones resueltas o duración de las conversaciones.
+
+Los indicadores disponibles dependen de la configuración del equipo. Consulta [Reportes avanzados](/reporting/advanced-reports) para configurar estas métricas.
+
+### Tipo de resultado
+
+Presenta la distribución de los resultados de llamada, con una cantidad y un porcentaje por resultado, junto al total de llamadas de la selección.
+
+Entre los resultados que puedes encontrar están **Contestada**, **Contestadora**, **No disponible**, **Número inválido** y **Servicio no disponible**. El [diccionario de códigos de resultado](/api-reference/dialer/contact-result-codes) relaciona las etiquetas con los códigos técnicos del historial.
+
+<Note>
+  Esta distribución corresponde a **llamadas**. Un contacto puede tener varios intentos, por lo que el total de llamadas puede ser distinto del total de contactos.
+</Note>
+
+## Análisis de voicemail
+
+Selecciona **Voicemail** para consultar los registros de detección de contestador automático (AMD). Cuando no existen registros, la vista muestra el mensaje **No hay registros AMD disponibles**.
+
+Desde esta vista puedes abrir **Voicemail Detector Studio** para escuchar y etiquetar llamadas, probar ajustes del detector y guardar una configuración por país. Consulta la [guía del Studio](/dialer/voicemail-detector).

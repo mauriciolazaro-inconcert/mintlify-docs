@@ -1,0 +1,130 @@
+---
+title: "Crear un lote"
+description: "Carga contactos desde CSV, relaciona sus campos y define los datos de contexto y las prioridades de marcación."
+---
+
+export const ContactMappingPreview = () => {
+  const [context, setContext] = useState(["motivo"]);
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const c = isDark ? { bg: "#111827", card: "#1f2937", border: "#374151", text: "#f9fafb", muted: "#9ca3af", accent: "#c4b5fd" } : { bg: "#f8fafc", card: "#ffffff", border: "#e2e8f0", text: "#172033", muted: "#64748b", accent: "#661aff" };
+  const extra = { motivo: "Confirmación de cita", sede: "Madrid" };
+  const toggle = (key) => setContext(context.includes(key) ? context.filter((item) => item !== key) : [...context, key]);
+  const panel = { padding: 16, borderRadius: 12, background: c.card, border: `1px solid ${c.border}`, minWidth: 0 };
+  return (
+    <div className="not-prose" style={{ padding: 16, borderRadius: 16, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 14 }}>
+      <div style={{ fontSize: 12, color: c.muted, marginBottom: 14 }}>Ejemplo interactivo · datos ficticios</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: 12 }}>
+        <div style={panel}>
+          <strong>Mapeo del CSV</strong>
+          {[["Identificador", "id → CLI-001"], ["Nombre", "nombre → Ana Ejemplo"], ["Teléfono", "telefono → 34910000000"]].map(([label, value]) => <div key={label} style={{ paddingTop: 12 }}><div style={{ fontSize: 12, color: c.muted }}>{label}</div><div style={{ marginTop: 4 }}>{value}</div></div>)}
+          <div style={{ marginTop: 18, fontWeight: 600 }}>Datos de contexto</div>
+          {Object.entries(extra).map(([key, value]) => <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, cursor: "pointer" }}><input type="checkbox" checked={context.includes(key)} onChange={() => toggle(key)} style={{ accentColor: c.accent }} /><span>{key}: {value}</span></label>)}
+        </div>
+        <div style={panel}>
+          <strong>Información disponible para el AV</strong>
+          <dl style={{ margin: "14px 0 0" }}>{Object.entries({ id: "CLI-001", nombre: "Ana Ejemplo", telefono: "34910000000", ...Object.fromEntries(context.map((key) => [key, extra[key]])) }).map(([key, value]) => <div key={key} style={{ padding: "9px 0", borderBottom: `1px solid ${c.border}`, overflowWrap: "anywhere" }}><dt style={{ color: c.muted, fontSize: 12 }}>{key}</dt><dd style={{ margin: "3px 0 0" }}>{value}</dd></div>)}</dl>
+          <div aria-live="polite" style={{ marginTop: 14, color: c.accent }}>{context.length ? `${context.length} campos adicionales seleccionados.` : "Solo se incluyen los datos básicos del contacto."}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Abre **Campañas salientes → Lotes** y pulsa **Crear lote**. El asistente contiene cuatro pasos: **Contactos**, **Mapeo de campos**, **Priorización de datos** y **Reglas**.
+
+## 1. Contactos
+
+Completa la información básica:
+
+| Campo | Qué indicar |
+| --- | --- |
+| **Nombre del lote** | Un nombre que permita reconocer la campaña o el grupo de contactos. |
+| **Tipo de canal** | Canal de voz para las llamadas salientes por SIP. |
+| **Canal** | El canal SIP previamente configurado y asociado al equipo. |
+
+Adjunta o arrastra el CSV en la sección **Contactos** y pulsa **Siguiente**.
+
+### Preparar el CSV
+
+El archivo debe utilizar **comas como separador** y contener un identificador o ID único, el nombre y al menos un teléfono por contacto. Incluye el **código de país** en los números.
+
+Este ejemplo utiliza datos ficticios y añade dos columnas para el contexto de la conversación:
+
+```csv
+id,nombre,telefono,motivo,sede
+CLI-001,Ana Ejemplo,34910000000,Confirmación de cita,Madrid
+CLI-002,Luis Ejemplo,34910000001,Seguimiento de solicitud,Barcelona
+```
+
+Los nombres de las columnas pueden adaptarse a tu archivo: en el siguiente paso indicarás a qué campo corresponde cada una.
+
+## 2. Mapeo de campos
+
+El mapeo relaciona las columnas del CSV con los datos que necesita Inagent.
+
+### Elegir cómo usar el mapeo
+
+| Opción | Cuándo utilizarla |
+| --- | --- |
+| **Configurar una vez** | El mapeo se prepara para este lote sin guardarlo para otros. |
+| **Configurar y guardar** | Asigna un nombre al mapeo para reutilizarlo al cargar otros lotes. |
+| **Usar existente** | Selecciona un mapeo guardado cuyas columnas correspondan a las del CSV actual. |
+
+<Warning>
+  Si aparece **Mapeo parcial aplicado**, algunas columnas del mapeo guardado no están en el CSV actual. Relaciona manualmente los campos indicados antes de continuar.
+</Warning>
+
+### Identificación y teléfonos
+
+Selecciona las columnas para **Identificador/ID de cliente** y **Dato nombre**. En **Números de teléfono**, relaciona la columna del teléfono y utiliza **Agregar teléfono** si el contacto dispone de más números en otras columnas.
+
+### Manejo de duplicados
+
+Selecciona el **Dato por verificar** y la **Acción ante duplicados**. La acción determina cómo se trata un contacto que ya existe en la cuenta.
+
+| Acción | Comportamiento |
+| --- | --- |
+| **Actualizar solo si el identificador coincide** | Combina la información con la del contacto existente si también coincide su identificador. |
+| **Actualizar aunque venga con diferente ID** | Combina la información aunque el identificador del lote sea diferente. |
+| **Reemplazar solo si el identificador coincide** | Sustituye el contacto, incluidas sus direcciones y campos personalizados, si coincide el identificador. |
+| **Reemplazar aunque venga con diferente ID** | Sustituye el contacto aunque el identificador del lote sea diferente. |
+| **Rechazar solo si el identificador coincide** | No procesa el contacto duplicado si también coincide su identificador. |
+| **Rechazar siempre** | No procesa el contacto cuando se detecta el duplicado por el dato elegido. |
+
+### Datos de contexto
+
+Activa **Datos de contexto** y selecciona las columnas adicionales que necesita el agente virtual. Usa **Agregar dato de contexto** para incluir más campos.
+
+<Info>
+  Por defecto, el AV dispone del nombre, teléfono e identificador. Para que utilice otros datos del CSV durante la conversación, debes mapearlos como **datos de contexto**.
+</Info>
+
+<ContactMappingPreview />
+
+## 3. Priorización de datos
+
+### Priorizar números de teléfono
+
+Si un contacto tiene varios teléfonos, activa esta opción y define su orden de contactación. Por ejemplo, puedes indicar que se intente primero el móvil y después el teléfono fijo.
+
+Si no defines una prioridad, se utiliza el orden de los teléfonos en el CSV.
+
+### Priorizar contactos
+
+Activa **Priorizar contactos** y selecciona la columna del CSV que contiene la prioridad de cada contacto. Los valores menores tienen mayor prioridad de marcación.
+
+La prioridad de los contactos y la de sus teléfonos se complementan con las [reglas de orden de contactación](/dialer/contact-rules#orden-de-contactacion).
+
+## 4. Reglas
+
+Elige entre **Aplicar reglas globales de contactación** y **Crear reglas personalizadas**. Revisa los horarios, intentos y condiciones de reintento antes de guardar. Consulta [Reglas de contactación](/dialer/contact-rules) para entender cada opción.
+
+Pulsa **Guardar** para crear el lote. Después, puedes [iniciar la contactación](/dialer/manage-batches) desde el listado o desde su detalle.
