@@ -120,6 +120,14 @@ export default async function main({ controller, args, context, logger }) {
 }
 ```
 
+## Usar credenciales desde el código
+
+Recupera claves, tokens y contraseñas mediante `controller.credentials.getByName(...)` o `controller.credentials.getById(...)`. Ambos métodos devuelven una credencial activa del tenant de la sesión, o `undefined` si no existe o no está activa. Valida los campos antes de usarlos y devuelve solo el resultado de la operación.
+
+<Card title="Credenciales: campos y ejemplos por tipo" icon="key" href="/tools/credentials#campos-por-tipo-de-credencial">
+  Consulta dónde encontrar los valores de API Key, Bearer, Basic Auth, Valores y OAuth 2.0, y cómo usarlos para autenticar solicitudes desde la herramienta.
+</Card>
+
 ## Métodos disponibles del controller
 
 Esta sección documenta los **métodos y propiedades** disponibles en el controller de sesión de la herramienta **Code**.  
