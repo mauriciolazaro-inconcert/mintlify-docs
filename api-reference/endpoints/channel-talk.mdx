@@ -1,7 +1,7 @@
 ---
 title: "Enviar mensaje EventStream"
 description: "Envía un mensaje de texto a una sesión activa del Canal API EventStream."
-api: "PUT https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}/{consumerId}"
+api: "PUT https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{sessionId}/{consumerId}"
 auth: "key"
 ---
 
@@ -10,7 +10,7 @@ Envía un mensaje de texto del usuario a una sesión activa. La respuesta del as
 ## Endpoint
 
 ```http
-PUT /assistants-channel/api/v1/channel/api/eventstream/{sessionId}/{consumerId}
+PUT /engine/api/channel/eventstream/{sessionId}/{consumerId}
 ```
 
 ## Autenticación
@@ -46,7 +46,7 @@ PUT /assistants-channel/api/v1/channel/api/eventstream/{sessionId}/{consumerId}
 <CodeGroup>
 
 ```bash cURL
-curl -X PUT "https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}/{consumerId}" \
+curl -X PUT "https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{sessionId}/{consumerId}" \
   -H "Content-Type: application/json" \
   -H "apikey: tu-api-key-aqui" \
   -d '{"message":"¿Cuál es el estado de mi pedido?"}'
@@ -57,7 +57,7 @@ const sessionId = "uuid-de-sesion";
 const consumerId = "uuid-del-consumer";
 
 const response = await fetch(
-  `https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/${sessionId}/${consumerId}`,
+  `https://api.backend.inconcertcc.com/engine/api/channel/eventstream/${sessionId}/${consumerId}`,
   {
     method: "PUT",
     headers: {
@@ -81,7 +81,7 @@ import requests
 
 session_id = "uuid-de-sesion"
 consumer_id = "uuid-del-consumer"
-url = f"https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{session_id}/{consumer_id}"
+url = f"https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{session_id}/{consumer_id}"
 
 headers = {
     "Content-Type": "application/json",

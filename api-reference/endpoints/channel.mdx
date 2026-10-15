@@ -21,13 +21,13 @@ El **Canal API EventStream** permite que aplicaciones externas interactúen con 
 ## Base URL
 
 ```http
-https://{dominio}/assistants-channel/api/v1/channel
+https://{dominio}/engine/api/channel
 ```
 
 Ejemplos:
 
-- **USA:** `https://api.backend.us1.inconcert.cloud/assistants-channel/api/v1/channel`
-- **Global:** `https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel`
+- **USA:** `https://api.backend.us1.inconcert.cloud/engine/api/channel`
+- **Global:** `https://api.backend.inconcertcc.com/engine/api/channel`
 
 ## Autenticación
 
@@ -47,17 +47,17 @@ Todos los endpoints requieren una API Key enviada en el header HTTP `apikey`.
 sequenceDiagram
     participant Cliente
     participant Inagent
-    Cliente->>Inagent: POST /api/eventstream/{crewId}
+    Cliente->>Inagent: POST /engine/api/channel/eventstream/{published_code}
     Inagent-->>Cliente: SSE Initialized { sessionId, consumerId }
     Inagent-->>Cliente: SSE hearthbeat
-    Cliente->>Inagent: PUT /api/eventstream/{sessionId}/{consumerId}
+    Cliente->>Inagent: PUT /engine/api/channel/eventstream/{sessionId}/{consumerId}
     Inagent-->>Cliente: HTTP 201
     Inagent-->>Cliente: SSE assistant.response / assistant.message
-    Cliente->>Inagent: DELETE /api/eventstream/{sessionId}
+    Cliente->>Inagent: DELETE /engine/api/channel/eventstream/{sessionId}
     Inagent-->>Cliente: HTTP 201
 ```
 
-1. Crea la sesión con el endpoint **Init**.
+1. Crea la sesión con el endpoint **Init** usando el código publicado del equipo (`published_code`), con el formato `{crewId}.{slug}.latest`. Por ejemplo: `12345678-1234-4abc-8def-1234567890ab.equipo-ejemplo.latest`.
 2. Conserva el `sessionId` y el `consumerId` recibidos en el evento `Initialized`.
 3. Envía mensajes con **Talk** usando esos identificadores.
 4. Procesa la respuesta del asistente desde el stream SSE abierto.

@@ -1,7 +1,7 @@
 ---
 title: "Crear sesión EventStream"
 description: "Inicia una sesión con un asistente de Inagent y recibe eventos en tiempo real por SSE."
-api: "POST https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{crewId}"
+api: "POST https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{published_code}"
 auth: "key"
 ---
 
@@ -10,7 +10,7 @@ Inicia una nueva sesión de inferencia con un asistente o `crew`. La respuesta p
 ## Endpoint
 
 ```http
-POST /assistants-channel/api/v1/channel/api/eventstream/{crewId}
+POST /engine/api/channel/eventstream/{published_code}
 ```
 
 ## Autenticación
@@ -21,10 +21,12 @@ POST /assistants-channel/api/v1/channel/api/eventstream/{crewId}
 
 ## Parámetros de ruta
 
-<ParamField path="crewId" type="string" required>
-  Identificador único del `crew` o asistente con el que se desea interactuar.
+<ParamField path="published_code" type="string" required>
+  Código publicado del equipo con el que se desea interactuar, con el formato `{crewId}.{slug}.latest`.
 
-  **Ejemplo:** `mi-asistente-abc123`
+  Incluye el identificador del equipo (`crewId`), el `slug` y el sufijo `latest`, separados por puntos. Usa el código completo en la ruta; el `crewId` por sí solo no es válido para iniciar la sesión.
+
+  **Ejemplo:** `12345678-1234-4abc-8def-1234567890ab.equipo-ejemplo.latest`
 </ParamField>
 
 ## Body
@@ -125,17 +127,17 @@ El modo `dynamic` genera el primer mensaje a partir de un historial previo. Es �
 <CodeGroup>
 
 ```bash cURL
-curl -N -X POST "https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{crewId}" \
+curl -N -X POST "https://api.backend.inconcertcc.com/engine/api/channel/eventstream/12345678-1234-4abc-8def-1234567890ab.equipo-ejemplo.latest" \
   -H "Content-Type: application/json" \
   -H "apikey: tu-api-key-aqui" \
   -d '{"arguments":{"nombre":"Juan"}}'
 ```
 
 ```javascript JavaScript
-const crewId = "mi-asistente-abc123";
+const published_code = "12345678-1234-4abc-8def-1234567890ab.equipo-ejemplo.latest";
 
 const response = await fetch(
-  `https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/${crewId}`,
+  `https://api.backend.inconcertcc.com/engine/api/channel/eventstream/${published_code}`,
   {
     method: "POST",
     headers: {
@@ -164,8 +166,8 @@ while (true) {
 import os
 import requests
 
-crew_id = "mi-asistente-abc123"
-url = f"https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{crew_id}"
+published_code = "12345678-1234-4abc-8def-1234567890ab.equipo-ejemplo.latest"
+url = f"https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{published_code}"
 
 headers = {
     "Content-Type": "application/json",

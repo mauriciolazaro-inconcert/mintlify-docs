@@ -1,7 +1,7 @@
 ---
 title: "Escuchar sesión EventStream"
 description: "Conecta un nuevo consumer a una sesión existente y recibe eventos por SSE."
-api: "POST https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}/listen"
+api: "POST https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{sessionId}/listen"
 auth: "key"
 ---
 
@@ -10,7 +10,7 @@ Permite a un nuevo consumer conectarse a una sesión existente y recibir sus eve
 ## Endpoint
 
 ```http
-POST /assistants-channel/api/v1/channel/api/eventstream/{sessionId}/listen
+POST /engine/api/channel/eventstream/{sessionId}/listen
 ```
 
 ## Autenticación
@@ -34,7 +34,7 @@ No requiere body.
 <CodeGroup>
 
 ```bash cURL
-curl -N -X POST "https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{sessionId}/listen" \
+curl -N -X POST "https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{sessionId}/listen" \
   -H "Content-Type: application/json" \
   -H "apikey: tu-api-key-aqui"
 ```
@@ -43,7 +43,7 @@ curl -N -X POST "https://api.backend.inconcertcc.com/assistants-channel/api/v1/c
 const sessionId = "uuid-de-sesion";
 
 const response = await fetch(
-  `https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/${sessionId}/listen`,
+  `https://api.backend.inconcertcc.com/engine/api/channel/eventstream/${sessionId}/listen`,
   {
     method: "POST",
     headers: {
@@ -68,7 +68,7 @@ import os
 import requests
 
 session_id = "uuid-de-sesion"
-url = f"https://api.backend.inconcertcc.com/assistants-channel/api/v1/channel/api/eventstream/{session_id}/listen"
+url = f"https://api.backend.inconcertcc.com/engine/api/channel/eventstream/{session_id}/listen"
 
 headers = {
     "Content-Type": "application/json",
